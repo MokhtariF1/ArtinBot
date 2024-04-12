@@ -31,7 +31,7 @@ async def call_handler(event):
         chat_type = None
     if chat_type == 'group' or chat_type == 'channel':
         return
-    join_channel_id = "https://t.me/hoooosseinbot"
+    join_channel_id = "https://t.me/F1DataOfficial"
     entity = await bot.    get_entity(join_channel_id)
     access_hash = entity.access_hash
     channel_id = entity.id
@@ -96,7 +96,7 @@ async def pay(event):
                 chat_type = None
             if chat_type == 'group' or chat_type == 'channel':
                 return
-            join_channel_id = "https://t.me/hoooosseinbot"
+            join_channel_id = "https://t.me/F1DataOfficial"
             entity = await bot.    get_entity(join_channel_id)
             access_hash = entity.access_hash
             channel_id = entity.id
