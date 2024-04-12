@@ -5,7 +5,7 @@ import string
 import random
 from telethon.tl.functions.channels import GetParticipantsRequest, GetFullChannelRequest
 from telethon.tl.types import ChannelParticipantsSearch, InputChannel
-
+from telethon.tl.types import PeerUser, PeerChat, PeerChannel
 
 api_id = 86576
 api_hash="385886b58b21b7f3762e1cde2d651925"
@@ -20,11 +20,18 @@ cur = con.cursor()
 
 @bot.on(events.CallbackQuery())
 async def call_handler(event):
-    
-    
     user_id = event.sender_id
-   
-    join_channel_id = "https://t.me/F1DataOfficial"
+    if type(event.message.peer_id) == PeerChannel:
+        chat_type = 'channel'
+    elif type(event.message.peer_id) == PeerChat:
+        chat_type = 'group'
+    elif type(event.message.peer_id) == PeerUser:
+        chat_type = 'user'
+    else:
+        chat_type = None
+    if chat_type == 'group' or chat_type == 'channel':
+        return
+    join_channel_id = "https://t.me/hoooosseinbot"
     entity = await bot.    get_entity(join_channel_id)
     access_hash = entity.access_hash
     channel_id = entity.id
@@ -75,7 +82,21 @@ async def call_handler(event):
 async def pay(event):
             user_id = event.sender_id
             text = event.raw_text
-            join_channel_id = "https://t.me/F1DataOfficial"
+            if type(event.message.peer_id) == PeerChannel:
+                
+                chat_type = 'channel'
+            elif type(event.message.peer_id) == PeerChat:
+                
+                chat_type = 'group'
+            elif type(event.message.peer_id) == PeerUser:
+                
+                chat_type = 'user'
+            else:
+                
+                chat_type = None
+            if chat_type == 'group' or chat_type == 'channel':
+                return
+            join_channel_id = "https://t.me/hoooosseinbot"
             entity = await bot.    get_entity(join_channel_id)
             access_hash = entity.access_hash
             channel_id = entity.id
@@ -284,7 +305,16 @@ async def pay(event):
 async def pay_hand(event):
     msg_id = event.original_update.msg_id
     user_id = event.sender_id
-       
+    if type(event.message.peer_id) == PeerChannel:
+        chat_type = 'channel'
+    elif type(event.message.peer_id) == PeerChat:
+        chat_type = 'group'
+    elif type(event.message.peer_id) == PeerUser:
+        chat_type = 'user'
+    else:
+        chat_type = None
+    if chat_type == 'group' or chat_type == 'channel':
+        return
     join_channel_id = "https://t.me/F1DataOfficial"
     entity = await bot.    get_entity(join_channel_id)
     access_hash = entity.access_hash
