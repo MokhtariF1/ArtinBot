@@ -31,7 +31,7 @@ async def call_handler(event):
         chat_type = None
     if chat_type == 'group' or chat_type == 'channel':
         return
-    join_channel_id = "https://t.me/F1DataOfficial"
+    join_channel_id = "https://t.me/hoooosseinbot"
     entity = await bot.    get_entity(join_channel_id)
     access_hash = entity.access_hash
     channel_id = entity.id
@@ -96,7 +96,7 @@ async def pay(event):
                 chat_type = None
             if chat_type == 'group' or chat_type == 'channel':
                 return
-            join_channel_id = "https://t.me/F1DataOfficial"
+            join_channel_id = "https://t.me/hoooosseinbot"
             entity = await bot.    get_entity(join_channel_id)
             access_hash = entity.access_hash
             channel_id = entity.id
@@ -145,10 +145,11 @@ async def pay(event):
                         keys = [
     [Button.text("قلب بزرگ")],
     [Button.text("مهمان قهوه ات"),Button.text("شام آخر" )],
-    [Button.text("جشن کوچک"),Button.text("جشن بزرگ"),Button.text("تو حساب کن",resize=True)]
+    [Button.text("جشن کوچک"),Button.text("جشن بزرگ"),Button.text("تو حساب کن",resize=True)],
+    [Button.text("بازگشت")]
     ]
                         await event.reply("یکی رو انتخاب کن:",buttons=keys)
-                elif text == "/start":
+                elif text == "/start" or text == "بازگشت":
                         
                         user = cur.execute(f"SELECT * FROM users WHERE id={user_id}").fetchone()
                         print(user)
@@ -180,7 +181,8 @@ async def pay(event):
                                 keys = [
                                 [Button.text("آرشیو",resize=True)],
                                 [Button.text("حساب کاربری"),Button.text("پشتیبانی")],
-                                [Button.text("حمایت"),Button.text("جستجو"),Button.text("قوانین")]
+                                [Button.text("حمایت"),Button.text("جستجو"),Button.text("قوانین")],
+                               
                                 ]
                                 await event.reply(f"انتخاب کنید",buttons=keys)
                 elif text == "مهمان قهوه ات":
