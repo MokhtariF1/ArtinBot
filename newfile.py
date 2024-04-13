@@ -31,7 +31,7 @@ async def call_handler(event):
         chat_type = None
     if chat_type == 'group' or chat_type == 'channel':
         return
-    join_channel_id = "https://t.me/hoooosseinbot"
+    join_channel_id = "https://t.me/F1DataOfficial"
     entity = await bot.    get_entity(join_channel_id)
     access_hash = entity.access_hash
     channel_id = entity.id
@@ -75,7 +75,8 @@ async def call_handler(event):
                             else:
                                 channel_username = f'https://t.me/{channel_username}'
                                 key = [
-                                    Button.url(text=chat_title, url=channel_username)
+                                    [Button.url(text=chat_title, url=channel_username)],
+                                    [Button.url("تایید عضویت",url="https://t.me/F1DataIQBot?start")]
                                 ]
                                 await event.reply("برای استفاده از ربات ابتدا در کانال زیر عضو شوید سپس دوباره استارت کنید", buttons=key)
 @bot.on(events.NewMessage())
@@ -96,7 +97,7 @@ async def pay(event):
                 chat_type = None
             if chat_type == 'group' or chat_type == 'channel':
                 return
-            join_channel_id = "https://t.me/hoooosseinbot"
+            join_channel_id = "https://t.me/F1DataOfficial"
             entity = await bot.    get_entity(join_channel_id)
             access_hash = entity.access_hash
             channel_id = entity.id
@@ -124,7 +125,8 @@ async def pay(event):
                 else:
                     channel_username = f'https://t.me/{channel_username}'
                 key = [
-                    Button.url(text=chat_title, url=channel_username)
+                    [Button.url(text=chat_title, url=channel_username)],
+                    [Button.url("تایید عضویت",url="https://t.me/F1DataIQBot?start")]
                 ]
                 await event.reply("برای استفاده از ربات ابتدا در کانال زیر عضو شوید سپس دوباره استارت کنید", buttons=key)
             else:
@@ -392,7 +394,8 @@ async def pay_hand(event):
                         else:
                             channel_username = f'https://t.me/{channel_username}'
                             key = [
-                            Button.url(text=chat_title, url=channel_username)
+                            [Button.url(text=chat_title, url=channel_username)],
+                            [Button.url("تایید عضویت",url="https://t.me/F1DataIQBot?start")]
                             ]
                             await event.reply("برای استفاده از ربات ابتدا در کانال زیر عضو شوید سپس دوباره استارت کنید", buttons=key)
 bot.run_until_disconnected()
