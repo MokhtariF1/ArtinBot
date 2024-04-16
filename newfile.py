@@ -21,33 +21,7 @@ cur = con.cursor()
 @bot.on(events.CallbackQuery())
 async def call_handler(event):
     user_id = event.sender_id
-    if type(event.message.peer_id) == PeerChannel:
-        chat_type = 'channel'
-    elif type(event.message.peer_id) == PeerChat:
-        chat_type = 'group'
-    elif type(event.message.peer_id) == PeerUser:
-        chat_type = 'user'
-    else:
-        chat_type = None
-    if chat_type == 'group' or chat_type == 'channel':
-        return
-    join_channel_id = "https://t.me/F1DataOfficial"
-    entity = await bot.    get_entity(join_channel_id)
-    access_hash = entity.access_hash
-    channel_id = entity.id
-    user = await bot.get_entity(user_id)
-    username = user.username
-    participants = await bot(GetParticipantsRequest(
-                channel=InputChannel(channel_id, access_hash),
-                filter=ChannelParticipantsSearch(''),
-                offset=0,
-                limit=1000000000,
-                hash=0
-            ))
-    ps = False
-    for p in participants.participants:
-        if user_id == p.user_id:
-            ps = True
+    ps = True
     if ps:
         msg_id = event.original_update.msg_id
         if event.data == b'lang:en':
@@ -65,20 +39,7 @@ async def call_handler(event):
                 fa = "زبان 🇮🇷فارسی انتخاب شد"
                 await bot.delete_messages(user_id,msg_id)
                 await bot.send_message(user_id, fa)
-     
-    else:
-                            full_info = await bot(GetFullChannelRequest(entity))
-                            chat_title = full_info.chats[0].title
-                            channel_username = full_info.chats[0].username
-                            if channel_username is None:
-                                channel_username = full_info.full_chat.exported_invite.link
-                            else:
-                                channel_username = f'https://t.me/{channel_username}'
-                                key = [
-                                    [Button.url(text=chat_title, url=channel_username)],
-                                    [Button.url("تایید عضویت",url="https://t.me/F1DataIQBot?start")]
-                                ]
-                                await event.reply("برای استفاده از ربات ابتدا در کانال زیر عضو شوید سپس دوباره استارت کنید", buttons=key)
+    
 @bot.on(events.NewMessage())
 async def pay(event):
             user_id = event.sender_id
@@ -126,7 +87,7 @@ async def pay(event):
                     channel_username = f'https://t.me/{channel_username}'
                 key = [
                     [Button.url(text=chat_title, url=channel_username)],
-                    [Button.url("تایید عضویت",url="https://t.me/F1DataIQBot?start")]
+                    [Button.url("تایید عضویت",url="https://t.me/F1DataIQBot?start=check")]
                 ]
                 await event.reply("برای استفاده از ربات ابتدا در کانال زیر عضو شوید سپس دوباره استارت کنید", buttons=key)
             else:
@@ -151,7 +112,7 @@ async def pay(event):
     [Button.text("بازگشت")]
     ]
                         await event.reply("یکی رو انتخاب کن:",buttons=keys)
-                elif text == "/start" or text == "بازگشت":
+                elif text.startswith("/start") or text == "بازگشت":
                         
                         user = cur.execute(f"SELECT * FROM users WHERE id={user_id}").fetchone()
                         print(user)
@@ -307,35 +268,8 @@ async def pay(event):
                             
 @bot.on(events.CallbackQuery(pattern="pay_true:*"))
 async def pay_hand(event):
-    msg_id = event.original_update.msg_id
     user_id = event.sender_id
-    if type(event.message.peer_id) == PeerChannel:
-        chat_type = 'channel'
-    elif type(event.message.peer_id) == PeerChat:
-        chat_type = 'group'
-    elif type(event.message.peer_id) == PeerUser:
-        chat_type = 'user'
-    else:
-        chat_type = None
-    if chat_type == 'group' or chat_type == 'channel':
-        return
-    join_channel_id = "https://t.me/F1DataOfficial"
-    entity = await bot.    get_entity(join_channel_id)
-    access_hash = entity.access_hash
-    channel_id = entity.id
-    user = await bot.get_entity(user_id)
-    username = user.username
-    participants = await bot(GetParticipantsRequest(
-                channel=InputChannel(channel_id, access_hash),
-                filter=ChannelParticipantsSearch(''),
-                offset=0,
-                limit=1000000000,
-                hash=0
-            ))
-    ps = False
-    for p in participants.participants:
-        if user_id == p.user_id:
-            ps = True
+    ps = True
     if ps:
         order_id = event.data.decode().split(":")[1]
         pay = cur.execute(f"SELECT * FROM pay WHERE order_id={order_id}").fetchone()
@@ -385,17 +319,4 @@ async def pay_hand(event):
           
               await event.reply("تا کنون پرداخت انجام نشده است")
               return
-    else:
-                        full_info = await bot(GetFullChannelRequest(entity))
-                        chat_title = full_info.chats[0].title
-                        channel_username = full_info.chats[0].username
-                        if channel_username is None:
-                            channel_username = full_info.full_chat.exported_invite.link
-                        else:
-                            channel_username = f'https://t.me/{channel_username}'
-                            key = [
-                            [Button.url(text=chat_title, url=channel_username)],
-                            [Button.url("تایید عضویت",url="https://t.me/F1DataIQBot?start")]
-                            ]
-                            await event.reply("برای استفاده از ربات ابتدا در کانال زیر عضو شوید سپس دوباره استارت کنید", buttons=key)
 bot.run_until_disconnected()
