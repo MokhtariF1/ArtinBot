@@ -53,7 +53,20 @@ async def call_handler(event):
         await bot.delete_messages(user_id, msg_id)
         await bot.send_message(user_id, fa)
 
-
+@bot.on(events.NewMessage(chats=[1647875091]))
+async def save_msg(event):
+    text = event.raw_text
+    msg_id = event.original_update.message.id
+    hashtags = config.extract_hashtags(text)
+    if len(hashtags) == 0:
+        return
+    for hashtag in hashtags:
+        data = [
+            (msg_id, "#" + hashtag)
+        ]
+        cur.executemany("INSERT INTO hashtag VALUES(?,?)", data)
+        con.commit()
+    print("hashtags saved to database")
 @bot.on(events.NewMessage())
 async def pay(event):
     user_id = event.sender_id
@@ -93,6 +106,27 @@ async def pay(event):
             pay = True
         elif text == bot_text["rules"]:
             await event.reply(bot_text["rules_text"])
+        elif text == bot_text["search"]:
+            keys = [
+                Button.text(bot_text["search_in_channel"]),
+                Button.text(bot_text["search_in_bot"],resize=True)
+            ]
+            await event.reply(bot_text["select"], buttons=keys)
+        elif text == bot_text["search_in_channel"]:
+            async with bot.conversation(user_id, timeout=1000) as conv:
+                await conv.send_message(bot_text["enter_hashtag"])
+                hashtag = await conv.get_response()
+                query = f"SELECT * FROM hashtag WHERE text LIKE '%{hashtag.raw_text}%'"
+                search = cur.execute(query).fetchall()
+                if len(search) == 0:
+                    key = Button.text(bot_text["back"],resize=True)
+                    await conv.send_message(bot_text["not_found"],buttons=key)
+                    await conv.cancel_all()
+                print(search)
+                result = "\nنتایج پیدا شده👇\n"
+                for tag in search:
+                    result += config.CHANNEL_ID + "/" + str(tag[0]) + "\n"
+                await conv.send_message(result)
         elif text == bot_text["protection"]:
             keys = [
                 [Button.text(bot_text["big_heart"])],

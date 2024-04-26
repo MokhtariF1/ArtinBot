@@ -1,5 +1,6 @@
 from telethon.tl.functions.channels import GetParticipantsRequest
 from telethon.tl.types import ChannelParticipantsSearch, InputChannel
+import re
 
 
 API_ID = 86576
@@ -34,6 +35,14 @@ async def join_check(user_id, cli):
             result = True
     return result, entity
 
+
+def extract_hashtags(text):
+    # the regular expression
+    regex = "#(\w+)"
+
+    # extracting the hashtags
+    hashtag_list = re.findall(regex, text)
+    return hashtag_list
 # bot texts
 TEXT = {
     "EN_SELECTED": "زبان 🏴󠁧󠁢󠁥󠁮󠁧󠁿انگلیسی انتخاب شد",
@@ -77,4 +86,9 @@ TEXT = {
 **توجه**: لطفا تا قبل از حداکثر ۱۰ دقیقه بعد از پرداخت وارد ربات شوید و دکمه زیر "پرداخت انجام شد" رو بزنید در‌ غیر این صورت پرداخت تایید نمیشود و پول به حساب شما باز می‌گردد """,
     "pay_verified": "پرداخت تایید شد و جایزه هایی که بعدا کارفرما میگه برای شما قرار داده شد",
     "dont_pay": "تا کنون پرداخت انجام نشده است",
+    "search_in_channel": "جستجو در کانال",
+    "search_in_bot": "جستجو در ربات",
+    "enter_hashtag": "هشتگ مورد نظر خود را برای جستجو در کانال با # یا بدون آن وارد کنید👇",
+    "not_found": "❗نتیجه ای پیدا نشد❗"
+
 }
