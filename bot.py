@@ -6,6 +6,7 @@ from telethon.tl.types import ChannelParticipantsSearch, InputChannel
 from telethon.tl.types import PeerUser, PeerChat, PeerChannel
 import config
 import sqlite3
+from navlib import paginate
 
 
 api_id = config.API_ID
@@ -32,6 +33,10 @@ else:
 # DB
 con = sqlite3.connect(config.DB_NAME)
 cur = con.cursor()
+
+def check_admin(user_id):
+    is_admin = cur.execute(f"SELECT * FROM admins WHERE _id = {user_id}").fetchone()
+    return True if is_admin is not None else False
 
 
 @bot.on(events.CallbackQuery())
@@ -106,6 +111,39 @@ async def pay(event):
             pay = True
         elif text == bot_text["rules"]:
             await event.reply(bot_text["rules_text"])
+        elif text == bot_text["archive"]:
+            keys = [
+                [
+                    Button.text(bot_text["reply"],resize=True)
+                ],
+                [
+                    Button.text(bot_text["fantasy"]),
+                    Button.text(bot_text["data_archive"])
+                ],
+                [
+                    Button.text(bot_text["soon"]),
+                    Button.text(bot_text["soon"]),
+                    Button.text(bot_text["soon"]),
+                ],
+                [
+                    Button.text(bot_text["back"])
+                ]
+            ]
+            await event.reply(bot_text["select"],buttons=keys)
+        elif text == bot_text["account"]:
+            keys = [
+                [
+                    Button.text(bot_text["user_information"]),
+                    Button.text(bot_text["personal_account"]),
+                ],
+                [
+                    Button.text(bot_text["sub_collection"],resize=1)
+                ],
+                [
+                    Button.text(bot_text["back"])
+                ]
+            ]
+            await event.reply(bot_text["select"], buttons=keys)
         elif text == bot_text["search"]:
             keys = [
                 Button.text(bot_text["search_in_channel"]),
@@ -127,6 +165,29 @@ async def pay(event):
                 for tag in search:
                     result += config.CHANNEL_ID + "/" + str(tag[0]) + "\n"
                 await conv.send_message(result)
+        elif text == bot_text["search_in_bot"]:
+            async with bot.conversation(user_id, timeout=1000) as conv:
+                msg = await conv.send_message(bot_text["enter_button"])
+                btn = await conv.get_response()
+                if btn.raw_text.startswith("_") is False:
+                    await event.reply(bot_text["underline"])
+                    return
+                query = f"SELECT * FROM btn WHERE text LIKE '%{btn.raw_text}%'"
+                search = cur.execute(query).fetchall()
+                if len(search) == 0:
+                    key = Button.text(bot_text["back"],resize=True)
+                    await conv.send_message(bot_text["not_found"],buttons=key)
+                    await conv.cancel_all()
+                keys = []
+                for s in search:
+                    key = [
+                        Button.text(s[1])
+                    ]
+                    keys.append(key)
+                result = "\nنتایج پیدا شده👇\n"
+
+                await conv.send_message(result, buttons=keys)
+                return
         elif text == bot_text["protection"]:
             keys = [
                 [Button.text(bot_text["big_heart"])],
@@ -137,7 +198,6 @@ async def pay(event):
             await event.reply(bot_text["select"], buttons=keys)
         elif text.startswith("/start") or text == bot_text["back"]:
             user = cur.execute(f"SELECT * FROM users WHERE id={user_id}").fetchone()
-            print(user)
             if user is None:
                 data = [
                     (user_id, None, False)
@@ -154,7 +214,6 @@ async def pay(event):
             else:
                 lang = user[1]
                 if lang is None:
-
                     keys = [
                         [Button.inline(bot_text["en"], b'lang:en'),
                          Button.inline(bot_text["fa"], b'lang:fa')
@@ -163,13 +222,138 @@ async def pay(event):
                     select = bot_text["select_lang"]
                     await event.reply(select, buttons=keys)
                 else:
+                    is_admin = cur.execute(f"SELECT * FROM admins WHERE _id = {user_id}").fetchone()
                     keys = [
                         [Button.text(bot_text["archive"], resize=True)],
                         [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
                         [Button.text(bot_text["protection"]), Button.text(bot_text["search"]), Button.text(bot_text["rules"])],
 
                     ]
+                    if is_admin is not None:
+                        keys = [
+                            [Button.text(bot_text["panel"],resize=True)],
+                            [Button.text(bot_text["archive"], resize=True)],
+                            [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
+                            [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
+                             Button.text(bot_text["rules"])],
+                        ]
                     await event.reply(bot_text["select"], buttons=keys)
+        elif text == bot_text["panel"]:
+            is_admin = check_admin(user_id)
+            if is_admin is False:
+                keys = [
+                    [Button.text(bot_text["archive"], resize=True)],
+                    [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
+                    [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
+                     Button.text(bot_text["rules"])],
+
+                ]
+                await event.reply(bot_text["select"], buttons=keys)
+            else:
+                keys = [
+                    [Button.text(bot_text["words"],resize=True)],
+                    [Button.text(bot_text['back'])]
+                ]
+                await event.reply(bot_text["select"], buttons=keys)
+        elif text == bot_text["words"]:
+            is_admin = check_admin(user_id)
+            if is_admin is False:
+                keys = [
+                    [Button.text(bot_text["archive"], resize=True)],
+                    [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
+                    [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
+                     Button.text(bot_text["rules"])],
+
+                ]
+                await event.reply(bot_text["select"], buttons=keys)
+            else:
+                keys = [
+                    [
+                        Button.text(bot_text["add_word"]),
+                        Button.text(bot_text["show_words"],resize=True),
+                    ],
+                    [Button.text(bot_text['back'])],
+                ]
+                await event.reply(bot_text["select"], buttons=keys)
+        elif text == bot_text["add_word"]:
+            is_admin = check_admin(user_id)
+            if is_admin is False:
+                keys = [
+                    [Button.text(bot_text["archive"], resize=True)],
+                    [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
+                    [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
+                     Button.text(bot_text["rules"])],
+
+                ]
+                await event.reply(bot_text["select"], buttons=keys)
+            else:
+                async with bot.conversation(user_id, timeout=1000) as conv:
+                    await conv.send_message(bot_text["enter_word"])
+                    word = await conv.get_response()
+                    if word.raw_text == bot_text["cancel"]:
+                        await conv.send_message(bot_text["canceled"])
+                        await conv.cancel_all()
+                    else:
+                        words = str(word.raw_text).split("\n")
+                        if len(words) != 1:
+                            for w in words:
+                                tag_word = w.split("_")
+                                data = [
+                                    (tag_word[0],tag_word[1])
+                                ]
+                                cur.executemany(f"INSERT INTO btn VALUES (?,?)", data)
+                                con.commit()
+                            await conv.send_message(bot_text["saved"])
+                            await conv.cancel_all()
+                        else:
+                            tag_word = word.raw_text.split("_")
+                            data_m = [
+                                (tag_word[0],tag_word[1])
+                            ]
+                            cur.executemany(f"INSERT INTO btn VALUES (?,?)", data_m)
+                            con.commit()
+                            await conv.send_message(bot_text["saved"])
+                            await conv.cancel_all()
+
+        elif text == bot_text["show_words"]:
+            is_admin = check_admin(user_id)
+            if is_admin is False:
+                keys = [
+                    [Button.text(bot_text["archive"], resize=True)],
+                    [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
+                    [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
+                     Button.text(bot_text["rules"])],
+
+                ]
+                await event.reply(bot_text["select"], buttons=keys)
+            else:
+                find_count = len(cur.execute("SELECT * FROM btn").fetchall())
+                if find_count == 0:
+                    await event.reply(bot_text['not_found'])
+                    return
+                await event.reply(bot_text['welcome_show_words'])
+                find_words = cur.execute("SELECT * FROM btn").fetchall()[:5]
+                items_per_page = 5
+                pages = find_count // items_per_page
+                if find_count % items_per_page != 0:
+                    pages += 1
+                paginate_keys = paginate('show_btn', 1, pages, ':')
+                for word in find_words:
+                    word_tag = word[0]
+                    word_text = word[1]
+                    key = [
+                        [
+                            Button.inline(bot_text['edit_btn'],
+                                          data=str.encode('edit_btn:' + str(word_tag))),
+                            Button.inline(bot_text['delete_btn'], 'delete_btn:' + str(word_tag)),
+                        ]
+                    ]
+                    full_channel = f'{bot_text["word_text"]}:{word_text}\n{bot_text["word_tag"]}:{word_tag}'
+                    await bot.send_message(user_id, full_channel, buttons=key)
+                try:
+                    await bot.send_message(user_id, bot_text['come_next'], buttons=paginate_keys)
+                except:
+                    pass
         elif text == bot_text["coffee"]:
             amount = 100000
             pay = True
@@ -321,6 +505,108 @@ async def pay_hand(event):
     else:
         await event.reply(bot_text["dont_pay"])
         return
+
+@bot.on(events.CallbackQuery(pattern="edit_btn:*"))
+async def eb(event):
+    user_id = event.sender_id
+    is_admin = check_admin(user_id)
+    if is_admin is False:
+        keys = [
+            [Button.text(bot_text["archive"], resize=True)],
+            [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
+            [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
+             Button.text(bot_text["rules"])],
+
+        ]
+        await event.reply(bot_text["select"], buttons=keys)
+        return
+    word_tag = event.data.decode().split(":")[1]
+    button = cur.execute(f"SELECT * FROM btn WHERE tag = '{word_tag}'").fetchone()
+    if button is None:
+        await bot.send_message(user_id, bot_text["not_found"])
+        return
+    else:
+        async with bot.conversation(user_id, timeout=1000) as conv:
+            await conv.send_message(bot_text["enter_new_text"])
+            new_text = await conv.get_response()
+            if new_text.raw_text == bot_text["cancel"]:
+                await conv.send_message(bot_text["canceled"])
+                await conv.cancel_all()
+            else:
+                text_tag = new_text.raw_text.split('_')
+                cur.execute(f"UPDATE btn SET text = '{text_tag[1]}',tag = '{text_tag[0]}' WHERE tag = '{word_tag}'")
+                con.commit()
+                await conv.send_message(bot_text["edited"])
+                await conv.cancel_all()
+
+
+@bot.on(events.CallbackQuery(pattern="delete_btn:*"))
+async def del_btn(event):
+    user_id = event.sender_id
+    is_admin = check_admin(user_id)
+    if is_admin is False:
+        keys = [
+            [Button.text(bot_text["archive"], resize=True)],
+            [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
+            [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
+             Button.text(bot_text["rules"])],
+
+        ]
+        await event.reply(bot_text["select"], buttons=keys)
+        return
+    btn_tag = event.data.decode().split(":")[1]
+    find_btn = cur.execute(f"SELECT * FROM btn WHERE tag = '{btn_tag}'").fetchone()
+    if find_btn is None:
+        await bot.send_message(user_id, bot_text["not_found"])
+    else:
+        cur.execute(f"DELETE FROM btn WHERE tag = '{btn_tag}'")
+        con.commit()
+        await bot.send_message(user_id, bot_text["deleted"])
+
+@bot.on(events.CallbackQuery(pattern='show_btn:*'))
+async def show_btn_handler(event):
+    user_id = event.sender_id
+    start_text = bot_text['select']
+    ch_admin = check_admin(user_id)
+    if ch_admin is False:
+        keys = [
+            [Button.text(bot_text["archive"], resize=True)],
+            [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
+            [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
+             Button.text(bot_text["rules"])],
+
+        ]
+        await event.reply(bot_text["select"], buttons=keys)
+        return
+    find_count = len(cur.execute("SELECT * FROM btn").fetchall())
+    if find_count == 0:
+        await bot.send_message(user_id, bot_text['not_found'])
+        return
+    page_number = int(event.data.decode().split(':')[1])
+    skip_number = (page_number * 5) - 5
+    # find_connections = db.connections.find().skip(skip_number).limit(5)
+    find_btn = cur.execute("SELECT * FROM btn LIMIT 5 OFFSET ?;", (skip_number,)).fetchall()
+    items_per_page = 5
+    pages = find_count // items_per_page
+    if find_count % items_per_page != 0:
+        pages += 1
+    paginate_keys = paginate('show_btn', page_number, pages, ':')
+    for btn in find_btn:
+        word_tag = btn[0]
+        btn_text = btn[1]
+        key = [
+            [
+                Button.inline(bot_text['edit_btn'],
+                              data=str.encode('edit_btn:' + str(word_tag))),
+                Button.inline(bot_text['delete_btn'], 'delete_btn:' + str(word_tag)),
+            ]
+        ]
+        full_channel = f'{bot_text["word_text"]}:{btn_text}\n{bot_text["word_tag"]}:{word_tag}'
+        await bot.send_message(user_id, full_channel, buttons=key)
+    try:
+        await bot.send_message(user_id, bot_text['come_next'], buttons=paginate_keys)
+    except:
+        pass
 
 
 bot.run_until_disconnected()
