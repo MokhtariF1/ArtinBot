@@ -5,10 +5,17 @@ import re
 
 API_ID = 86576
 API_HASH = "385886b58b21b7f3762e1cde2d651925"
-BOT_TOKEN = "7185706687:AAEkVBiMGDh0IigJs0iJBSSL1i7U7mN1e2k"
+ENV = 1
+if ENV:
+    BOT_TOKEN = "7185706687:AAEkVBiMGDh0IigJs0iJBSSL1i7U7mN1e2k"
+else:
+    BOT_TOKEN = "6300653200:AAFK0BuvMPJ4kZV3gj_sbvXezciah_ga1B4"
 PAY_TOKEN = "fced3227-3cf2-486f-95e7-52ee9e8fd77d"
 SESSION_NAME = "bot"
-PROXY = True
+if ENV:
+    PROXY = False
+else:
+    PROXY = True
 PROXY_TYPE = "socks5"
 PROXY_ADDRESS = "127.0.0.1"
 PROXY_PORT = 10808
@@ -114,7 +121,7 @@ TEXT = {
     "user_information": "اطلاعات کاربری",
     "personal_account": "حساب شخصی",
     "sub_collection": "زیر مجموعه گیری",
-    "": "",
+    "first_start": "ابتدا استارت کنید",
     "": "",
     "": "",
 }

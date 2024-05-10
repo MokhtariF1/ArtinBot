@@ -7,6 +7,7 @@ from telethon.tl.types import PeerUser, PeerChat, PeerChannel
 import config
 import sqlite3
 from navlib import paginate
+from datetime import datetime
 
 
 api_id = config.API_ID
@@ -199,10 +200,12 @@ async def pay(event):
         elif text.startswith("/start") or text == bot_text["back"]:
             user = cur.execute(f"SELECT * FROM users WHERE id={user_id}").fetchone()
             if user is None:
+                currentDateAndTime = datetime.now()
+                currentTime = currentDateAndTime.strftime("%Y-%m-%d %H:%M:%S")
                 data = [
-                    (user_id, None, False)
+                    (user_id, None, False, currentTime, 0, 0, 0, 0, 0),
                 ]
-                cur.executemany(f"INSERT INTO users VALUES (?,?,?)", data)
+                cur.executemany(f"INSERT INTO users VALUES (?,?,?,?,?,?,?,?,?)", data)
                 con.commit()
                 keys = [
                     [Button.inline(bot_text["en"], b'lang:en'),
@@ -314,7 +317,40 @@ async def pay(event):
                             con.commit()
                             await conv.send_message(bot_text["saved"])
                             await conv.cancel_all()
-
+        elif text == bot_text["user_information"]:
+            user = cur.execute(f"SELECT * FROM users WHERE id = {user_id}").fetchone()
+            if user is None:
+                await event.reply(bot_text["first_start"])
+            else:
+                num_id = user[0]
+                join_date = user[3]
+                sub_count = user[4]
+                score = user[5]
+                protection = user[7]
+                fantasy = user[6]
+                validity = user[8]
+                tel_user = await bot.get_entity(user_id)
+                first_name = tel_user.first_name
+                last_name = tel_user.last_name
+                username = tel_user.username if tel_user.username is not None else '❌'
+                full_name = first_name + last_name if last_name is not None else first_name
+                a_tag = f'<a href="tg://user?id={user_id}">{full_name}</a>'
+                c_tag = f'<code>{num_id}</code>'
+                b_tag = f'<b>📜 اطلاعات کاربری شما به شرح ذیل می باشد:</b>'
+                full_text = "{btag}\n\n" \
+                            "⁣👦🏻نام: {name}\n" \
+                            "🌐آیدی: {username}\n" \
+                            "👤آیدی عددی: {num_id}\n" \
+                            "🕰زمان عضویت: {join_date}\n" \
+                            "💰تعداد زیر مجموعه: {sub_count}\n" \
+                            "⭐️تعداد امتیاز: {score}\n" \
+                            "💵مقدار حمایت: {protection}\n" \
+                            "💎تعداد سکه فانتزی: {fantasy}\n" \
+                            "💳میزان اعتبار: {validity}\n".format(num_id=c_tag, join_date=join_date, sub_count=sub_count,
+                                                               protection=protection, score=score, fantasy=fantasy,
+                                                               validity=validity, name=a_tag, username=username, btag=b_tag)
+                await bot.send_message(user_id, full_text,
+                                       parse_mode='html')
         elif text == bot_text["show_words"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
