@@ -9,7 +9,6 @@ import sqlite3
 from navlib import paginate
 from datetime import datetime
 
-
 api_id = config.API_ID
 api_hash = config.API_HASH
 bot_token = config.BOT_TOKEN
@@ -35,6 +34,39 @@ else:
 con = sqlite3.connect(config.DB_NAME)
 cur = con.cursor()
 
+back = Button.text(bot_text["back"], resize=True)
+drivers_translate = {
+    "Max_Verstappen": "مکس ورستپن",
+    "Liam_Lawson": "لیام لاوسون",
+    "Sergio_Pérez": "سرجیو پرز",
+    "Lewis_Hamilton": "لوئیس همیلتون",
+    "George_Russell": "جورج راسل",
+    "Oliver_Bearman": "اولیور برمن",
+    "Mick_Schumacher": "میک شوماخر",
+    "Charles_Leclerc": "شارل لکلرک",
+    "Robert_Kubica": "رابرت کوبیتسا",
+    "Nikita_Mazepin": "نیکیتا مازپین",
+    "Carlos_Sainz": "کارلوس ساینز",
+    "Alexander_Albon": "الکس آلبون",
+    "Antonio_Giovinazzi": "آنتونیو جیووناتزی",
+    "Sebastian_Vettel": "سباستین فتل",
+    "Logan_Sargeant": "لوگان سارجنت",
+    "Nicholas_Latifi": "نیکولاس لطیفی",
+    "Guanyu_Zhou": "گوانیو ژو",
+    "Nyck_De_Vries": "نیک دوریس",
+    "Valtteri_Bottas": "والتری بوتاس",
+    "Daniel_Ricciardo": "دنیل ریکاردو",
+    "Lando_Norris": "لندو نوریس",
+    "Oscar_Piastri": "اسکار پیاستری",
+    "Lance_Stroll": "لنس استرول",
+    "Fernando_Alonso": "فرناندو آلونسو",
+    "Pierre_Gasly": "پیر گسلی",
+    "Esteban_Ocon": "استبان اوکون",
+    "Yuki_Tsunoda": "یوکی سونودا",
+    "Nico_Hülkenberg": "نیکو هالکنبرگ",
+    "Kevin_Magnussen": "کوین مگنوسن"
+}
+
 def check_admin(user_id):
     is_admin = cur.execute(f"SELECT * FROM admins WHERE _id = {user_id}").fetchone()
     return True if is_admin is not None else False
@@ -59,6 +91,7 @@ async def call_handler(event):
         await bot.delete_messages(user_id, msg_id)
         await bot.send_message(user_id, fa)
 
+
 @bot.on(events.NewMessage(chats=[1647875091]))
 async def save_msg(event):
     text = event.raw_text
@@ -73,6 +106,8 @@ async def save_msg(event):
         cur.executemany("INSERT INTO hashtag VALUES(?,?)", data)
         con.commit()
     print("hashtags saved to database")
+
+
 @bot.on(events.NewMessage())
 async def pay(event):
     user_id = event.sender_id
@@ -115,7 +150,7 @@ async def pay(event):
         elif text == bot_text["archive"]:
             keys = [
                 [
-                    Button.text(bot_text["reply"],resize=True)
+                    Button.text(bot_text["reply"], resize=True)
                 ],
                 [
                     Button.text(bot_text["fantasy"]),
@@ -130,7 +165,7 @@ async def pay(event):
                     Button.text(bot_text["back"])
                 ]
             ]
-            await event.reply(bot_text["select"],buttons=keys)
+            await event.reply(bot_text["select"], buttons=keys)
         elif text == bot_text["account"]:
             keys = [
                 [
@@ -138,7 +173,7 @@ async def pay(event):
                     Button.text(bot_text["personal_account"]),
                 ],
                 [
-                    Button.text(bot_text["sub_collection"],resize=1)
+                    Button.text(bot_text["sub_collection"], resize=1)
                 ],
                 [
                     Button.text(bot_text["back"])
@@ -148,7 +183,7 @@ async def pay(event):
         elif text == bot_text["search"]:
             keys = [
                 Button.text(bot_text["search_in_channel"]),
-                Button.text(bot_text["search_in_bot"],resize=True)
+                Button.text(bot_text["search_in_bot"], resize=True)
             ]
             await event.reply(bot_text["select"], buttons=keys)
         elif text == bot_text["search_in_channel"]:
@@ -158,8 +193,8 @@ async def pay(event):
                 query = f"SELECT * FROM hashtag WHERE text LIKE '%{hashtag.raw_text}%'"
                 search = cur.execute(query).fetchall()
                 if len(search) == 0:
-                    key = Button.text(bot_text["back"],resize=True)
-                    await conv.send_message(bot_text["not_found"],buttons=key)
+                    key = Button.text(bot_text["back"], resize=True)
+                    await conv.send_message(bot_text["not_found"], buttons=key)
                     await conv.cancel_all()
                 print(search)
                 result = "\nنتایج پیدا شده👇\n"
@@ -176,8 +211,8 @@ async def pay(event):
                 query = f"SELECT * FROM btn WHERE text LIKE '%{btn.raw_text}%'"
                 search = cur.execute(query).fetchall()
                 if len(search) == 0:
-                    key = Button.text(bot_text["back"],resize=True)
-                    await conv.send_message(bot_text["not_found"],buttons=key)
+                    key = Button.text(bot_text["back"], resize=True)
+                    await conv.send_message(bot_text["not_found"], buttons=key)
                     await conv.cancel_all()
                 keys = []
                 for s in search:
@@ -193,7 +228,8 @@ async def pay(event):
             keys = [
                 [Button.text(bot_text["big_heart"])],
                 [Button.text(bot_text["coffee"]), Button.text(bot_text["dinner"])],
-                [Button.text(bot_text["small_party"]), Button.text(bot_text["big_party"]), Button.text(bot_text["you_pay"], resize=True)],
+                [Button.text(bot_text["small_party"]), Button.text(bot_text["big_party"]),
+                 Button.text(bot_text["you_pay"], resize=True)],
                 [Button.text(bot_text["back"])]
             ]
             await event.reply(bot_text["select"], buttons=keys)
@@ -227,34 +263,37 @@ async def pay(event):
                 else:
                     is_admin = cur.execute(f"SELECT * FROM admins WHERE _id = {user_id}").fetchone()
                     keys = [
-                        [Button.text(bot_text["archive"], resize=True)],
+                        [Button.text(bot_text["archive"], resize=True), Button.text(bot_text["scores"])],
                         [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
-                        [Button.text(bot_text["protection"]), Button.text(bot_text["search"]), Button.text(bot_text["rules"])],
-
+                        [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
+                         Button.text(bot_text["rules"])],
                     ]
                     if is_admin is not None:
                         keys = [
-                            [Button.text(bot_text["panel"],resize=True)],
-                            [Button.text(bot_text["archive"], resize=True)],
+                            [Button.text(bot_text["panel"], resize=True)],
+                            [Button.text(bot_text["archive"], resize=True), Button.text(bot_text["scores"])],
                             [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
                             [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
                              Button.text(bot_text["rules"])],
+
                         ]
                     await event.reply(bot_text["select"], buttons=keys)
         elif text == bot_text["panel"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
                 keys = [
-                    [Button.text(bot_text["archive"], resize=True)],
+                    [Button.text(bot_text["archive"], resize=True), Button.text(bot_text["scores"])],
                     [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
                     [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
                      Button.text(bot_text["rules"])],
-
                 ]
                 await event.reply(bot_text["select"], buttons=keys)
             else:
                 keys = [
-                    [Button.text(bot_text["words"],resize=True)],
+                    [
+                        Button.text(bot_text["words"], resize=True),
+                        Button.text(bot_text["grand"])
+                    ],
                     [Button.text(bot_text['back'])]
                 ]
                 await event.reply(bot_text["select"], buttons=keys)
@@ -262,31 +301,59 @@ async def pay(event):
             is_admin = check_admin(user_id)
             if is_admin is False:
                 keys = [
-                    [Button.text(bot_text["archive"], resize=True)],
+                    [Button.text(bot_text["archive"], resize=True), Button.text(bot_text["scores"])],
                     [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
                     [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
                      Button.text(bot_text["rules"])],
-
                 ]
                 await event.reply(bot_text["select"], buttons=keys)
             else:
                 keys = [
                     [
                         Button.text(bot_text["add_word"]),
-                        Button.text(bot_text["show_words"],resize=True),
+                        Button.text(bot_text["show_words"], resize=True),
                     ],
                     [Button.text(bot_text['back'])],
                 ]
                 await event.reply(bot_text["select"], buttons=keys)
+        elif text == bot_text["scores"]:
+            keys = [
+                [
+                    Button.text(bot_text["add_score"], resize=True),
+                    Button.text(bot_text["show_table"]),
+                ],
+                [
+                    Button.text(bot_text["back"], resize=True)
+                ],
+            ]
+            await event.reply(bot_text["select"], buttons=keys)
+        elif text == bot_text["add_score"]:
+            find_grands = cur.execute("SELECT * FROM grand").fetchall()
+            if len(find_grands) == 0:
+                await event.reply(bot_text["grands_not_found"], buttons=back)
+                return
+            inline_keys = []
+            for grand in find_grands:
+                grand_name = grand[1]
+                grand_num = grand[0]
+                key = [Button.inline(grand_name, str.encode("get_drivers" + ":" + str(grand_num)))]
+                inline_keys.append(key)
+            await event.reply(bot_text["select_grand"], buttons=inline_keys)
+
+        elif text == bot_text["grand"]:
+            keys = [
+                Button.text(bot_text["add_grand"]),
+                Button.text(bot_text["show_grand"], resize=True),
+            ]
+            await event.reply(bot_text["select"], buttons=keys)
         elif text == bot_text["add_word"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
                 keys = [
-                    [Button.text(bot_text["archive"], resize=True)],
+                    [Button.text(bot_text["archive"], resize=True), Button.text(bot_text["scores"])],
                     [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
                     [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
                      Button.text(bot_text["rules"])],
-
                 ]
                 await event.reply(bot_text["select"], buttons=keys)
             else:
@@ -302,7 +369,7 @@ async def pay(event):
                             for w in words:
                                 tag_word = w.split("_")
                                 data = [
-                                    (tag_word[0],tag_word[1])
+                                    (tag_word[0], tag_word[1])
                                 ]
                                 cur.executemany(f"INSERT INTO btn VALUES (?,?)", data)
                                 con.commit()
@@ -311,12 +378,93 @@ async def pay(event):
                         else:
                             tag_word = word.raw_text.split("_")
                             data_m = [
-                                (tag_word[0],tag_word[1])
+                                (tag_word[0], tag_word[1])
                             ]
                             cur.executemany(f"INSERT INTO btn VALUES (?,?)", data_m)
                             con.commit()
                             await conv.send_message(bot_text["saved"])
                             await conv.cancel_all()
+        elif text == bot_text["add_grand"]:
+            is_admin = check_admin(user_id)
+            if is_admin is False:
+                keys = [
+                    [Button.text(bot_text["archive"], resize=True), Button.text(bot_text["scores"])],
+                    [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
+                    [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
+                     Button.text(bot_text["rules"])],
+                ]
+                await event.reply(bot_text["select"], buttons=keys)
+            else:
+                async with bot.conversation(user_id, timeout=1000) as conv:
+                    await conv.send_message(bot_text["enter_grand"])
+                    grand_name = await conv.get_response()
+                    if grand_name.raw_text == bot_text["cancel"]:
+                        await conv.send_message(bot_text["canceled"])
+                        return
+                    await conv.send_message(bot_text["enter_grand_num"])
+                    grand_num = await conv.get_response()
+                    if grand_num.raw_text == bot_text["cancel"]:
+                        await conv.send_message(bot_text["canceled"])
+                        return
+                    data = [
+                        (grand_num.raw_text, grand_name.raw_text, False)
+                    ]
+                    cur.executemany(f"INSERT INTO grand VALUES (?,?,?)", data)
+                    con.commit()
+                    # request to ergast
+                    ergast_requesting = await event.reply(bot_text["requesting_ergast"])
+                    url = f"http://ergast.com/api/f1/2024/{grand_num.raw_text}/drivers.json"
+                    result = requests.get(url).json()
+                    drivers = result["MRData"]["DriverTable"]["Drivers"]
+                    for driver in drivers:
+                        driver_name = driver["givenName"] + "_" + driver["familyName"]
+                        driver_id = driver["driverId"]
+                        data = [
+                            (int(grand_num.raw_text), driver_name, driver_id, 0, 0, 0),
+                        ]
+                        cur.executemany("INSERT INTO drivers VALUES (?,?,?,?,?,?)", data)
+                        con.commit()
+                    print(ergast_requesting)
+                    await bot.delete_messages(user_id, ergast_requesting.id)
+                    await event.reply(bot_text["successfully"])
+        elif text == bot_text["show_grand"]:
+            is_admin = check_admin(user_id)
+            if is_admin is False:
+                keys = [
+                    [Button.text(bot_text["archive"], resize=True), Button.text(bot_text["scores"])],
+                    [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
+                    [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
+                     Button.text(bot_text["rules"])],
+                ]
+                await event.reply(bot_text["select"], buttons=keys)
+            else:
+                find_count = len(cur.execute("SELECT * FROM grand").fetchall())
+                if find_count == 0:
+                    await event.reply(bot_text['not_found'])
+                    return
+                await event.reply(bot_text['welcome_show_grand'])
+                find_grands = cur.execute("SELECT * FROM grand").fetchall()[:5]
+                items_per_page = 5
+                pages = find_count // items_per_page
+                if find_count % items_per_page != 0:
+                    pages += 1
+                paginate_keys = paginate('show_grand', 1, pages, ':')
+                for grand in find_grands:
+                    grand_num = grand[0]
+                    grand_name = grand[1]
+                    key = [
+                        [
+                            Button.inline(bot_text['close_grand'],
+                                          data=str.encode('close_grand:' + str(grand_num))),
+                            Button.inline(bot_text['delete_grand'], 'delete_grand:' + str(grand_num)),
+                        ]
+                    ]
+                    full_channel = f'{bot_text["grand_round"]}:{grand_num}\n{bot_text["grand_name"]}:{grand_name}'
+                    await bot.send_message(user_id, full_channel, buttons=key)
+                try:
+                    await bot.send_message(user_id, bot_text['come_next'], buttons=paginate_keys)
+                except:
+                    pass
         elif text == bot_text["user_information"]:
             user = cur.execute(f"SELECT * FROM users WHERE id = {user_id}").fetchone()
             if user is None:
@@ -346,20 +494,21 @@ async def pay(event):
                             "⭐️تعداد امتیاز: {score}\n" \
                             "💵مقدار حمایت: {protection}\n" \
                             "💎تعداد سکه فانتزی: {fantasy}\n" \
-                            "💳میزان اعتبار: {validity}\n".format(num_id=c_tag, join_date=join_date, sub_count=sub_count,
-                                                               protection=protection, score=score, fantasy=fantasy,
-                                                               validity=validity, name=a_tag, username=username, btag=b_tag)
+                            "💳میزان اعتبار: {validity}\n".format(num_id=c_tag, join_date=join_date,
+                                                                  sub_count=sub_count,
+                                                                  protection=protection, score=score, fantasy=fantasy,
+                                                                  validity=validity, name=a_tag, username=username,
+                                                                  btag=b_tag)
                 await bot.send_message(user_id, full_text,
                                        parse_mode='html')
         elif text == bot_text["show_words"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
                 keys = [
-                    [Button.text(bot_text["archive"], resize=True)],
+                    [Button.text(bot_text["archive"], resize=True), Button.text(bot_text["scores"])],
                     [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
                     [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
                      Button.text(bot_text["rules"])],
-
                 ]
                 await event.reply(bot_text["select"], buttons=keys)
             else:
@@ -542,17 +691,17 @@ async def pay_hand(event):
         await event.reply(bot_text["dont_pay"])
         return
 
+
 @bot.on(events.CallbackQuery(pattern="edit_btn:*"))
 async def eb(event):
     user_id = event.sender_id
     is_admin = check_admin(user_id)
     if is_admin is False:
         keys = [
-            [Button.text(bot_text["archive"], resize=True)],
+            [Button.text(bot_text["archive"], resize=True), Button.text(bot_text["scores"])],
             [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
             [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
              Button.text(bot_text["rules"])],
-
         ]
         await event.reply(bot_text["select"], buttons=keys)
         return
@@ -582,11 +731,10 @@ async def del_btn(event):
     is_admin = check_admin(user_id)
     if is_admin is False:
         keys = [
-            [Button.text(bot_text["archive"], resize=True)],
+            [Button.text(bot_text["archive"], resize=True), Button.text(bot_text["scores"])],
             [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
             [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
              Button.text(bot_text["rules"])],
-
         ]
         await event.reply(bot_text["select"], buttons=keys)
         return
@@ -599,6 +747,7 @@ async def del_btn(event):
         con.commit()
         await bot.send_message(user_id, bot_text["deleted"])
 
+
 @bot.on(events.CallbackQuery(pattern='show_btn:*'))
 async def show_btn_handler(event):
     user_id = event.sender_id
@@ -606,11 +755,10 @@ async def show_btn_handler(event):
     ch_admin = check_admin(user_id)
     if ch_admin is False:
         keys = [
-            [Button.text(bot_text["archive"], resize=True)],
+            [Button.text(bot_text["archive"], resize=True), Button.text(bot_text["scores"])],
             [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
             [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
              Button.text(bot_text["rules"])],
-
         ]
         await event.reply(bot_text["select"], buttons=keys)
         return
@@ -645,4 +793,207 @@ async def show_btn_handler(event):
         pass
 
 
+@bot.on(events.CallbackQuery(pattern='show_grand:*'))
+async def show_grand_handler(event):
+    user_id = event.sender_id
+    start_text = bot_text['select']
+    ch_admin = check_admin(user_id)
+    if ch_admin is False:
+        keys = [
+            [Button.text(bot_text["archive"], resize=True), Button.text(bot_text["scores"])],
+            [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
+            [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
+             Button.text(bot_text["rules"])],
+        ]
+        await event.reply(bot_text["select"], buttons=keys)
+        return
+    find_count = len(cur.execute("SELECT * FROM grand").fetchall())
+    if find_count == 0:
+        await bot.send_message(user_id, bot_text['not_found'])
+        return
+    page_number = int(event.data.decode().split(':')[1])
+    skip_number = (page_number * 5) - 5
+    # find_connections = db.connections.find().skip(skip_number).limit(5)
+    find_grands = cur.execute("SELECT * FROM grand LIMIT 5 OFFSET ?;", (skip_number,)).fetchall()
+    items_per_page = 5
+    pages = find_count // items_per_page
+    if find_count % items_per_page != 0:
+        pages += 1
+    paginate_keys = paginate('show_grand', page_number, pages, ':')
+    for grand in find_grands:
+        grand_num = grand[0]
+        grand_name = grand[1]
+        key = [
+            [
+                Button.inline(bot_text['close_grand'],
+                              data=str.encode('close_grand:' + str(grand_num))),
+                Button.inline(bot_text['delete_grand'], 'delete_grand:' + str(grand_num)),
+            ]
+        ]
+        full_channel = f'{bot_text["grand_round"]}:{grand_num}\n{bot_text["grand_name"]}:{grand_name}'
+        await bot.send_message(user_id, full_channel, buttons=key)
+    try:
+        await bot.send_message(user_id, bot_text['come_next'], buttons=paginate_keys)
+    except:
+        pass
+
+
+@bot.on(events.CallbackQuery(pattern="delete_grand:*"))
+async def del_grand(event):
+    user_id = event.sender_id
+    is_admin = check_admin(user_id)
+    if is_admin is False:
+        keys = [
+            [Button.text(bot_text["archive"], resize=True), Button.text(bot_text["scores"])],
+            [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
+            [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
+             Button.text(bot_text["rules"])],
+        ]
+        await event.reply(bot_text["select"], buttons=keys)
+        return
+    grand_num = event.data.decode().split(":")[1]
+    find_btn = cur.execute(f"SELECT * FROM grand WHERE num = '{grand_num}'").fetchone()
+    if find_btn is None:
+        await bot.send_message(user_id, bot_text["not_found"])
+    else:
+        cur.execute(f"DELETE FROM grand WHERE num = '{grand_num}'")
+        con.commit()
+        await bot.send_message(user_id, bot_text["deleted"])
+
+
+@bot.on(events.CallbackQuery(pattern="close_grand:*"))
+async def close_grand_handler(event):
+    user_id = event.sender_id
+    is_admin = check_admin(user_id)
+    if is_admin is False:
+        keys = [
+            [Button.text(bot_text["archive"], resize=True), Button.text(bot_text["scores"])],
+            [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
+            [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
+             Button.text(bot_text["rules"])],
+        ]
+        await event.reply(bot_text["select"], buttons=keys)
+        return
+    grand_num = event.data.decode().split(":")[1]
+    grand = cur.execute(f"SELECT * FROM grand WHERE num = '{grand_num}'").fetchone()
+    if grand is None:
+        await event.reply(bot_text["grand_not_found"])
+        return
+    if grand[2]:
+        cur.execute(f"UPDATE grand SET close = {False} WHERE num = '{grand_num}'")
+        con.commit()
+        await event.reply(bot_text["grand_opened"])
+    else:
+        cur.execute(f"UPDATE grand SET close = {True} WHERE num = '{grand_num}'")
+        con.commit()
+        await event.reply(bot_text["grand_closed"])
+
+
+@bot.on(events.CallbackQuery(pattern="get_drivers:*"))
+async def get_drivers_handler(event):
+    grand_num = event.data.decode().split(":")[1]
+    find_grand = cur.execute(f"SELECT * FROM grand WHERE num = '{grand_num}'").fetchone()
+    if find_grand is None:
+        await event.reply(bot_text["grand_not_found"])
+    elif find_grand[2]:
+        await event.reply(bot_text["grand_is_close"])
+    else:
+        drivers = cur.execute(f"SELECT * FROM drivers WHERE for_grand = {grand_num}").fetchall()
+        print(drivers)
+        drivers_keys = []
+
+        for driver in drivers:
+            btn_text = drivers_translate[driver[1]]
+            driver_key = Button.inline(btn_text, str.encode("driver_score" + ":" + driver[2] + ":"
+                                                                                 + str(grand_num)))
+            drivers_keys.append(driver_key)
+        result = []
+        for i in range(0, len(drivers_keys), 2):
+            if i + 1 < len(drivers_keys):
+                result.append([drivers_keys[i], drivers_keys[i + 1]])
+            else:
+                result.append([drivers_keys[i]])
+        await event.reply(bot_text["select_driver"].format(gp=find_grand[1]), buttons=result)
+
+
+@bot.on(events.CallbackQuery(pattern="driver_score:*"))
+async def driver_score_handler(event):
+    user_id = event.sender_id
+    spl = event.data.decode().split(":")
+    driver_id = spl[1]
+    grand_num = spl[2]
+    find_grand = cur.execute(f"SELECT * FROM grand WHERE num = '{grand_num}'").fetchone()
+    if find_grand is None:
+        await event.reply(bot_text["grand_not_found"])
+    elif find_grand[2]:
+        await event.reply(bot_text["grand_is_close"])
+    else:
+        driver_score = cur.execute(f"SELECT * FROM driver_score WHERE user_id = {user_id} AND driver_id = '{driver_id}' "
+                                   f"AND for_grand = '{grand_num}'").fetchone()
+        if driver_score is not None:
+            await event.reply(bot_text["you_scored"])
+            return
+        async with bot.conversation(user_id, timeout=1000) as conv:
+            await conv.send_message(bot_text["qualifying"])
+            while True:
+                try:
+                    qscore = await conv.get_response()
+                    qscore = qscore.raw_text
+                    if int(qscore) < 1:
+                        await conv.send_message(bot_text["small_score"])
+                    elif int(qscore) > 10:
+                        await conv.send_message(bot_text["big_score"])
+                    else:
+                        break
+                except ValueError:
+                    await conv.send_message(bot_text["just_num"])
+            await conv.send_message(bot_text["race"])
+            while True:
+                try:
+                    rscore = await conv.get_response()
+                    rscore = rscore.raw_text
+                    if int(rscore) < 1:
+                        await conv.send_message(bot_text["small_score"])
+                    elif int(rscore) > 10:
+                        await conv.send_message(bot_text["big_score"])
+                    else:
+                        break
+                except ValueError:
+                    await conv.send_message(bot_text["just_num"])
+            await conv.send_message(bot_text["car"])
+            while True:
+                try:
+                    cscore = await conv.get_response()
+                    cscore = cscore.raw_text
+                    if int(cscore) < 1:
+                        await conv.send_message(bot_text["small_score"])
+                    elif int(cscore) > 10:
+                        await conv.send_message(bot_text["big_score"])
+                    else:
+                        break
+                except ValueError:
+                    await conv.send_message(bot_text["just_num"])
+            avg = (int(rscore) + int(qscore) + int(cscore)) / 3
+            avg = round(avg, 2)
+            find_driver = cur.execute(f"SELECT * FROM drivers WHERE for_grand = {grand_num} AND driver_id = '{driver_id}'").fetchone()
+            avg_plus = find_driver[4]
+            avg_count = find_driver[5]
+            avg_plus += avg
+            avg_count += 1
+            avg_all = avg_plus / avg_count
+            avg_all = round(avg_all, 2)
+            cur.execute(f"UPDATE drivers SET avg_plus = {avg_plus},avg_count = {avg_count},avg = {avg_all} WHERE for_grand ="
+                        f" {grand_num} AND driver_id = '{driver_id}'")
+            con.commit()
+            data = [
+                (user_id, driver_id, grand_num)
+            ]
+            cur.executemany("INSERT INTO driver_score VALUES (?,?,?)", data)
+            con.commit()
+            text = f"\n{avg}میانگین امتیاز شما به این راننده: " \
+                   f"{avg_all}میانگین کل امتیازات این راننده: "
+            t1 = "میانگین امتیاز شما به این راننده: {avg}".format(avg=avg)
+            t2 = "میانگین کل امتیازات راننده: {avg_all}".format(avg_all=avg_all)
+            await event.reply(t1)
+            await event.reply(t2)
 bot.run_until_disconnected()
