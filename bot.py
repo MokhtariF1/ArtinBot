@@ -158,7 +158,7 @@ async def pay(event):
                 ],
                 [
                     Button.text(bot_text["soon"]),
-                    Button.text(bot_text["soon"]),
+                    Button.text(bot_text["scores"]),
                     Button.text(bot_text["soon"]),
                 ],
                 [
@@ -263,7 +263,7 @@ async def pay(event):
                 else:
                     is_admin = cur.execute(f"SELECT * FROM admins WHERE _id = {user_id}").fetchone()
                     keys = [
-                        [Button.text(bot_text["archive"], resize=True), Button.text(bot_text["scores"])],
+                        [Button.text(bot_text["archive"], resize=True)],
                         [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
                         [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
                          Button.text(bot_text["rules"])],
@@ -271,7 +271,7 @@ async def pay(event):
                     if is_admin is not None:
                         keys = [
                             [Button.text(bot_text["panel"], resize=True)],
-                            [Button.text(bot_text["archive"], resize=True), Button.text(bot_text["scores"])],
+                            [Button.text(bot_text["archive"], resize=True)],
                             [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
                             [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
                              Button.text(bot_text["rules"])],
@@ -282,7 +282,7 @@ async def pay(event):
             is_admin = check_admin(user_id)
             if is_admin is False:
                 keys = [
-                    [Button.text(bot_text["archive"], resize=True), Button.text(bot_text["scores"])],
+                    [Button.text(bot_text["archive"], resize=True)],
                     [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
                     [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
                      Button.text(bot_text["rules"])],
@@ -301,7 +301,7 @@ async def pay(event):
             is_admin = check_admin(user_id)
             if is_admin is False:
                 keys = [
-                    [Button.text(bot_text["archive"], resize=True), Button.text(bot_text["scores"])],
+                    [Button.text(bot_text["archive"], resize=True)],
                     [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
                     [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
                      Button.text(bot_text["rules"])],
@@ -339,18 +339,32 @@ async def pay(event):
                 key = [Button.inline(grand_name, str.encode("get_drivers" + ":" + str(grand_num)))]
                 inline_keys.append(key)
             await event.reply(bot_text["select_grand"], buttons=inline_keys)
-
+        elif text == bot_text["show_table"]:
+            grands = cur.execute("SELECT * FROM grand").fetchall()
+            if len(grands) == 0:
+                await event.reply(bot_text["grands_not_found"])
+            else:
+                keys = []
+                for grand in grands:
+                    grand_num = grand[0]
+                    grand_text = grand[1]
+                    key = [Button.inline(grand_text, str.encode("see_score" + ":" + str(grand_num)))]
+                    keys.append(key)
+                await event.reply(bot_text["select_see_grand"], buttons=keys)
         elif text == bot_text["grand"]:
             keys = [
-                Button.text(bot_text["add_grand"]),
-                Button.text(bot_text["show_grand"], resize=True),
+                [
+                    Button.text(bot_text["add_grand"]),
+                    Button.text(bot_text["show_grand"], resize=True)
+                ],
+                [back]
             ]
             await event.reply(bot_text["select"], buttons=keys)
         elif text == bot_text["add_word"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
                 keys = [
-                    [Button.text(bot_text["archive"], resize=True), Button.text(bot_text["scores"])],
+                    [Button.text(bot_text["archive"], resize=True)],
                     [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
                     [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
                      Button.text(bot_text["rules"])],
@@ -388,7 +402,7 @@ async def pay(event):
             is_admin = check_admin(user_id)
             if is_admin is False:
                 keys = [
-                    [Button.text(bot_text["archive"], resize=True), Button.text(bot_text["scores"])],
+                    [Button.text(bot_text["archive"], resize=True)],
                     [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
                     [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
                      Button.text(bot_text["rules"])],
@@ -431,7 +445,7 @@ async def pay(event):
             is_admin = check_admin(user_id)
             if is_admin is False:
                 keys = [
-                    [Button.text(bot_text["archive"], resize=True), Button.text(bot_text["scores"])],
+                    [Button.text(bot_text["archive"], resize=True)],
                     [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
                     [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
                      Button.text(bot_text["rules"])],
@@ -505,7 +519,7 @@ async def pay(event):
             is_admin = check_admin(user_id)
             if is_admin is False:
                 keys = [
-                    [Button.text(bot_text["archive"], resize=True), Button.text(bot_text["scores"])],
+                    [Button.text(bot_text["archive"], resize=True)],
                     [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
                     [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
                      Button.text(bot_text["rules"])],
@@ -698,7 +712,7 @@ async def eb(event):
     is_admin = check_admin(user_id)
     if is_admin is False:
         keys = [
-            [Button.text(bot_text["archive"], resize=True), Button.text(bot_text["scores"])],
+            [Button.text(bot_text["archive"], resize=True)],
             [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
             [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
              Button.text(bot_text["rules"])],
@@ -731,7 +745,7 @@ async def del_btn(event):
     is_admin = check_admin(user_id)
     if is_admin is False:
         keys = [
-            [Button.text(bot_text["archive"], resize=True), Button.text(bot_text["scores"])],
+            [Button.text(bot_text["archive"], resize=True)],
             [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
             [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
              Button.text(bot_text["rules"])],
@@ -755,7 +769,7 @@ async def show_btn_handler(event):
     ch_admin = check_admin(user_id)
     if ch_admin is False:
         keys = [
-            [Button.text(bot_text["archive"], resize=True), Button.text(bot_text["scores"])],
+            [Button.text(bot_text["archive"], resize=True)],
             [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
             [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
              Button.text(bot_text["rules"])],
@@ -800,7 +814,7 @@ async def show_grand_handler(event):
     ch_admin = check_admin(user_id)
     if ch_admin is False:
         keys = [
-            [Button.text(bot_text["archive"], resize=True), Button.text(bot_text["scores"])],
+            [Button.text(bot_text["archive"], resize=True)],
             [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
             [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
              Button.text(bot_text["rules"])],
@@ -844,7 +858,7 @@ async def del_grand(event):
     is_admin = check_admin(user_id)
     if is_admin is False:
         keys = [
-            [Button.text(bot_text["archive"], resize=True), Button.text(bot_text["scores"])],
+            [Button.text(bot_text["archive"], resize=True)],
             [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
             [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
              Button.text(bot_text["rules"])],
@@ -867,7 +881,7 @@ async def close_grand_handler(event):
     is_admin = check_admin(user_id)
     if is_admin is False:
         keys = [
-            [Button.text(bot_text["archive"], resize=True), Button.text(bot_text["scores"])],
+            [Button.text(bot_text["archive"], resize=True)],
             [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
             [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
              Button.text(bot_text["rules"])],
@@ -990,10 +1004,23 @@ async def driver_score_handler(event):
             ]
             cur.executemany("INSERT INTO driver_score VALUES (?,?,?)", data)
             con.commit()
-            text = f"\n{avg}میانگین امتیاز شما به این راننده: " \
-                   f"{avg_all}میانگین کل امتیازات این راننده: "
-            t1 = "میانگین امتیاز شما به این راننده: {avg}".format(avg=avg)
-            t2 = "میانگین کل امتیازات راننده: {avg_all}".format(avg_all=avg_all)
-            await event.reply(t1)
-            await event.reply(t2)
+            await event.reply(bot_text["successfully_scored"], buttons=back)
+
+@bot.on(events.CallbackQuery(pattern="see_score:*"))
+async def see_score_handler(event):
+    user_id = event.sender_id
+    grand_num = int(event.data.decode().split(":")[1])
+    find_grand = cur.execute(f"SELECT * FROM grand WHERE num = '{grand_num}'").fetchone()
+    if find_grand is None:
+        await event.reply(bot_text["grand_not_found"], buttons = back)
+    else:
+        drivers = cur.execute(f"SELECT * FROM drivers WHERE for_grand = {grand_num} ORDER BY avg").fetchall()
+        drivers = drivers[::-1]
+        text = """میانگین امتیازات ثبت شده برای رانندگان {grand_name}👇 \n\n""".format(grand_name=find_grand[1])
+        for driver in drivers:
+            driver_name = drivers_translate[driver[1]]
+            avg = driver[3]
+            driver_text = f"{driver_name} : `{avg}`"
+            text = text + driver_text + "\n\n"
+        await event.reply(text)
 bot.run_until_disconnected()
