@@ -292,11 +292,15 @@ async def pay(event):
                 keys = [
                     [
                         Button.text(bot_text["words"], resize=True),
-                        Button.text(bot_text["grand"])
+                        Button.text(bot_text["grand"]),
+                        Button.text(bot_text["robot_statistics"]),
                     ],
                     [Button.text(bot_text['back'])]
                 ]
                 await event.reply(bot_text["select"], buttons=keys)
+        elif text == bot_text["robot_statistics"]:
+            users = cur.execute("SELECT * FROM users").fetchall()
+            await event.reply(bot_text["statistics_text"].format(users=len(users)))
         elif text == bot_text["words"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
@@ -328,7 +332,7 @@ async def pay(event):
             ]
             await event.reply(bot_text["select"], buttons=keys)
         elif text == bot_text["add_score"]:
-            find_grands = cur.execute("SELECT * FROM grand").fetchall()
+            find_grands = cur.execute("SELECT * FROM grand ORDER BY num").fetchall()
             if len(find_grands) == 0:
                 await event.reply(bot_text["grands_not_found"], buttons=back)
                 return
@@ -340,7 +344,7 @@ async def pay(event):
                 inline_keys.append(key)
             await event.reply(bot_text["select_grand"], buttons=inline_keys)
         elif text == bot_text["show_table"]:
-            grands = cur.execute("SELECT * FROM grand").fetchall()
+            grands = cur.execute("SELECT * FROM grand ORDER BY num").fetchall()
             if len(grands) == 0:
                 await event.reply(bot_text["grands_not_found"])
             else:
@@ -415,10 +419,18 @@ async def pay(event):
                     if grand_name.raw_text == bot_text["cancel"]:
                         await conv.send_message(bot_text["canceled"])
                         return
+                    find_grand_name = cur.execute(f"SELECT * FROM grand WHERE name = '{grand_name.raw_text}'").fetchone()
+                    if find_grand_name is not None:
+                        await event.reply(bot_text["name_already_exists"])
+                        return
                     await conv.send_message(bot_text["enter_grand_num"])
                     grand_num = await conv.get_response()
                     if grand_num.raw_text == bot_text["cancel"]:
                         await conv.send_message(bot_text["canceled"])
+                        return
+                    find_grand_round = cur.execute(f"SELECT * FROM grand WHERE num = '{grand_num.raw_text}'").fetchone()
+                    if find_grand_round is not None:
+                        await event.reply(bot_text["round_already_exists"])
                         return
                     data = [
                         (grand_num.raw_text, grand_name.raw_text, False)
@@ -457,7 +469,7 @@ async def pay(event):
                     await event.reply(bot_text['not_found'])
                     return
                 await event.reply(bot_text['welcome_show_grand'])
-                find_grands = cur.execute("SELECT * FROM grand").fetchall()[:5]
+                find_grands = cur.execute("SELECT * FROM grand ORDER BY num").fetchall()[:5]
                 items_per_page = 5
                 pages = find_count // items_per_page
                 if find_count % items_per_page != 0:
@@ -821,7 +833,7 @@ async def show_grand_handler(event):
         ]
         await event.reply(bot_text["select"], buttons=keys)
         return
-    find_count = len(cur.execute("SELECT * FROM grand").fetchall())
+    find_count = len(cur.execute("SELECT * FROM grand ORDER BY num").fetchall())
     if find_count == 0:
         await bot.send_message(user_id, bot_text['not_found'])
         return
