@@ -2,7 +2,7 @@ import sqlite3
 con = sqlite3.connect("bot.db")
 cur = con.cursor()
 # cur.execute("DROP TABLE pay")
-# cur.execute("DROP TABLE users")
+cur.execute("DROP TABLE users")
 # cur.execute("DROP TABLE btn")
 cur.execute("DROP TABLE grand")
 cur.execute("DROP TABLE drivers")

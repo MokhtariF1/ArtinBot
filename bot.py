@@ -81,15 +81,47 @@ async def call_handler(event):
         up_en = cur.execute(f"UPDATE users SET lang = {en} WHERE id={user_id}")
         con.commit()
         en = bot_text["EN_SELECTED"]
+        is_admin = check_admin(user_id)
+        keys = [
+            [Button.text(bot_text["archive"], resize=True)],
+            [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
+            [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
+             Button.text(bot_text["rules"])],
+        ]
+        if is_admin:
+            keys = [
+                [Button.text(bot_text["panel"], resize=True)],
+                [Button.text(bot_text["archive"], resize=True)],
+                [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
+                [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
+                 Button.text(bot_text["rules"])],
+
+            ]
         await bot.delete_messages(user_id, msg_id)
-        await bot.send_message(user_id, en)
+        await bot.send_message(user_id, en, buttons=keys)
     elif event.data == b'lang:fa':
         fa = 2
         up_fa = cur.execute(f"UPDATE users SET lang = {fa} WHERE id={user_id}")
         con.commit()
         fa = bot_text["FA_SELECTED"]
+        is_admin = check_admin(user_id)
+        keys = [
+            [Button.text(bot_text["archive"], resize=True)],
+            [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
+            [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
+             Button.text(bot_text["rules"])],
+        ]
+        if is_admin:
+            keys = [
+                [Button.text(bot_text["panel"], resize=True)],
+                [Button.text(bot_text["archive"], resize=True)],
+                [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
+                [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
+                 Button.text(bot_text["rules"])],
+
+            ]
         await bot.delete_messages(user_id, msg_id)
-        await bot.send_message(user_id, fa)
+        await bot.send_message(user_id, fa, buttons=keys)
 
 
 @bot.on(events.NewMessage(chats=[1647875091]))
@@ -962,44 +994,32 @@ async def driver_score_handler(event):
         async with bot.conversation(user_id, timeout=1000) as conv:
             await conv.send_message(bot_text["qualifying"])
             while True:
-                try:
-                    qscore = await conv.get_response()
-                    qscore = qscore.raw_text
-                    if int(qscore) < 1:
-                        await conv.send_message(bot_text["small_score"])
-                    elif int(qscore) > 10:
-                        await conv.send_message(bot_text["big_score"])
-                    else:
-                        break
-                except ValueError:
-                    await conv.send_message(bot_text["just_num"])
+                qscore = await conv.get_response()
+                qscore = qscore.raw_text
+                check = config.check_number(qscore)
+                if check:
+                    break
+                else:
+                    await event.reply(bot_text["try_again"])
             await conv.send_message(bot_text["race"])
             while True:
-                try:
-                    rscore = await conv.get_response()
-                    rscore = rscore.raw_text
-                    if int(rscore) < 1:
-                        await conv.send_message(bot_text["small_score"])
-                    elif int(rscore) > 10:
-                        await conv.send_message(bot_text["big_score"])
-                    else:
-                        break
-                except ValueError:
-                    await conv.send_message(bot_text["just_num"])
+                rscore = await conv.get_response()
+                rscore = rscore.raw_text
+                check = config.check_number(rscore)
+                if check:
+                    break
+                else:
+                    await event.reply(bot_text["try_again"])
             await conv.send_message(bot_text["car"])
             while True:
-                try:
-                    cscore = await conv.get_response()
-                    cscore = cscore.raw_text
-                    if int(cscore) < 1:
-                        await conv.send_message(bot_text["small_score"])
-                    elif int(cscore) > 10:
-                        await conv.send_message(bot_text["big_score"])
-                    else:
-                        break
-                except ValueError:
-                    await conv.send_message(bot_text["just_num"])
-            avg = (int(rscore) + int(qscore) + int(cscore)) / 3
+                cscore = await conv.get_response()
+                cscore = cscore.raw_text
+                check = config.check_number(cscore)
+                if check:
+                    break
+                else:
+                    await event.reply(bot_text["try_again"])
+            avg = (float(rscore) + float(qscore) + float(cscore)) / 3
             avg = round(avg, 2)
             find_driver = cur.execute(f"SELECT * FROM drivers WHERE for_grand = {grand_num} AND driver_id = '{driver_id}'").fetchone()
             avg_plus = find_driver[4]
