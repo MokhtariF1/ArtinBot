@@ -14,14 +14,16 @@ PAY_TOKEN = "fced3227-3cf2-486f-95e7-52ee9e8fd77d"
 SESSION_NAME = "bot"
 if ENV:
     PROXY = False
+    BOT_ID = "https://t.me/F1DataIQBot"
 else:
     PROXY = True
+    BOT_ID = "https://t.me/F1data_Test_bot"
+
 PROXY_TYPE = "socks5"
 PROXY_ADDRESS = "127.0.0.1"
 PROXY_PORT = 10808
 DB_NAME = "bot.db"
 CHANNEL_ID = "https://t.me/F1DataOfficial"
-BOT_ID = "https://t.me/F1DataIQBot"
 CALLBACK_URL = "https://f1datas.com/payment"
 
 
@@ -77,7 +79,7 @@ def check_number(num):
 
 # bot texts
 TEXT = {
-    "EN_SELECTED": "زبان 🏴󠁧󠁢󠁥󠁮󠁧󠁿انگلیسی انتخاب شد",
+    "EN_SELECTED": "زبان 🏴انگلیسی انتخاب شد",
     "FA_SELECTED": "زبان 🇮🇷فارسی انتخاب شد",
     "Membership_Confirmation": "تایید عضویت",
     "pls_join": "برای استفاده از ربات ابتدا در کانال زیر عضو شوید سپس دوباره استارت کنید",
@@ -92,7 +94,7 @@ TEXT = {
     "you_pay": "تو پرداخت کن",
     "back": "بازگشت",
     "select": "یک دکمه را انتخاب کنید",
-    "en": "🏴󠁧󠁢󠁥󠁮󠁧󠁿انگلیسی",
+    "en": "English 🏴󠁧󠁢󠁥󠁮󠁧󠁿",
     "fa": "🇮🇷فارسی",
     "select_lang": "زبان ربات را انتخاب کنید",
     "archive": "صفحه اصلی",
@@ -181,5 +183,119 @@ TEXT = {
     "round_already_exists": "گرندپری با این راند از قبل موجود است❗\n لطفا دوباره دکمه افزودن را بزنید و امتحان کنید",
     "robot_statistics": "آمار ربات",
     "statistics_text": "تعداد کاربران ربات: {users}",
-    "try_again": "عدد شما درست نیست! مجدد تلاش کنید"
+    "try_again": "عدد شما درست نیست! مجدد تلاش کنید",
+    "sub_link": "هر نفر که با لینک زیر ربات رو استارت کنه یک امتیاز زیر مجموعه گیری به شما داده میشود👇\n{link}"
+}
+
+EN_TEXT = {
+    "EN_SELECTED": "English 🏴󠁧󠁢󠁥󠁮󠁧󠁿 󠁧󠁢󠁥󠁮language was selected",
+    "FA_SELECTED": "Persian 🇮🇷 language was selected",
+    "Membership_Confirmation": "confirmation✅",
+    "pls_join": "To use the robot, first subscribe to the following channel, then start again",
+    "big_heart": "big heart",
+    "rules": "rules",
+    "protection": "protection",
+    "rules_text": "rules text",
+    "coffee": "your coffee guest",
+    "dinner": "the last supper",
+    "small_party": "small party",
+    "big_party": "big party",
+    "you_pay": "you pay",
+    "back": "back",
+    "select": "Select a button:",
+    "en": "English 🏴󠁧󠁢󠁥󠁮󠁧󠁿󠁧󠁢󠁥󠁮󠁧󠁿",
+    "fa": "🇮🇷فارسی",
+    "select_lang": "Select the language of the bot",
+    "archive": "main page",
+    "account": "account",
+    "support": "support",
+    "search": "search",
+    "option": "You have already used this option!",
+    "enter_amount": "Please enter the amount in Rials. The minimum amount is 1000 Rials and the maximum amount is "
+                    "500,000,000 Rials",
+    "small_amount": "The amount is less than the minimum amount. Please enter the amount of 1000 rials or more:",
+    "big_amount": "The amount is more than the limit, please enter a lower amount:",
+    "just_num": "Just enter the number",
+    "name": "Enter the name of the payer: \n To cancel at any stage, send the word cancel!",
+    "dont_image": "Payment canceled! Please click the button again and enter the correct values",
+    "cancel": "cancel",
+    "canceled": "Canceled successfully",
+    "phone": "Enter the payer's phone number: \n To cancel, send the word cancel!",
+    "email": "Enter the payer's email: \n To cancel, send the word cancel!",
+    "desc": "Enter description: \n To cancel send the word cancel!",
+    "success_pay": "Payment Done",
+    "pay_link": """Your payment gateway has been created: \n
+{}
+
+**Note**: Please login to the robot no later than 10 minutes after payment and press the button below "Payment Done", 
+otherwise the payment will not be confirmed and the money will be returned to your account.""",
+    "pay_verified": "The payment was confirmed and the rewards that the employer says later were placed for you",
+    "dont_pay": "Payment has not been made yet",
+    "search_in_channel": "Search in channel",
+    "search_in_bot": "Search in bot",
+    "enter_hashtag": "Enter your desired hashtag to search the channel with or without # 👇",
+    "not_found": "❗No results found❗",
+    "enter_button": "Enter the name of the button or part of it:",
+    "panel": "admin panel",
+    "words": "words",
+    "add_word": "add word",
+    "show_words": "show words",
+    "enter_word": "Enter the name of the button:\n To cancel, send the word cancel",
+    "saved": "Successfully registered✅",
+    "welcome_show_words": "Registered words:",
+    "delete_btn": "🗑",
+    "edit_btn": "✏️ ",
+    "word_text": "button text",
+    "word_tag": "button tag",
+    "come_next": "paging button",
+    "enter_new_text": "Enter new text:",
+    "edited": "Changed successfully",
+    "deleted": "Removed successfully",
+    "underline": "To search in bot buttons, put _ or hyphen in your first phrase",
+    "reply": "replay",
+    "fantasy": "fantasy league",
+    "data_archive": "data archive",
+    "soon": "soon",
+    "user_information": "user information",
+    "personal_account": "personal account",
+    "sub_collection": "sub collection",
+    "first_start": "start first",
+    "grand": "grand prix",
+    "add_grand": "add",
+    "show_grand": "view",
+    "enter_grand": "Enter the name of the Grand Prix in Farsi or English:",
+    "enter_grand_num": "Enter the number of the round in which the race was held in this Grand Prix:\n "
+                       "like China, which is round 5",
+    "successfully": "Successfully registered",
+    "welcome_show_grand": "Registered Grand Prix:",
+    "close_grand": "🔐",
+    "delete_grand": "🗑",
+    "grand_round": "grand prix round",
+    "grand_name": "grand prix name",
+    "grand_not_found": "The Grand Prix has been removed❗",
+    "grand_opened": "Opened successfully",
+    "grand_closed": "Closed successfully",
+    "scores": "power ranking",
+    "add_score": "register points",
+    "show_table": "view table",
+    "grands_not_found": "The Grand Prix are not yet registered for voting❗",
+    "select_grand": "Select the Grand Prix you want to vote for the drivers",
+    "requesting_ergast": "درحال درخواست به ایرگست... لطفا منتظر باشید",
+    "grand_is_close": "Scoring has been stopped in this Grand Prix",
+    "select_driver": "{gp} drivers of\n Select one of the drivers to rate",
+    "qualifying": "Enter your desired score from 1 to 10 for the driver's lane marking performance:",
+    "race": "Enter your desired score from 1 to 10 for the driver's performance in the race:",
+    "car": "امتیاز مورد نظر خود را از 1 تا 10 برای نسبت عملکرد راننده به ماشین وارد کنید:",
+    "small_score": "The minimum score is 1",
+    "big_score": "The maximum score is 10",
+    "you_scored": "You have already rated this driver",
+    "select_see_grand": "Select the desired grand prix to view the points recorded for the drivers👇",
+    "successfully_scored": "Your score has been registered successfully✅",
+    "name_already_exists": "A Grand Prix with this name already exists❗\n Please hit the add button again and try",
+    "round_already_exists": "The Grand Prix is already available with this round❗"
+                            "\n Please hit the add button again and try",
+    "robot_statistics": "bot statistics",
+    "statistics_text": "Number of bot users: {users}",
+    "try_again": "Your number is not correct! Try again",
+    "sub_link": "Every person who starts the robot with the link below will be given a collection point 👇\n{link}"
 }

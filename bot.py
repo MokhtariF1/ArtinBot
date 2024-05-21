@@ -15,7 +15,6 @@ bot_token = config.BOT_TOKEN
 pay_token = config.PAY_TOKEN
 session_name = config.SESSION_NAME
 proxy = config.PROXY
-bot_text = config.TEXT
 if proxy:
     print("connecting...")
     proxy_type = config.PROXY_TYPE
@@ -34,7 +33,6 @@ else:
 con = sqlite3.connect(config.DB_NAME)
 cur = con.cursor()
 
-back = Button.text(bot_text["back"], resize=True)
 drivers_translate = {
     "Max_Verstappen": "مکس ورستپن",
     "Liam_Lawson": "لیام لاوسون",
@@ -71,6 +69,14 @@ def check_admin(user_id):
     is_admin = cur.execute(f"SELECT * FROM admins WHERE _id = {user_id}").fetchone()
     return True if is_admin is not None else False
 
+def check_lang(user_id):
+    user = cur.execute(f"SELECT * FROM users WHERE id = {user_id}").fetchone()
+    if user is None:
+        lang = None
+    else:
+        lang = user[1]
+    print(lang)
+    return lang
 
 @bot.on(events.CallbackQuery())
 async def call_handler(event):
@@ -80,6 +86,7 @@ async def call_handler(event):
         en = 1
         up_en = cur.execute(f"UPDATE users SET lang = {en} WHERE id={user_id}")
         con.commit()
+        bot_text = config.EN_TEXT
         en = bot_text["EN_SELECTED"]
         is_admin = check_admin(user_id)
         keys = [
@@ -103,6 +110,7 @@ async def call_handler(event):
         fa = 2
         up_fa = cur.execute(f"UPDATE users SET lang = {fa} WHERE id={user_id}")
         con.commit()
+        bot_text = config.TEXT
         fa = bot_text["FA_SELECTED"]
         is_admin = check_admin(user_id)
         keys = [
@@ -143,6 +151,12 @@ async def save_msg(event):
 @bot.on(events.NewMessage())
 async def pay(event):
     user_id = event.sender_id
+    lang = check_lang(user_id)
+    if lang == 1:
+        bot_text = config.EN_TEXT
+    else:
+        bot_text = config.TEXT
+    back = Button.text(bot_text["back"], resize=True)
     if type(event.message.peer_id) == PeerChannel:
         chat_type = 'channel'
     elif type(event.message.peer_id) == PeerChat:
@@ -266,6 +280,25 @@ async def pay(event):
             ]
             await event.reply(bot_text["select"], buttons=keys)
         elif text.startswith("/start") or text == bot_text["back"]:
+            start_parameter = event.message.message.split()
+            if len(start_parameter) == 2:
+                start_parameter = int(start_parameter[1])
+                print(start_parameter)
+                if start_parameter != user_id:
+                    find_invite = cur.execute(f"SELECT * FROM invite WHERE user_id = {user_id} AND invite_id = "
+                                              f"{start_parameter}").fetchone()
+                    if find_invite is None:
+                        print("hi")
+                        data = [
+                            (user_id, start_parameter)
+                        ]
+                        cur.executemany(f"INSERT INTO invite VALUES (?,?)", data)
+                        con.commit()
+                        find_user = cur.execute(f"SELECT * FROM users WHERE id = {start_parameter}").fetchone()
+                        sub_count = find_user[4]
+                        cur.execute(f"UPDATE users SET sub_count = {sub_count + 1} WHERE id = {start_parameter}")
+                        con.commit()
+
             user = cur.execute(f"SELECT * FROM users WHERE id={user_id}").fetchone()
             if user is None:
                 currentDateAndTime = datetime.now()
@@ -283,8 +316,8 @@ async def pay(event):
                 select = bot_text["select_lang"]
                 await event.reply(select, buttons=keys)
             else:
-                lang = user[1]
-                if lang is None:
+                lang_ch = user[1]
+                if lang_ch is None:
                     keys = [
                         [Button.inline(bot_text["en"], b'lang:en'),
                          Button.inline(bot_text["fa"], b'lang:fa')
@@ -542,23 +575,48 @@ async def pay(event):
                 full_name = first_name + last_name if last_name is not None else first_name
                 a_tag = f'<a href="tg://user?id={user_id}">{full_name}</a>'
                 c_tag = f'<code>{num_id}</code>'
-                b_tag = f'<b>📜 اطلاعات کاربری شما به شرح ذیل می باشد:</b>'
-                full_text = "{btag}\n\n" \
-                            "⁣👦🏻نام: {name}\n" \
-                            "🌐آیدی: {username}\n" \
-                            "👤آیدی عددی: {num_id}\n" \
-                            "🕰زمان عضویت: {join_date}\n" \
-                            "💰تعداد زیر مجموعه: {sub_count}\n" \
-                            "⭐️تعداد امتیاز: {score}\n" \
-                            "💵مقدار حمایت: {protection}\n" \
-                            "💎تعداد سکه فانتزی: {fantasy}\n" \
-                            "💳میزان اعتبار: {validity}\n".format(num_id=c_tag, join_date=join_date,
-                                                                  sub_count=sub_count,
-                                                                  protection=protection, score=score, fantasy=fantasy,
-                                                                  validity=validity, name=a_tag, username=username,
-                                                                  btag=b_tag)
+                if lang:
+                    b_tag = "<b>📜 Your user information is as follows:</b>"
+                    full_text = "{btag}\n\n" \
+                                "⁣👦🏻name: {name}\n" \
+                                "🌐id: {username}\n" \
+                                "👤number id: {num_id}\n" \
+                                "🕰join date: {join_date}\n" \
+                                "💰sub collection count: {sub_count}\n" \
+                                "⭐️score count: {score}\n" \
+                                "💵amount of support: {protection}\n" \
+                                "💎fantasy coins: {fantasy}\n" \
+                                "💳validity: {validity}\n".format(num_id=c_tag, join_date=join_date,
+                                                                      sub_count=sub_count,
+                                                                      protection=protection, score=score,
+                                                                      fantasy=fantasy,
+                                                                      validity=validity, name=a_tag, username=username,
+                                                                      btag=b_tag)
+                else:
+                    b_tag = f'<b>📜 اطلاعات کاربری شما به شرح ذیل می باشد:</b>'
+                    full_text = "{btag}\n\n" \
+                                "⁣👦🏻نام: {name}\n" \
+                                "🌐آیدی: {username}\n" \
+                                "👤آیدی عددی: {num_id}\n" \
+                                "🕰زمان عضویت: {join_date}\n" \
+                                "💰تعداد زیر مجموعه: {sub_count}\n" \
+                                "⭐️تعداد امتیاز: {score}\n" \
+                                "💵مقدار حمایت: {protection}\n" \
+                                "💎تعداد سکه فانتزی: {fantasy}\n" \
+                                "💳میزان اعتبار: {validity}\n".format(num_id=c_tag, join_date=join_date,
+                                                                      sub_count=sub_count,
+                                                                      protection=protection, score=score,
+                                                                      fantasy=fantasy,
+                                                                      validity=validity, name=a_tag, username=username,
+                                                                      btag=b_tag)
+
                 await bot.send_message(user_id, full_text,
                                        parse_mode='html')
+        elif text == bot_text["sub_collection"]:
+            bot_id = config.BOT_ID
+            invite_link = bot_id + "?start=" + str(user_id)
+            text = bot_text["sub_link"].format(link=invite_link)
+            await event.reply(text)
         elif text == bot_text["show_words"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
@@ -705,6 +763,12 @@ async def pay(event):
 @bot.on(events.CallbackQuery(pattern="pay_true:*"))
 async def pay_hand(event):
     user_id = event.sender_id
+    lang = check_lang(user_id)
+    if lang == 1:
+        bot_text = config.EN_TEXT
+    else:
+        bot_text = config.TEXT
+    back = Button.text(bot_text["back"], resize=True)
     msg_id = event.original_update.msg_id
     order_id = event.data.decode().split(":")[1]
     pay = cur.execute(f"SELECT * FROM pay WHERE order_id={order_id}").fetchone()
@@ -753,6 +817,12 @@ async def pay_hand(event):
 @bot.on(events.CallbackQuery(pattern="edit_btn:*"))
 async def eb(event):
     user_id = event.sender_id
+    lang = check_lang(user_id)
+    if lang == 1:
+        bot_text = config.EN_TEXT
+    else:
+        bot_text = config.TEXT
+    back = Button.text(bot_text["back"], resize=True)
     is_admin = check_admin(user_id)
     if is_admin is False:
         keys = [
@@ -786,6 +856,12 @@ async def eb(event):
 @bot.on(events.CallbackQuery(pattern="delete_btn:*"))
 async def del_btn(event):
     user_id = event.sender_id
+    lang = check_lang(user_id)
+    if lang == 1:
+        bot_text = config.EN_TEXT
+    else:
+        bot_text = config.TEXT
+    back = Button.text(bot_text["back"], resize=True)
     is_admin = check_admin(user_id)
     if is_admin is False:
         keys = [
@@ -809,6 +885,12 @@ async def del_btn(event):
 @bot.on(events.CallbackQuery(pattern='show_btn:*'))
 async def show_btn_handler(event):
     user_id = event.sender_id
+    lang = check_lang(user_id)
+    if lang == 1:
+        bot_text = config.EN_TEXT
+    else:
+        bot_text = config.TEXT
+    back = Button.text(bot_text["back"], resize=True)
     start_text = bot_text['select']
     ch_admin = check_admin(user_id)
     if ch_admin is False:
@@ -854,6 +936,12 @@ async def show_btn_handler(event):
 @bot.on(events.CallbackQuery(pattern='show_grand:*'))
 async def show_grand_handler(event):
     user_id = event.sender_id
+    lang = check_lang(user_id)
+    if lang == 1:
+        bot_text = config.EN_TEXT
+    else:
+        bot_text = config.TEXT
+    back = Button.text(bot_text["back"], resize=True)
     start_text = bot_text['select']
     ch_admin = check_admin(user_id)
     if ch_admin is False:
@@ -899,6 +987,12 @@ async def show_grand_handler(event):
 @bot.on(events.CallbackQuery(pattern="delete_grand:*"))
 async def del_grand(event):
     user_id = event.sender_id
+    lang = check_lang(user_id)
+    if lang == 1:
+        bot_text = config.EN_TEXT
+    else:
+        bot_text = config.TEXT
+    back = Button.text(bot_text["back"], resize=True)
     is_admin = check_admin(user_id)
     if is_admin is False:
         keys = [
@@ -922,6 +1016,12 @@ async def del_grand(event):
 @bot.on(events.CallbackQuery(pattern="close_grand:*"))
 async def close_grand_handler(event):
     user_id = event.sender_id
+    lang = check_lang(user_id)
+    if lang == 1:
+        bot_text = config.EN_TEXT
+    else:
+        bot_text = config.TEXT
+    back = Button.text(bot_text["back"], resize=True)
     is_admin = check_admin(user_id)
     if is_admin is False:
         keys = [
@@ -949,6 +1049,13 @@ async def close_grand_handler(event):
 
 @bot.on(events.CallbackQuery(pattern="get_drivers:*"))
 async def get_drivers_handler(event):
+    user_id = event.sender_id
+    lang = check_lang(user_id)
+    if lang == 1:
+        bot_text = config.EN_TEXT
+    else:
+        bot_text = config.TEXT
+    back = Button.text(bot_text["back"], resize=True)
     grand_num = event.data.decode().split(":")[1]
     find_grand = cur.execute(f"SELECT * FROM grand WHERE num = '{grand_num}'").fetchone()
     if find_grand is None:
@@ -977,6 +1084,12 @@ async def get_drivers_handler(event):
 @bot.on(events.CallbackQuery(pattern="driver_score:*"))
 async def driver_score_handler(event):
     user_id = event.sender_id
+    lang = check_lang(user_id)
+    if lang == 1:
+        bot_text = config.EN_TEXT
+    else:
+        bot_text = config.TEXT
+    back = Button.text(bot_text["back"], resize=True)
     spl = event.data.decode().split(":")
     driver_id = spl[1]
     grand_num = spl[2]
@@ -1041,6 +1154,12 @@ async def driver_score_handler(event):
 @bot.on(events.CallbackQuery(pattern="see_score:*"))
 async def see_score_handler(event):
     user_id = event.sender_id
+    lang = check_lang(user_id)
+    if lang == 1:
+        bot_text = config.EN_TEXT
+    else:
+        bot_text = config.TEXT
+    back = Button.text(bot_text["back"], resize=True)
     grand_num = int(event.data.decode().split(":")[1])
     find_grand = cur.execute(f"SELECT * FROM grand WHERE num = '{grand_num}'").fetchone()
     if find_grand is None:
@@ -1048,7 +1167,10 @@ async def see_score_handler(event):
     else:
         drivers = cur.execute(f"SELECT * FROM drivers WHERE for_grand = {grand_num} ORDER BY avg").fetchall()
         drivers = drivers[::-1]
-        text = """میانگین امتیازات ثبت شده برای رانندگان {grand_name}👇 \n\n""".format(grand_name=find_grand[1])
+        if lang:
+            text = """Average points registered for drivers {grand_name}👇 \n\n""".format(grand_name=find_grand[1])
+        else:
+            text = """میانگین امتیازات ثبت شده برای رانندگان {grand_name}👇 \n\n""".format(grand_name=find_grand[1])
         for driver in drivers:
             driver_name = drivers_translate[driver[1]]
             avg = driver[3]
