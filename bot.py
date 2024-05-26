@@ -667,6 +667,8 @@ async def pay(event):
                             else:
                                 top_speed_path = fr"{BASE_DIR}\{image_top}"
                                 speed_trap_path = fr"{BASE_DIR}\{image_base_trap}"
+                            print(top_speed_path)
+                            print(speed_trap_path)
                             await bot.send_file(user_id, caption="top speed", file=top_speed_path)
                             await bot.send_file(user_id, caption="speed trap", file=speed_trap_path)
                             await conv.cancel_all()
