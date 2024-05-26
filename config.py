@@ -84,8 +84,10 @@ TEXT = {
     "Membership_Confirmation": "تایید عضویت",
     "pls_join": "برای استفاده از ربات ابتدا در کانال زیر عضو شوید سپس دوباره استارت کنید",
     "big_heart": "قلب بزرگ",
-    "rules": "قوانین",
+    "rules": "تنظیمات",
+    "rules_show": "قوانین",
     "protection": "حمایت",
+    "language": "زبان",
     "rules_text": "متن قوانین",
     "coffee": "مهمان قهوه ات",
     "dinner": "شام آخر",
@@ -101,6 +103,7 @@ TEXT = {
     "account": "حساب کاربری",
     "support": "پشتیبانی",
     "search": "جستجو",
+    "top_speed": "سرعت",
     "option": "شما قبلا از این آپشن استفاده کرده اید!",
     "enter_amount": "لطفا مبلغ را به ریال وارد کنید . حداقل مبلغ 1000 ریال و حداکثر مبلغ 500,000,000 ریال است",
     "small_amount": "مبلغ کمتر از حداقل مقدار است.لطفا مبلغ 1000 ریال یا بیشتر را وارد کنید:",
@@ -109,6 +112,7 @@ TEXT = {
     "name": "نام پرداخت کننده را وارد کنید: \n برای کنسل کردن در هر مرحله کلمه کنسل را ارسال کنید!",
     "dont_image": "پرداخت کنسل شد! لطفا دوباره دکمه را بزنید و مقادیر درست وارد کنید",
     "cancel": "کنسل",
+    "select_year": "سال را انتخاب کنید:",
     "canceled": "با موفقیت کنسل شد",
     "phone": "شماره تلفن پرداخت کننده را وارد کنید: \n برای کنسل کردن کلمه کنسل را ارسال کنید!",
     "email": "ایمیل پرداخت کننده را وارد کنید: \n برای کنسل کردن کلمه کنسل را ارسال کنید!",
@@ -182,9 +186,13 @@ TEXT = {
     "name_already_exists": "گرندپری با این نام از قبل موجود است❗\n لطفا دوباره دکمه افزودن را بزنید و امتحان کنید",
     "round_already_exists": "گرندپری با این راند از قبل موجود است❗\n لطفا دوباره دکمه افزودن را بزنید و امتحان کنید",
     "robot_statistics": "آمار ربات",
+    "loading": "درحال دریافت اطلاعات...",
     "statistics_text": "تعداد کاربران ربات: {users}",
     "try_again": "عدد شما درست نیست! مجدد تلاش کنید",
-    "sub_link": "هر نفر که با لینک زیر ربات رو استارت کنه یک امتیاز زیر مجموعه گیری به شما داده میشود👇\n{link}"
+    "sub_link": "هر نفر که با لینک زیر ربات رو استارت کنه یک امتیاز زیر مجموعه گیری به شما داده میشود👇\n{link}",
+    "timeout_error": "زمان پاسخگویی تمام شده است!\nلطفا مجدد تلاش کنید",
+    "select_gp": "گرندپری را انتخاب کنید:",
+    "select_session": "لطفا رویداد را انتخاب کنید:"
 }
 
 EN_TEXT = {
@@ -193,8 +201,10 @@ EN_TEXT = {
     "Membership_Confirmation": "confirmation✅",
     "pls_join": "To use the robot, first subscribe to the following channel, then start again",
     "big_heart": "big heart",
-    "rules": "rules",
+    "rules": "settings",
+    "rules_show": "rules",
     "protection": "protection",
+    "language": "language",
     "rules_text": "rules text",
     "coffee": "your coffee guest",
     "dinner": "the last supper",
@@ -235,6 +245,7 @@ otherwise the payment will not be confirmed and the money will be returned to yo
     "search_in_bot": "Search in bot",
     "enter_hashtag": "Enter your desired hashtag to search the channel with or without # 👇",
     "not_found": "❗No results found❗",
+    "select_year": "select year:",
     "enter_button": "Enter the name of the button or part of it:",
     "panel": "admin panel",
     "words": "words",
@@ -245,6 +256,7 @@ otherwise the payment will not be confirmed and the money will be returned to yo
     "welcome_show_words": "Registered words:",
     "delete_btn": "🗑",
     "edit_btn": "✏️ ",
+    "top_speed": "top speed",
     "word_text": "button text",
     "word_tag": "button tag",
     "come_next": "paging button",
@@ -297,5 +309,9 @@ otherwise the payment will not be confirmed and the money will be returned to yo
     "robot_statistics": "bot statistics",
     "statistics_text": "Number of bot users: {users}",
     "try_again": "Your number is not correct! Try again",
-    "sub_link": "Every person who starts the robot with the link below will be given a collection point 👇\n{link}"
+    "sub_link": "Every person who starts the robot with the link below will be given a collection point 👇\n{link}",
+    "timeout_error": "Response time is over!\nPlease try again",
+    "select_gp": "please select grand prix:",
+    "select_session": "please select event:",
+    "loading": "loading data..."
 }
