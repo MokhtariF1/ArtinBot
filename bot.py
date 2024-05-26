@@ -664,7 +664,10 @@ async def pay(event):
                             print(image_base_top)
                             print(image_base_trap)
                             if os.path.exists(image_base_top) is False and os.path.exists(image_base_trap) is False:
-                                top_speed_path, speed_trap_path = top_speed(year, gp, session)
+                                try:
+                                    top_speed_path, speed_trap_path = top_speed(year, gp, session)
+                                except:
+                                    pass
                                 image_base_top = fr"{BASE_DIR}/{top_speed_path}"
                                 image_base_trap = fr"{BASE_DIR}/{speed_trap_path}"
                             time.sleep(1)
