@@ -10,7 +10,7 @@ from navlib import paginate
 from datetime import datetime
 from funections import top_speed
 from pathlib import Path
-
+import os
 
 api_id = config.API_ID
 api_hash = config.API_HASH
@@ -656,11 +656,19 @@ async def pay(event):
                             session = event_data.decode()
                             await conv.send_message(bot_text["loading"])
                             BASE_DIR = Path(__file__).resolve().parent
-                            top_speed_path, speed_trap_path = top_speed(year, gp, session)
-                            top_speed_path = fr"{BASE_DIR}\{top_speed_path}"
-                            speed_trap_path = fr"{BASE_DIR}\{speed_trap_path}"
-                            await event.reply("top speed", file=top_speed_path)
-                            await event.reply("speed trap", file=speed_trap_path)
+                            image_top = f"{year}-{gp}-{session}-top_speed.png"
+                            image_base_top = fr"{BASE_DIR}\{image_top}"
+                            image_trap = f"{year}-{gp}-{session}-speed_trap.png"
+                            image_base_trap = fr"{BASE_DIR}\{image_trap}"
+                            if os.path.exists(image_base_top) is False and os.path.exists(image_base_trap) is False:
+                                top_speed_path, speed_trap_path = top_speed(year, gp, session)
+                                top_speed_path = fr"{BASE_DIR}\{top_speed_path}"
+                                speed_trap_path = fr"{BASE_DIR}\{speed_trap_path}"
+                            else:
+                                top_speed_path = fr"{BASE_DIR}\{image_top}"
+                                speed_trap_path = fr"{BASE_DIR}\{image_base_trap}"
+                            await bot.send_file(user_id, caption="top speed", file=top_speed_path)
+                            await bot.send_file(user_id, caption="speed trap", file=speed_trap_path)
                             await conv.cancel_all()
         elif text == bot_text["add_grand"]:
             is_admin = check_admin(user_id)
