@@ -660,13 +660,15 @@ async def pay(event):
                             image_base_top = fr"{BASE_DIR}\{image_top}"
                             image_trap = f"{year}-{gp}-{session}-speed_trap.png"
                             image_base_trap = fr"{BASE_DIR}\{image_trap}"
+                            print(image_base_top)
+                            print(image_base_trap)
                             if os.path.exists(image_base_top) is False and os.path.exists(image_base_trap) is False:
                                 top_speed_path, speed_trap_path = top_speed(year, gp, session)
                                 top_speed_path = fr"{BASE_DIR}\{top_speed_path}"
                                 speed_trap_path = fr"{BASE_DIR}\{speed_trap_path}"
                             else:
                                 top_speed_path = fr"{BASE_DIR}\{image_top}"
-                                speed_trap_path = fr"{BASE_DIR}\{image_base_trap}"
+                                speed_trap_path = fr"{BASE_DIR}\{image_trap}"
                             print(top_speed_path)
                             print(speed_trap_path)
                             await bot.send_file(user_id, caption="top speed", file=top_speed_path)
