@@ -8,6 +8,9 @@ import config
 import sqlite3
 from navlib import paginate
 from datetime import datetime
+from funections import top_speed
+from pathlib import Path
+
 
 api_id = config.API_ID
 api_hash = config.API_HASH
@@ -126,7 +129,6 @@ async def call_handler(event):
                 [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
                 [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
                  Button.text(bot_text["rules"])],
-
             ]
         await bot.delete_messages(user_id, msg_id)
         await bot.send_message(user_id, fa, buttons=keys)
@@ -192,6 +194,50 @@ async def pay(event):
             amount = 2000000
             pay = True
         elif text == bot_text["rules"]:
+            keys = [
+                [
+                    Button.text(bot_text["rules_show"]),
+                    Button.text(bot_text["language"], resize=True),
+                ],
+                [
+                    Button.text(bot_text["back"])
+                ]
+            ]
+            await event.reply(bot_text["select"], buttons=keys)
+        elif text == bot_text["language"]:
+            keys = [
+                [
+                    Button.text(bot_text["fa"]),
+                    Button.text(bot_text["en"]),
+                ],
+                [
+                    Button.text(bot_text["back"], resize=True)
+                ]
+            ]
+            await event.reply(bot_text["select_lang"], buttons=keys)
+        elif text == bot_text["fa"]:
+            cur.execute(f"UPDATE users SET lang = 2 WHERE id = {user_id}")
+            con.commit()
+            bot_text = config.TEXT
+            keys = [
+                [Button.text(bot_text["archive"], resize=True)],
+                [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
+                [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
+                 Button.text(bot_text["rules"])],
+            ]
+            await event.reply(bot_text["FA_SELECTED"], buttons= keys)
+        elif text == bot_text["en"]:
+            cur.execute(f"UPDATE users SET lang = 1 WHERE id = {user_id}")
+            con.commit()
+            bot_text = config.EN_TEXT
+            keys = [
+                [Button.text(bot_text["archive"], resize=True)],
+                [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
+                [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
+                 Button.text(bot_text["rules"])],
+            ]
+            await event.reply(bot_text["EN_SELECTED"], buttons= keys)
+        elif text == bot_text["rules_show"]:
             await event.reply(bot_text["rules_text"])
         elif text == bot_text["archive"]:
             keys = [
@@ -466,6 +512,155 @@ async def pay(event):
                             cur.executemany(f"INSERT INTO btn VALUES (?,?)", data_m)
                             con.commit()
                             await conv.send_message(bot_text["saved"])
+                            await conv.cancel_all()
+        elif text == bot_text["data_archive"]:
+            keys = [
+                [
+                    Button.text(bot_text["top_speed"])
+                ],
+                [
+                    Button.text(bot_text["back"], resize=1)
+                ]
+            ]
+            await event.reply(bot_text["select"], buttons=keys)
+        elif text == bot_text["top_speed"]:
+            async with bot.conversation(user_id) as conv:
+                year_keys = [
+                    [
+                        Button.inline("2024", b'2024')
+                    ],
+                    [
+                        Button.inline("2023", b'2023')
+                    ],
+                    [
+                        Button.inline("2022", b'2022')
+                    ],
+                    [
+                        Button.inline("2021", b'2021')
+                    ],
+                    [
+                        Button.inline("2020", b'2020')
+                    ],
+                    [
+                        Button.inline("2019", b'2019')
+                    ],
+                    [
+                        Button.inline("2018", b'2018')
+                    ],
+                    [
+                        Button.inline(bot_text["cancel"], b'cancel')
+                    ]
+                ]
+                ask_year = await conv.send_message(bot_text["select_year"], buttons=year_keys)
+                try:
+                    year_res = await conv.wait_event(events.CallbackQuery(), timeout=60)
+                except TimeoutError:
+                    await conv.send_message(bot_text["timeout_error"])
+                    await conv.cancel_all()
+                year_data = year_res.data
+                if year_data == b'cancel':
+                    await conv.send_message(bot_text["canceled"])
+                    await bot.delete_messages(user_id, ask_year.id)
+                    await conv.cancel_all()
+                else: 
+                    year = int(year_data)
+                    url = f"https://f1datas.com/api/v1/fastf1/session/gp?year={year}"
+                    response = requests.get(url).json()["Country"]
+                    country_tr = {
+                        "Bahrain_Grand_Prix": "گرندپری بحرین",
+                        "Saudi_Arabian_Grand_Prix": "گرندپری عربستان",
+                        "Australian_Grand_Prix": "گرندپری استرالیا",
+                        "Azerbaijan_Grand_Prix": "گرندپری آذربایجان",
+                        "United_States_Grand_Prix": "گرندپری آمریکا",
+                        "Miami_Grand_Prix": "گرندپری میامی",
+                        "Monaco_Grand_Prix": "گرندپری موناکو",
+                        "Spanish_Grand_Prix": "گرندپری اسپانیا",
+                        "Canadian_Grand_Prix": "گرندپری کانادا",
+                        "Austrian_Grand_Prix": "گرندپری اتریش",
+                        "British_Grand_Prix": "گرندپری بریتانیا",
+                        "Hungarian_Grand_Prix": "گرندپری مجارستان",
+                        "Belgian_Grand_Prix": "گرندپری بلژیک",
+                        "Dutch_Grand_Prix": "گرندپری هلند",
+                        "Italian_Grand_Prix": "گرندپری ایتالیا",
+                        "Singapore_Grand_Prix": "گرندپری سنگاپور",
+                        "Japanese_Grand_Prix": "گرندپری ژاپن",
+                        "Qatar_Grand_Prix": "گرندپری قطر",
+                        "Mexico_City_Grand_Prix": "گرندپری مکزیک",
+                        "São_Paulo_Grand_Prix": "گرندپری برزیل",
+                        "Abu_Dhabi_Grand_Prix": "گرندپری ابوظبی",
+                        "Las_Vegas_Grand_Prix": "گرندپری لاس وگاس",
+                        "Emilia_Romagna_Grand_Prix": "گرندپری امیلیا رومانیا",
+                        "Portuguese_Grand_Prix": "گرند پری پرتغال",
+                        "French_Grand_Prix": "گرند پری فرانسه",
+                        "Styrian_Grand_Prix": "گرند پری استراین",
+                        "Turkish_Grand_Prix": "گرند پری ترکیه",
+                        "Russian_Grand_Prix": "گرند پری روسیه",
+                        "Tuscan_Grand_Prix": "گرند پری توسکان",
+                        "Eifel_Grand_Prix": "گرند پری ایفل",
+                        "Sakhir_Grand_Prix": "گرند پری ساخیر",
+                        "Chinese_Grand_Prix": "گرند پری چین",
+                    }
+
+
+                    gp_keys = []
+                    for gp in response:
+                        gp_text = country_tr[gp["tr"]]
+                        gp_data = gp["t"].encode()
+                        key = Button.inline(gp_text, data=gp_data)
+                        gp_keys.append(key)
+                    result = []
+                    for i in range(0, len(gp_keys), 2):
+                        if i + 1 < len(gp_keys):
+                            result.append([gp_keys[i], gp_keys[i + 1]])
+                        else:
+                            result.append([gp_keys[i]])
+                    result.append([Button.inline(bot_text["cancel"], b'cancel')])
+                    ask_gp = await conv.send_message(bot_text["select_gp"], buttons=result)
+                    try:
+                        gp_res = await conv.wait_event(events.CallbackQuery(), timeout=60)
+                        gp_data = gp_res.data
+                    except TimeoutError:
+                        await conv.send_message(bot_text["timeout_error"])
+                        await conv.cancel_all()
+                    if gp_data == b'cancel':
+                        await conv.send_message(bot_text["canceled"])
+                        await conv.cancel_all()
+                    else:
+                        gp = gp_data.decode()
+                        url = f"https://f1datas.com/api/v1/fastf1/session?year={year}&country={gp}"
+                        sessions = requests.get(url).json()["sessions"]
+                        type_tr = {
+                            "Practice_1": "تمرین اول",
+                            "Practice_2": "تمرین دوم",
+                            "Practice_3": "تمرین سوم",
+                            "Sprint": "اسپرینت",
+                            "Sprint_Shootout": "اسپرینت شوت آوت",
+                            "Sprint_Qualifying": "تعیین خط اسپرینت",
+                            "Qualifying": "تعیین خط",
+                            "Race": "مسابقه"
+                        }
+                        sessions_keys = []
+                        for session in sessions:
+                            session_text = type_tr[session]
+                            session_key = [
+                                Button.inline(session_text, session.encode()),
+                            ]
+                            sessions_keys.append(session_key)
+                        await event.reply(bot_text["select_session"], buttons=sessions_keys)
+                        session_res = await conv.wait_event(events.CallbackQuery(), timeout=60)
+                        event_data = session_res.data
+                        if event_data == b'cancel':
+                            await conv.send_message(bot_text["canceled"])
+                            await conv.cancel_all()
+                        else:
+                            session = event_data.decode()
+                            await conv.send_message(bot_text["loading"])
+                            BASE_DIR = Path(__file__).resolve().parent
+                            top_speed_path, speed_trap_path = top_speed(year, gp, session)
+                            top_speed_path = fr"{BASE_DIR}\{top_speed_path}"
+                            speed_trap_path = fr"{BASE_DIR}\{speed_trap_path}"
+                            await event.reply("top speed", file=top_speed_path)
+                            await event.reply("speed trap", file=speed_trap_path)
                             await conv.cancel_all()
         elif text == bot_text["add_grand"]:
             is_admin = check_admin(user_id)
