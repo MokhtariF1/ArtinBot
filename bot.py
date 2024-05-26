@@ -668,8 +668,8 @@ async def pay(event):
                                     top_speed_path, speed_trap_path = top_speed(year, gp, session)
                                 except:
                                     pass
-                                image_base_top = fr"{BASE_DIR}/{top_speed_path}"
-                                image_base_trap = fr"{BASE_DIR}/{speed_trap_path}"
+                                # image_base_top = fr"{BASE_DIR}/{top_speed_path}"
+                                # image_base_trap = fr"{BASE_DIR}/{speed_trap_path}"
                             time.sleep(1)
                             await bot.send_file(user_id, caption="top speed", file=image_base_top)
                             await bot.send_file(user_id, caption="speed trap", file=image_base_trap)
