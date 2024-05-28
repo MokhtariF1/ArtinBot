@@ -5,7 +5,7 @@ import re
 
 API_ID = 86576
 API_HASH = "385886b58b21b7f3762e1cde2d651925"
-ENV = 1
+ENV = 0
 if ENV:
     BOT_TOKEN = "7185706687:AAEkVBiMGDh0IigJs0iJBSSL1i7U7mN1e2k"
 else:
@@ -24,6 +24,7 @@ PROXY_ADDRESS = "127.0.0.1"
 PROXY_PORT = 10808
 DB_NAME = "bot.db"
 CHANNEL_ID = "https://t.me/F1DataOfficial"
+CHANNEL_ID_PLUS = "https://t.me/RacePlusIran"
 CALLBACK_URL = "https://f1datas.com/payment"
 
 
@@ -44,6 +45,22 @@ async def join_check(user_id, cli):
             result = True
     return result, entity
 
+async def join_check_plus(user_id, cli):
+    entity = await cli.get_entity(CHANNEL_ID_PLUS)
+    access_hash = entity.access_hash
+    channel_id = entity.id
+    participants = await cli(GetParticipantsRequest(
+        channel=InputChannel(channel_id, access_hash),
+        filter=ChannelParticipantsSearch(''),
+        offset=0,
+        limit=1000000000,
+        hash=0
+    ))
+    result = False
+    for p in participants.participants:
+        if user_id == p.user_id:
+            result = True
+    return result, entity
 
 def extract_hashtags(text):
     # the regular expression
