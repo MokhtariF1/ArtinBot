@@ -11,6 +11,7 @@ from datetime import datetime
 from funections import top_speed
 from pathlib import Path
 import os
+import time
 
 
 api_id = config.API_ID
@@ -336,6 +337,19 @@ async def pay(event):
                 [Button.text(bot_text["back"])]
             ]
             await event.reply(bot_text["select"], buttons=keys)
+        elif text == bot_text["soon"]:
+            await event.reply(bot_text["coming_soon"])
+        elif text == bot_text["bot_ping"]:
+            start = time.time()
+            pm = await event.reply(bot_text["getting_ping"])
+            end = time.time()
+            ping = end - start
+            if lang == 1:
+                await pm.edit(f"bot ping is {ping:.2f}s")
+            else:
+                await pm.edit(f"پینگ ربات {ping:.2f} ثانیه است")
+            time.sleep(5)
+            await bot.delete_messages(user_id, pm.id)
         elif text.startswith("/start") or text == bot_text["back"]:
             start_parameter = event.message.message.split()
             if len(start_parameter) == 2:
@@ -690,9 +704,9 @@ async def pay(event):
                             loading = await conv.send_message(bot_text["loading"])
                             BASE_DIR = Path(__file__).resolve().parent
                             image_top = f"{year}-{gp}-{session}-top_speed.png"
-                            image_base_top = fr"{BASE_DIR}/{image_top}"
+                            image_base_top = fr"{BASE_DIR}\{image_top}"
                             image_trap = f"{year}-{gp}-{session}-speed_trap.png"
-                            image_base_trap = fr"{BASE_DIR}/{image_trap}"
+                            image_base_trap = fr"{BASE_DIR}\{image_trap}"
                             if os.path.exists(image_base_top) is False and os.path.exists(image_base_trap) is False:
                                 try:
                                     top_speed_path, speed_trap_path = top_speed(year, gp, session)
