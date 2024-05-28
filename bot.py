@@ -11,7 +11,7 @@ from datetime import datetime
 from funections import top_speed
 from pathlib import Path
 import os
-import time
+
 
 api_id = config.API_ID
 api_hash = config.API_HASH
@@ -433,16 +433,31 @@ async def pay(event):
                 ]
                 await event.reply(bot_text["select"], buttons=keys)
         elif text == bot_text["scores"]:
-            keys = [
-                [
-                    Button.text(bot_text["add_score"], resize=True),
-                    Button.text(bot_text["show_table"]),
-                ],
-                [
-                    Button.text(bot_text["back"], resize=True)
-                ],
-            ]
-            await event.reply(bot_text["select"], buttons=keys)
+            join_ch, entity = await config.join_check_plus(user_id, bot)
+            if join_ch is False:
+                full_info = await bot(GetFullChannelRequest(entity))
+                chat_title = full_info.chats[0].title
+                channel_username = full_info.chats[0].username
+                if channel_username is None:
+                    channel_username = full_info.full_chat.exported_invite.link
+                else:
+                    channel_username = f'https://t.me/{channel_username}'
+                key = [
+                    [Button.url(text=chat_title, url=channel_username)],
+                    [Button.url(bot_text["Membership_Confirmation"], url=f"{config.BOT_ID}?start=check")]
+                ]
+                await event.reply(bot_text["pls_join"], buttons=key)
+            else:
+                keys = [
+                    [
+                        Button.text(bot_text["add_score"], resize=True),
+                        Button.text(bot_text["show_table"]),
+                    ],
+                    [
+                        Button.text(bot_text["back"], resize=True)
+                    ],
+                ]
+                await event.reply(bot_text["select"], buttons=keys)
         elif text == bot_text["add_score"]:
             find_grands = cur.execute("SELECT * FROM grand ORDER BY num").fetchall()
             if len(find_grands) == 0:
@@ -658,21 +673,18 @@ async def pay(event):
                             await conv.send_message(bot_text["loading"])
                             BASE_DIR = Path(__file__).resolve().parent
                             image_top = f"{year}-{gp}-{session}-top_speed.png"
-                            image_base_top = fr"{BASE_DIR}/{image_top}"
+                            image_base_top = fr"{BASE_DIR}\{image_top}"
                             image_trap = f"{year}-{gp}-{session}-speed_trap.png"
-                            image_base_trap = fr"{BASE_DIR}/{image_trap}"
-                            print(image_base_top)
-                            print(image_base_trap)
+                            image_base_trap = fr"{BASE_DIR}\{image_trap}"
                             if os.path.exists(image_base_top) is False and os.path.exists(image_base_trap) is False:
-                                try:
-                                    top_speed_path, speed_trap_path = top_speed(year, gp, session)
-                                except:
-                                    pass
-                                # image_base_top = fr"{BASE_DIR}/{top_speed_path}"
-                                # image_base_trap = fr"{BASE_DIR}/{speed_trap_path}"
-                            time.sleep(1)
-                            await bot.send_file(user_id, caption="top speed", file=image_base_top)
-                            await bot.send_file(user_id, caption="speed trap", file=image_base_trap)
+                                top_speed_path, speed_trap_path = top_speed(year, gp, session)
+                                top_speed_path = fr"{BASE_DIR}\{top_speed_path}"
+                                speed_trap_path = fr"{BASE_DIR}\{speed_trap_path}"
+                            else:
+                                top_speed_path = fr"{BASE_DIR}\{image_top}"
+                                speed_trap_path = fr"{BASE_DIR}\{image_base_trap}"
+                            await bot.send_file(user_id, caption="top speed", file=top_speed_path)
+                            await bot.send_file(user_id, caption="speed trap", file=speed_trap_path)
                             await conv.cancel_all()
         elif text == bot_text["add_grand"]:
             is_admin = check_admin(user_id)
