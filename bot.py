@@ -11,7 +11,6 @@ from datetime import datetime
 from funections import top_speed
 from pathlib import Path
 import os
-import time
 
 
 api_id = config.API_ID
@@ -695,11 +694,7 @@ async def pay(event):
                             image_trap = f"{year}-{gp}-{session}-speed_trap.png"
                             image_base_trap = fr"{BASE_DIR}/{image_trap}"
                             if os.path.exists(image_base_top) is False and os.path.exists(image_base_trap) is False:
-                                try:
-                                    top_speed_path, speed_trap_path = top_speed(year, gp, session)
-                                except:
-                                    pass
-                            time.sleep(1)
+                                top_speed_path, speed_trap_path = top_speed(year, gp, session)
                             await bot.delete_messages(user_id, loading.id)
                             await bot.send_file(user_id, caption="top speed", file=image_base_top)
                             await bot.send_file(user_id, caption="speed trap", file=image_base_trap)
