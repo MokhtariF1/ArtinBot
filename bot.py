@@ -201,6 +201,11 @@ async def pay(event):
                     Button.text(bot_text["language"], resize=True),
                 ],
                 [
+                    Button.text(bot_text["soon"]),
+                    Button.text(bot_text["bot_ping"]),
+                    Button.text(bot_text["account_setup"]),
+                ],
+                [
                     Button.text(bot_text["back"])
                 ]
             ]
@@ -275,8 +280,13 @@ async def pay(event):
             await event.reply(bot_text["select"], buttons=keys)
         elif text == bot_text["search"]:
             keys = [
-                Button.text(bot_text["search_in_channel"]),
-                Button.text(bot_text["search_in_bot"], resize=True)
+                [
+                    Button.text(bot_text["search_in_channel"]),
+                    Button.text(bot_text["search_in_bot"], resize=True)
+                ],
+                [
+                    Button.text(bot_text["back"])
+                ]
             ]
             await event.reply(bot_text["select"], buttons=keys)
         elif text == bot_text["search_in_channel"]:
@@ -329,22 +339,25 @@ async def pay(event):
         elif text.startswith("/start") or text == bot_text["back"]:
             start_parameter = event.message.message.split()
             if len(start_parameter) == 2:
-                start_parameter = int(start_parameter[1])
-                print(start_parameter)
-                if start_parameter != user_id:
-                    find_invite = cur.execute(f"SELECT * FROM invite WHERE user_id = {user_id} AND invite_id = "
-                                              f"{start_parameter}").fetchone()
-                    if find_invite is None:
-                        print("hi")
-                        data = [
-                            (user_id, start_parameter)
-                        ]
-                        cur.executemany(f"INSERT INTO invite VALUES (?,?)", data)
-                        con.commit()
-                        find_user = cur.execute(f"SELECT * FROM users WHERE id = {start_parameter}").fetchone()
-                        sub_count = find_user[4]
-                        cur.execute(f"UPDATE users SET sub_count = {sub_count + 1} WHERE id = {start_parameter}")
-                        con.commit()
+                if start_parameter[1] != "check":
+                    start_parameter = int(start_parameter[1])
+                    print(start_parameter)
+                    if start_parameter != user_id:
+                        print("hi1")
+                        find_invite = cur.execute(f"SELECT * FROM invite WHERE user_id = {user_id} AND invite_id = "
+                                                f"{start_parameter}").fetchone()
+                        print(find_invite)
+                        if find_invite is None:
+                            print("hi")
+                            data = [
+                                (user_id, start_parameter)
+                            ]
+                            cur.executemany(f"INSERT INTO invite VALUES (?,?)", data)
+                            con.commit()
+                            find_user = cur.execute(f"SELECT * FROM users WHERE id = {start_parameter}").fetchone()
+                            sub_count = find_user[4]
+                            cur.execute(f"UPDATE users SET sub_count = {sub_count + 1} WHERE id = {start_parameter}")
+                            con.commit()
 
             user = cur.execute(f"SELECT * FROM users WHERE id={user_id}").fetchone()
             if user is None:
@@ -444,7 +457,6 @@ async def pay(event):
                     channel_username = f'https://t.me/{channel_username}'
                 key = [
                     [Button.url(text=chat_title, url=channel_username)],
-                    [Button.url(bot_text["Membership_Confirmation"], url=f"{config.BOT_ID}?start=check")]
                 ]
                 await event.reply(bot_text["pls_join"], buttons=key)
             else:
@@ -570,6 +582,7 @@ async def pay(event):
                 ask_year = await conv.send_message(bot_text["select_year"], buttons=year_keys)
                 try:
                     year_res = await conv.wait_event(events.CallbackQuery(), timeout=60)
+                    await bot.delete_messages(user_id, ask_year.id)
                 except TimeoutError:
                     await conv.send_message(bot_text["timeout_error"])
                     await conv.cancel_all()
@@ -616,8 +629,6 @@ async def pay(event):
                         "Sakhir_Grand_Prix": "گرند پری ساخیر",
                         "Chinese_Grand_Prix": "گرند پری چین",
                     }
-
-
                     gp_keys = []
                     for gp in response:
                         gp_text = country_tr[gp["tr"]]
@@ -634,10 +645,11 @@ async def pay(event):
                     ask_gp = await conv.send_message(bot_text["select_gp"], buttons=result)
                     try:
                         gp_res = await conv.wait_event(events.CallbackQuery(), timeout=60)
-                        gp_data = gp_res.data
+                        await bot.delete_messages(user_id, ask_gp.id)
                     except TimeoutError:
                         await conv.send_message(bot_text["timeout_error"])
                         await conv.cancel_all()
+                    gp_data = gp_res.data
                     if gp_data == b'cancel':
                         await conv.send_message(bot_text["canceled"])
                         await conv.cancel_all()
@@ -662,15 +674,20 @@ async def pay(event):
                                 Button.inline(session_text, session.encode()),
                             ]
                             sessions_keys.append(session_key)
-                        await event.reply(bot_text["select_session"], buttons=sessions_keys)
-                        session_res = await conv.wait_event(events.CallbackQuery(), timeout=60)
+                        ask_event = await event.reply(bot_text["select_session"], buttons=sessions_keys)
+                        try:
+                            session_res = await conv.wait_event(events.CallbackQuery(), timeout=60)
+                            await bot.delete_messages(user_id, ask_event.id)
+                        except TimeoutError:
+                            await conv.send_message(bot_text["timeout_error"])
+                            await conv.cancel_all()
                         event_data = session_res.data
                         if event_data == b'cancel':
                             await conv.send_message(bot_text["canceled"])
                             await conv.cancel_all()
                         else:
                             session = event_data.decode()
-                            await conv.send_message(bot_text["loading"])
+                            loading = await conv.send_message(bot_text["loading"])
                             BASE_DIR = Path(__file__).resolve().parent
                             image_top = f"{year}-{gp}-{session}-top_speed.png"
                             image_base_top = fr"{BASE_DIR}\{image_top}"
@@ -683,6 +700,7 @@ async def pay(event):
                             else:
                                 top_speed_path = fr"{BASE_DIR}\{image_top}"
                                 speed_trap_path = fr"{BASE_DIR}\{image_base_trap}"
+                            await bot.delete_messages(user_id, loading.id)
                             await bot.send_file(user_id, caption="top speed", file=top_speed_path)
                             await bot.send_file(user_id, caption="speed trap", file=speed_trap_path)
                             await conv.cancel_all()
@@ -794,7 +812,7 @@ async def pay(event):
                 full_name = first_name + last_name if last_name is not None else first_name
                 a_tag = f'<a href="tg://user?id={user_id}">{full_name}</a>'
                 c_tag = f'<code>{num_id}</code>'
-                if lang:
+                if lang == 1:
                     b_tag = "<b>📜 Your user information is as follows:</b>"
                     full_text = "{btag}\n\n" \
                                 "⁣👦🏻name: {name}\n" \
