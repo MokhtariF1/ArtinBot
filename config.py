@@ -5,20 +5,17 @@ import re
 
 API_ID = 86576
 API_HASH = "385886b58b21b7f3762e1cde2d651925"
-ENV = 0
+ENV = 1
 if ENV:
     BOT_TOKEN = "7185706687:AAEkVBiMGDh0IigJs0iJBSSL1i7U7mN1e2k"
-else:
-    BOT_TOKEN = "6300653200:AAFK0BuvMPJ4kZV3gj_sbvXezciah_ga1B4"
-PAY_TOKEN = "fced3227-3cf2-486f-95e7-52ee9e8fd77d"
-SESSION_NAME = "bot"
-if ENV:
     PROXY = False
     BOT_ID = "https://t.me/F1DataIQBot"
 else:
+    BOT_TOKEN = "6300653200:AAFK0BuvMPJ4kZV3gj_sbvXezciah_ga1B4"
     PROXY = True
     BOT_ID = "https://t.me/F1data_Test_bot"
-
+PAY_TOKEN = "fced3227-3cf2-486f-95e7-52ee9e8fd77d"
+SESSION_NAME = "bot"
 PROXY_TYPE = "socks5"
 PROXY_ADDRESS = "127.0.0.1"
 PROXY_PORT = 10808
@@ -102,9 +99,9 @@ TEXT = {
     "pls_join": "برای استفاده از ربات ابتدا در کانال زیر عضو شوید سپس دوباره استارت کنید",
     "big_heart": "قلب بزرگ",
     "rules": "تنظیمات",
-    "rules_show": "قوانین",
+    "rules_show": "قوانین فنی",
     "protection": "حمایت",
-    "language": "زبان",
+    "language": "زبان ربات",
     "rules_text": "متن قوانین",
     "coffee": "مهمان قهوه ات",
     "dinner": "شام آخر",
@@ -209,7 +206,10 @@ TEXT = {
     "sub_link": "هر نفر که با لینک زیر ربات رو استارت کنه یک امتیاز زیر مجموعه گیری به شما داده میشود👇\n{link}",
     "timeout_error": "زمان پاسخگویی تمام شده است!\nلطفا مجدد تلاش کنید",
     "select_gp": "گرندپری را انتخاب کنید:",
-    "select_session": "لطفا رویداد را انتخاب کنید:"
+    "select_session": "لطفا رویداد را انتخاب کنید:",
+    "pls_join_plus": "لطفا برای استفاده از دکمه پاور رنکینگ در کانال زیر عضو شوید و سپس مجدد پاور رنکینگ را بزنید",
+    "account_setup": "تنظیم اکانت",
+    "bot_ping": "پینگ ربات"
 }
 
 EN_TEXT = {
@@ -219,9 +219,9 @@ EN_TEXT = {
     "pls_join": "To use the robot, first subscribe to the following channel, then start again",
     "big_heart": "big heart",
     "rules": "settings",
-    "rules_show": "rules",
+    "rules_show": "Technical rules",
     "protection": "protection",
-    "language": "language",
+    "language": "bot language",
     "rules_text": "rules text",
     "coffee": "your coffee guest",
     "dinner": "the last supper",
@@ -330,5 +330,8 @@ otherwise the payment will not be confirmed and the money will be returned to yo
     "timeout_error": "Response time is over!\nPlease try again",
     "select_gp": "please select grand prix:",
     "select_session": "please select event:",
-    "loading": "loading data..."
+    "loading": "loading data...",
+    "pls_join_plus": "Please subscribe to the channel below to use the power ranking button and then click power ranking again.",
+    "account_setup": "account setup",
+    "bot_ping": "bot ping"
 }
