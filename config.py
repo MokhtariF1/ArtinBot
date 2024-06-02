@@ -214,8 +214,13 @@ TEXT = {
     "getting_ping": "درحال دریافت پینگ...",
     "overtake": "سبقت گرفتن",
     "map_viz": "مپ ویز",
-    "ask_driver": "راننده مورد نظر خود را انتخاب کنید:"
-
+    "ask_driver": "راننده مورد نظر خود را انتخاب کنید:",
+    "ask_state": "حالت پرسش مورد نظر را انتخاب کنید:\nحالت 1:تک سواله\nحالت 2:چند سواله",
+    "ask_performance": "به عملکرد راننده از 1 تا 10 امتیاز بدهید:",
+    "new_users": "کاربران جدید",
+    "users_excel": "اکسل کاربران",
+    "users_excel_caption": "فایل اکسل کاربران ربات",
+    "dont_time": "مسابقه هنوز شروع نشده است!"
 }
 
 EN_TEXT = {
@@ -344,5 +349,11 @@ otherwise the payment will not be confirmed and the money will be returned to yo
     "getting_ping": "Receiving ping...",
     "overtake": "Overtake",
     "map_viz": "Map viz",
-    "ask_driver": "please select driver:"
+    "ask_driver": "please select driver:",
+    "ask_state": "Select the desired question mode:\nMode 1: Single question\nMode 2: Multiple questions",
+    "ask_performance": "Give the driver's performance from 1 to 10 points:",
+    "new_users": "New users",
+    "users_excel": "Excel Users",
+    "users_excel_caption": "Excel file of robot users",
+    "dont_time": "The race has not started yet!"
 }

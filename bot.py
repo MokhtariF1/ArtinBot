@@ -1,5 +1,8 @@
 import requests
 from random import randint
+import openpyxl
+from datetime import datetime
+import pandas as pd
 from telethon.sync import TelegramClient, events, Button
 from telethon.tl.functions.channels import GetParticipantsRequest, GetFullChannelRequest
 from telethon.tl.types import ChannelParticipantsSearch, InputChannel
@@ -25,8 +28,8 @@ if proxy:
     proxy_type = config.PROXY_TYPE
     proxy_address = config.PROXY_ADDRESS
     proxy_port = config.PROXY_PORT
-    # bot = TelegramClient(session_name, api_id, api_hash, proxy=(proxy_type, proxy_address, proxy_port))
-    bot = TelegramClient(session_name, api_id, api_hash)
+    bot = TelegramClient(session_name, api_id, api_hash, proxy=(proxy_type, proxy_address, proxy_port))
+    # bot = TelegramClient(session_name, api_id, api_hash)
     # Create an instance of the TelegramClient
     bot.start(bot_token=bot_token)
     print("connected!")
@@ -227,23 +230,43 @@ async def pay(event):
             cur.execute(f"UPDATE users SET lang = 2 WHERE id = {user_id}")
             con.commit()
             bot_text = config.TEXT
-            keys = [
-                [Button.text(bot_text["archive"], resize=True)],
-                [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
-                [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
-                 Button.text(bot_text["rules"])],
-            ]
+            ch = check_admin(user_id)
+            if ch is False:
+                keys = [
+                    [Button.text(bot_text["archive"], resize=True)],
+                    [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
+                    [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
+                    Button.text(bot_text["rules"])],
+                ]
+            else:
+                keys = [
+                    [Button.text(bot_text["panel"])],
+                    [Button.text(bot_text["archive"], resize=True)],
+                    [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
+                    [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
+                    Button.text(bot_text["rules"])],
+                ]
             await event.reply(bot_text["FA_SELECTED"], buttons= keys)
         elif text == bot_text["en"]:
             cur.execute(f"UPDATE users SET lang = 1 WHERE id = {user_id}")
             con.commit()
             bot_text = config.EN_TEXT
-            keys = [
-                [Button.text(bot_text["archive"], resize=True)],
-                [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
-                [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
-                 Button.text(bot_text["rules"])],
-            ]
+            ch = check_admin(user_id)
+            if ch is False:
+                keys = [
+                    [Button.text(bot_text["archive"], resize=True)],
+                    [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
+                    [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
+                    Button.text(bot_text["rules"])],
+                ]
+            else:
+                keys = [
+                    [Button.text(bot_text["panel"])],
+                    [Button.text(bot_text["archive"], resize=True)],
+                    [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
+                    [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
+                    Button.text(bot_text["rules"])],
+                ]
             await event.reply(bot_text["EN_SELECTED"], buttons= keys)
         elif text == bot_text["rules_show"]:
             await event.reply(bot_text["rules_text"])
@@ -435,12 +458,75 @@ async def pay(event):
                         Button.text(bot_text["grand"]),
                         Button.text(bot_text["robot_statistics"]),
                     ],
+                    [
+                        Button.text(bot_text["new_users"]),
+                        Button.text(bot_text["users_excel"])
+                    ],
                     [Button.text(bot_text['back'])]
                 ]
                 await event.reply(bot_text["select"], buttons=keys)
-        elif text == bot_text["robot_statistics"]:
+        elif text == bot_text["users_excel"]:
             users = cur.execute("SELECT * FROM users").fetchall()
-            await event.reply(bot_text["statistics_text"].format(users=len(users)))
+            # Create a new Excel workbook
+            workbook = openpyxl.Workbook()
+            # Select the default sheet (usually named 'Sheet')
+            sheet = workbook.active
+            # Add data to the Excel sheet
+            data = [
+                ["Name", "ID"],
+            ]
+            for user in users:
+                user_id_ = user[0]
+                get_user = await bot.get_entity(user_id_)
+                full_name = get_user.first_name + get_user.last_name if get_user.last_name is not None else get_user.first_name
+                user_data = [full_name, user_id_]
+                data.append(user_data)
+            for row in data:
+                sheet.append(row)
+            # Save the workbook to a file
+            name = str(randint(0, 2747)) + ".xlsx"
+            workbook.save(name)
+            workbook.close()
+            # Print a success message
+            await bot.send_file(user_id, name, caption=bot_text["users_excel_caption"])
+        elif text == bot_text["new_users"]:
+            is_admin = check_admin(user_id)
+            if is_admin is False:
+                keys = [
+                    [Button.text(bot_text["archive"], resize=True)],
+                    [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
+                    [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
+                     Button.text(bot_text["rules"])],
+                ]
+                await event.reply(bot_text["select"], buttons=keys)
+            else:
+                text = ""
+                users = cur.execute("SELECT * FROM users ORDER BY join_time ASC LIMIT 10;").fetchall()
+                for user in users:
+                    get_user = await bot.get_entity(user[0])
+                    user_id_ = get_user.id
+                    last_name = get_user.last_name
+                    full_name = get_user.first_name + last_name if last_name is not None else get_user.first_name 
+                    username = get_user.username if get_user.username is not None else "❌"
+                    a_tag = f'<a href="tg://user?id={user_id_}">{full_name}</a>'
+                    if lang == 1:
+                        text += f"Number Id: {user_id_}\nUserName: {username}\nFullName: {a_tag} \n➖➖➖➖➖➖\n"
+                    else:
+                        text += f"آیدی عددی: {user_id_}\nنام کاربری: {username}\nنام: {a_tag}\n➖➖➖➖➖➖\n"
+                await event.reply(text, parse_mode="html")
+        elif text == bot_text["robot_statistics"]:
+            is_admin = check_admin(user_id)
+            if is_admin is False:
+                keys = [
+                    [Button.text(bot_text["archive"], resize=True)],
+                    [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
+                    [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
+                     Button.text(bot_text["rules"])],
+                ]
+                await event.reply(bot_text["select"], buttons=keys)
+            else:
+                users = cur.execute("SELECT * FROM users").fetchall()
+                await event.reply(bot_text["statistics_text"].format(users=len(users)))
         elif text == bot_text["words"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
@@ -675,28 +761,39 @@ async def pay(event):
                         await conv.cancel_all()
                     else:
                         gp = gp_data.decode()
+                        check_date = "https://ergast.com/api/f1/2024.json"
+                        check_date = requests.get(check_date).json()["MRData"]["RaceTable"]["Races"]
+                        for grand in check_date:
+                            if grand["raceName"] == gp:
+                                now = datetime.today()
+                                now = f"{now.year}-{now.month}-{now.day}"
+                                now = datetime.strptime(now, "%Y-%m-%d")
+                                now = time.mktime(now.timetuple())
+                                race_time = grand["date"]
+                                race = datetime.strptime(race_time, "%Y-%m-%d")
+                                race_time = time.mktime(race.timetuple())
+                                if now < race_time:
+                                    await conv.send_message(bot_text["dont_time"])
+                                    return
                         url = f"https://f1datas.com/api/v1/fastf1/session?year={year}&country={gp}"
                         sessions = requests.get(url).json()["sessions"]
                         type_tr = {
-                            "Practice_1": "تمرین اول",
-                            "Practice_2": "تمرین دوم",
-                            "Practice_3": "تمرین سوم",
                             "Sprint": "اسپرینت",
-                            "Sprint_Shootout": "اسپرینت شوت آوت",
-                            "Sprint_Qualifying": "تعیین خط اسپرینت",
-                            "Qualifying": "تعیین خط",
                             "Race": "مسابقه"
                         }
                         sessions_keys = []
                         for session in sessions:
-                            if lang == 1:
-                                session_text = session
+                            if session != "Race" and session != "Sprint":
+                                continue
                             else:
-                                session_text = type_tr[session]
-                            session_key = [
-                                Button.inline(session_text, session.encode()),
-                            ]
-                            sessions_keys.append(session_key)
+                                if lang == 1:
+                                    session_text = session
+                                else:
+                                    session_text = type_tr[session]
+                                session_key = [
+                                    Button.inline(session_text, session.encode()),
+                                ]
+                                sessions_keys.append(session_key)
                         ask_event = await event.reply(bot_text["select_session"], buttons=sessions_keys)
                         try:
                             session_res = await conv.wait_event(events.CallbackQuery(), timeout=60)
@@ -829,6 +926,20 @@ async def pay(event):
                         await conv.cancel_all()
                     else:
                         gp = gp_data.decode()
+                        check_date = "https://ergast.com/api/f1/2024.json"
+                        check_date = requests.get(check_date).json()["MRData"]["RaceTable"]["Races"]
+                        for grand in check_date:
+                            if grand["raceName"] == gp:
+                                now = datetime.today()
+                                now = f"{now.year}-{now.month}-{now.day}"
+                                now = datetime.strptime(now, "%Y-%m-%d")
+                                now = time.mktime(now.timetuple())
+                                race_time = grand["date"]
+                                race = datetime.strptime(race_time, "%Y-%m-%d")
+                                race_time = time.mktime(race.timetuple())
+                                if now < race_time:
+                                    await conv.send_message(bot_text["dont_time"])
+                                    return           
                         url = f"https://f1datas.com/api/v1/fastf1/session?year={year}&country={gp}"
                         sessions = requests.get(url).json()["sessions"]
                         type_tr = {
@@ -986,6 +1097,20 @@ async def pay(event):
                         await conv.cancel_all()
                     else:
                         gp_country = gp_data.decode().split(":")[0]
+                        check_date = "https://ergast.com/api/f1/2024.json"
+                        check_date = requests.get(check_date).json()["MRData"]["RaceTable"]["Races"]
+                        for grand in check_date:
+                            if grand["raceName"] == gp_country:
+                                now = datetime.today()
+                                now = f"{now.year}-{now.month}-{now.day}"
+                                now = datetime.strptime(now, "%Y-%m-%d")
+                                now = time.mktime(now.timetuple())
+                                race_time = grand["date"]
+                                race = datetime.strptime(race_time, "%Y-%m-%d")
+                                race_time = time.mktime(race.timetuple())
+                                if now < race_time:
+                                    await conv.send_message(bot_text["dont_time"])
+                                    return
                         url = f"https://f1datas.com/api/v1/fastf1/session?year={year}&country={gp_country}"
                         sessions = requests.get(url).json()["sessions"]
                         type_tr = {
@@ -1091,10 +1216,21 @@ async def pay(event):
                     if find_grand_round is not None:
                         await event.reply(bot_text["round_already_exists"])
                         return
-                    data = [
-                        (grand_num.raw_text, grand_name.raw_text, False)
+                    keys = [
+                        Button.inline("1", b'1'),
+                        Button.inline("2", b'2')
                     ]
-                    cur.executemany(f"INSERT INTO grand VALUES (?,?,?)", data)
+                    await conv.send_message(bot_text["ask_state"], buttons=keys)
+                    try:
+                        state = await conv.wait_event(events.CallbackQuery())
+                    except TimeoutError:
+                        await conv.send_message(bot_text["timeout_error"])
+                        await conv.cancel_all()
+                    state_data = int(state.data.decode())
+                    data = [
+                        (grand_num.raw_text, grand_name.raw_text, False, state_data)
+                    ]
+                    cur.executemany(f"INSERT INTO grand VALUES (?,?,?,?)", data)
                     con.commit()
                     # request to ergast
                     ergast_requesting = await event.reply(bot_text["requesting_ergast"])
@@ -1698,53 +1834,81 @@ async def driver_score_handler(event):
         if driver_score is not None:
             await event.reply(bot_text["you_scored"])
             return
-        async with bot.conversation(user_id, timeout=1000) as conv:
-            await conv.send_message(bot_text["qualifying"])
-            while True:
-                qscore = await conv.get_response()
-                qscore = qscore.raw_text
-                check = config.check_number(qscore)
-                if check:
-                    break
-                else:
-                    await event.reply(bot_text["try_again"])
-            await conv.send_message(bot_text["race"])
-            while True:
-                rscore = await conv.get_response()
-                rscore = rscore.raw_text
-                check = config.check_number(rscore)
-                if check:
-                    break
-                else:
-                    await event.reply(bot_text["try_again"])
-            await conv.send_message(bot_text["car"])
-            while True:
-                cscore = await conv.get_response()
-                cscore = cscore.raw_text
-                check = config.check_number(cscore)
-                if check:
-                    break
-                else:
-                    await event.reply(bot_text["try_again"])
-            avg = (float(rscore) + float(qscore) + float(cscore)) / 3
-            avg = round(avg, 2)
-            find_driver = cur.execute(f"SELECT * FROM drivers WHERE for_grand = {grand_num} AND driver_id = '{driver_id}'").fetchone()
-            avg_plus = find_driver[4]
-            avg_count = find_driver[5]
-            avg_plus += avg
-            avg_count += 1
-            avg_all = avg_plus / avg_count
-            avg_all = round(avg_all, 2)
-            cur.execute(f"UPDATE drivers SET avg_plus = {avg_plus},avg_count = {avg_count},avg = {avg_all} WHERE for_grand ="
-                        f" {grand_num} AND driver_id = '{driver_id}'")
-            con.commit()
-            data = [
-                (user_id, driver_id, grand_num)
-            ]
-            cur.executemany("INSERT INTO driver_score VALUES (?,?,?)", data)
-            con.commit()
-            await event.reply(bot_text["successfully_scored"], buttons=back)
-
+        grand_state = find_grand[3]
+        if grand_state == 2:
+            async with bot.conversation(user_id, timeout=1000) as conv:
+                await conv.send_message(bot_text["qualifying"])
+                while True:
+                    qscore = await conv.get_response()
+                    qscore = qscore.raw_text
+                    check = config.check_number(qscore)
+                    if check:
+                        break
+                    else:
+                        await event.reply(bot_text["try_again"])
+                await conv.send_message(bot_text["race"])
+                while True:
+                    rscore = await conv.get_response()
+                    rscore = rscore.raw_text
+                    check = config.check_number(rscore)
+                    if check:
+                        break
+                    else:
+                        await event.reply(bot_text["try_again"])
+                await conv.send_message(bot_text["car"])
+                while True:
+                    cscore = await conv.get_response()
+                    cscore = cscore.raw_text
+                    check = config.check_number(cscore)
+                    if check:
+                        break
+                    else:
+                        await event.reply(bot_text["try_again"])
+                avg = (float(rscore) + float(qscore) + float(cscore)) / 3
+                avg = round(avg, 2)
+                find_driver = cur.execute(f"SELECT * FROM drivers WHERE for_grand = {grand_num} AND driver_id = '{driver_id}'").fetchone()
+                avg_plus = find_driver[4]
+                avg_count = find_driver[5]
+                avg_plus += avg
+                avg_count += 1
+                avg_all = avg_plus / avg_count
+                avg_all = round(avg_all, 2)
+                cur.execute(f"UPDATE drivers SET avg_plus = {avg_plus},avg_count = {avg_count},avg = {avg_all} WHERE for_grand ="
+                            f" {grand_num} AND driver_id = '{driver_id}'")
+                con.commit()
+                data = [
+                    (user_id, driver_id, grand_num)
+                ]
+                cur.executemany("INSERT INTO driver_score VALUES (?,?,?)", data)
+                con.commit()
+                await event.reply(bot_text["successfully_scored"], buttons=back)
+        else:
+            async with bot.conversation(user_id, timeout=1000) as conv:
+                await conv.send_message(bot_text["ask_performance"])
+                while True:
+                    pscore = await conv.get_response()
+                    pscore = pscore.raw_text
+                    check = config.check_number(pscore)
+                    if check:
+                        break
+                    else:
+                        await event.reply(bot_text["try_again"])
+                find_driver = cur.execute(f"SELECT * FROM drivers WHERE for_grand = {grand_num} AND driver_id = '{driver_id}'").fetchone()
+                avg_plus = find_driver[4]
+                avg_count = find_driver[5]
+                avg_plus += int(pscore)
+                avg_count += 1
+                avg_all = avg_plus / avg_count
+                avg_all = round(avg_all, 2)
+                cur.execute(f"UPDATE drivers SET avg_plus = {avg_plus},avg_count = {avg_count},avg = {avg_all} WHERE for_grand ="
+                            f" {grand_num} AND driver_id = '{driver_id}'")
+                con.commit()
+                data = [
+                    (user_id, driver_id, grand_num)
+                ]
+                cur.executemany("INSERT INTO driver_score VALUES (?,?,?)", data)
+                con.commit()
+                await event.reply(bot_text["successfully_scored"], buttons=back)
 @bot.on(events.CallbackQuery(pattern="see_score:*"))
 async def see_score_handler(event):
     user_id = event.sender_id
@@ -1761,7 +1925,7 @@ async def see_score_handler(event):
     else:
         drivers = cur.execute(f"SELECT * FROM drivers WHERE for_grand = {grand_num} ORDER BY avg").fetchall()
         drivers = drivers[::-1]
-        if lang:
+        if lang == 1:
             text = """Average points registered for drivers {grand_name}👇 \n\n""".format(grand_name=find_grand[1])
         else:
             text = """میانگین امتیازات ثبت شده برای رانندگان {grand_name}👇 \n\n""".format(grand_name=find_grand[1])
