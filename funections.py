@@ -1,7 +1,9 @@
 import fastf1 as ff1
-from fastf1 import plotting
+from fastf1.core import Laps
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.collections import LineCollection
 import seaborn as sns
 import time
 def top_speed(year, gp, identifier):
@@ -199,9 +201,126 @@ def top_speed(year, gp, identifier):
     plt.tight_layout()
     # plt.savefig("test3.png")
     return top_speed_path, speed_trap_path
+
+def overtake(year, gp, identifier):
+    session = ff1.get_session(year, gp, identifier)
+    session.load()
+    laps = session.laps
+
+    def lap_involves_pit_stop(lap: Laps) -> bool:
+        """Check if a lap involves a pit stop."""
+        return lap['PitOutTime'].notna().any() or lap['PitInTime'].notna().any()
+
+    overtakes = {}
+
+    for lap_number in range(2, int(max(laps['LapNumber'])) + 1):
+        current_lap = laps.pick_lap(lap_number)
+        previous_lap = laps.pick_lap(lap_number - 1)
+        
+        for driver in current_lap['Driver'].unique():
+            current_driver_lap = current_lap.pick_driver(driver)
+            previous_driver_lap = previous_lap.pick_driver(driver)
+            
+            if lap_involves_pit_stop(current_driver_lap) or lap_involves_pit_stop(previous_driver_lap):
+                continue
+            
+            current_position = current_driver_lap['Position'].values[0]
+            previous_position = previous_driver_lap['Position'].values[0]
+            
+            if current_position < previous_position:
+                overtakes[driver] = overtakes.get(driver, 0) + 1
+
+    # Plotting adjustments
+    drivers = list(overtakes.keys())
+    overtake_counts = [overtakes[driver] for driver in drivers]
+    max_overtakes = max(overtake_counts) if overtakes else 0
+    colors = plt.cm.viridis(np.linspace(0, 1, len(drivers)))
+
+    plt.figure(figsize=(10, 6))
+    bars = plt.barh(drivers, overtake_counts, color=colors)
+
+    # Add watermarks
+    plt.text(0.5, 0.02, 'F1Datas.Com', fontsize=12, color='black', ha='center', va='bottom', alpha=0.5, transform=plt.gca().transAxes)
+    plt.text(0.5, 0.98, 'F1 Data IQ', fontsize=12, color='black', ha='center', va='top', transform=plt.gca().transAxes)
+
+    plt.xlabel('Number of Overtakes', fontsize=12)
+    plt.ylabel('Drivers', fontsize=12)
+    plt.title('Genuine Overtakes by Each Driver (Excluding Pit Stops)', fontsize=14)
+    plt.xticks(fontsize=10)
+    plt.yticks(fontsize=10)
+    plt.grid(axis='x', linestyle='--', alpha=0.6)
+    plt.xlim(0, max_overtakes)  # Set x-axis limits
+
+    # Adding the count above each bar
+    for bar, count in zip(bars, overtake_counts):
+        plt.text(bar.get_width(), bar.get_y() + bar.get_height() / 2, f'{count}', 
+                va='center', ha='left', fontsize=10, color='blue')
+
+    plt.tight_layout()
+    overtake_path = f"{year}-{gp}-{identifier}-overtake.png"
+    plt.savefig(overtake_path)
+
+def map_viz(year, gp, identifier, driver):
+    colormap = plt.cm.viridis
+
+    # Load session data
+    session = ff1.get_session(year, gp, identifier)
+    weekend = session.event
+    session.load()
+    lap = session.laps.pick_driver(driver).pick_fastest()
+
+    # Extract telemetry data
+    x = lap.telemetry['X']
+    y = lap.telemetry['Y']
+    speed = lap.telemetry['Speed']
+
+    # Create line segments for track visualization
+    points = np.array([x, y]).T.reshape(-1, 1, 2)
+    segments = np.concatenate([points[:-1], points[1:]], axis=1)
+
+    # Create figure and axes
+    fig, ax = plt.subplots(figsize=(12, 8))
+
+    # Plot background track line with markers
+    ax.plot(x, y, color='lightgrey', linestyle='-', marker='o', markersize=2, markerfacecolor='black', linewidth=2, zorder=1)
+
+    # Create a continuous norm to map from data points to colors
+    norm = plt.Normalize(speed.min(), speed.max())
+    lc = LineCollection(segments, cmap=colormap, norm=norm, linewidth=4, zorder=2)
+    lc.set_array(speed)
+    line = ax.add_collection(lc)
+
+    # Add color bar as legend with customizations
+    cbar = plt.colorbar(line, ax=ax, orientation='horizontal', pad=0.04)
+    cbar.set_label('Speed (m/s)')
+    cbar.ax.tick_params(labelsize=12)
+
+    # Add driver's initials
+    ax.text(0.95, 0.05, driver, fontsize=16, color='black', ha='center', va='bottom', transform=ax.transAxes)
+
+    # Add watermarks with improved appearance
+    plt.text(0.98, 0.02, 'F1Datas.com', fontsize=10, color='black', ha='right', va='bottom', alpha=0.5, transform=ax.transAxes)
+    plt.text(0.98, 0.98, 'F1 Data IQ', fontsize=10, color='black', ha='right', va='top', transform=ax.transAxes)
+
+    # Add title with more information
+    ax.set_title(f'{weekend.name} {year} - {identifier} - {driver} - Speed Visualization', fontsize=20)
+
+    # Add labels and grid lines with enhanced appearance
+    ax.set_xlabel('X Position (m)', fontsize=16)
+    ax.set_ylabel('Y Position (m)', fontsize=16)
+    ax.grid(True, linestyle='--', alpha=0.7, linewidth=0.5)
+
+    # Adjust figure spacing
+    plt.subplots_adjust(left=0.1, right=0.9, top=0.9, bottom=0.1)
+
+    # Show plot
+    viz_path = f"{year}-{gp}-{identifier}-map_viz.png"
+    plt.savefig(viz_path)
+
+
 # start = time.time()
 # try:
-#     test = top_speed(200, 'jjlj', "s")
+#     test = overtake(2024, 'Bahrain Grand Prix', "R")
 # except Exception as e:
 #     print(e)
 # end = time.time()

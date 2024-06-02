@@ -212,6 +212,9 @@ TEXT = {
     "bot_ping": "پینگ ربات",
     "coming_soon": "این بخش بزودی فعال خواهد شد",
     "getting_ping": "درحال دریافت پینگ...",
+    "overtake": "سبقت گرفتن",
+    "map_viz": "مپ ویز",
+    "ask_driver": "راننده مورد نظر خود را انتخاب کنید:"
 
 }
 
@@ -339,4 +342,7 @@ otherwise the payment will not be confirmed and the money will be returned to yo
     "bot_ping": "Bot ping",
     "coming_soon": "This section will be activated soon",
     "getting_ping": "Receiving ping...",
+    "overtake": "Overtake",
+    "map_viz": "Map viz",
+    "ask_driver": "please select driver:"
 }
