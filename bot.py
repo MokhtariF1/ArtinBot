@@ -713,7 +713,7 @@ async def pay(event):
                             loading = await conv.send_message(bot_text["loading"])
                             BASE_DIR = Path(__file__).resolve().parent
                             image_over = f"{year}-{gp}-{session}-overtake.png"
-                            image_base_over = fr"{BASE_DIR}\{image_over}"
+                            image_base_over = fr"{BASE_DIR}/{image_over}"
                             if os.path.exists(image_base_over) is False:
                                 try:
                                     overtakepath = overtake(year, gp, session)
@@ -1054,7 +1054,7 @@ async def pay(event):
                                 loading = await conv.send_message(bot_text["loading"])
                                 BASE_DIR = Path(__file__).resolve().parent
                                 image_viz = f"{year}-{gp_round}-{session}-map_viz.png"
-                                image_base_viz = fr"{BASE_DIR}\{image_viz}"
+                                image_base_viz = fr"{BASE_DIR}/{image_viz}"
                                 if os.path.exists(image_base_viz) is False:
                                     print(year, gp_round, session, driver_code)
                                     image_viz_path = map_viz(year, gp_round, session, driver_code)
