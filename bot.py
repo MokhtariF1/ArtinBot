@@ -8,7 +8,7 @@ import config
 import sqlite3
 from navlib import paginate
 from datetime import datetime
-from funections import top_speed
+from funections import top_speed, overtake, map_viz
 from pathlib import Path
 import os
 import time
@@ -25,7 +25,8 @@ if proxy:
     proxy_type = config.PROXY_TYPE
     proxy_address = config.PROXY_ADDRESS
     proxy_port = config.PROXY_PORT
-    bot = TelegramClient(session_name, api_id, api_hash, proxy=(proxy_type, proxy_address, proxy_port))
+    # bot = TelegramClient(session_name, api_id, api_hash, proxy=(proxy_type, proxy_address, proxy_port))
+    bot = TelegramClient(session_name, api_id, api_hash)
     # Create an instance of the TelegramClient
     bot.start(bot_token=bot_token)
     print("connected!")
@@ -558,13 +559,169 @@ async def pay(event):
         elif text == bot_text["data_archive"]:
             keys = [
                 [
-                    Button.text(bot_text["top_speed"])
+                    Button.text(bot_text["top_speed"]),
+                    Button.text(bot_text["overtake"]),
+                    Button.text(bot_text["map_viz"])
                 ],
                 [
                     Button.text(bot_text["back"], resize=1)
                 ]
             ]
             await event.reply(bot_text["select"], buttons=keys)
+        elif text == bot_text["overtake"]:
+            async with bot.conversation(user_id) as conv:
+                year_keys = [
+                    [
+                        Button.inline("2024", b'2024')
+                    ],
+                    [
+                        Button.inline("2023", b'2023')
+                    ],
+                    [
+                        Button.inline("2022", b'2022')
+                    ],
+                    [
+                        Button.inline("2021", b'2021')
+                    ],
+                    [
+                        Button.inline("2020", b'2020')
+                    ],
+                    [
+                        Button.inline("2019", b'2019')
+                    ],
+                    [
+                        Button.inline("2018", b'2018')
+                    ],
+                    [
+                        Button.inline(bot_text["cancel"], b'cancel')
+                    ]
+                ]
+                ask_year = await conv.send_message(bot_text["select_year"], buttons=year_keys)
+                try:
+                    year_res = await conv.wait_event(events.CallbackQuery(), timeout=60)
+                    await bot.delete_messages(user_id, ask_year.id)
+                except TimeoutError:
+                    await conv.send_message(bot_text["timeout_error"])
+                    await conv.cancel_all()
+                year_data = year_res.data
+                if year_data == b'cancel':
+                    await conv.send_message(bot_text["canceled"])
+                    await bot.delete_messages(user_id, ask_year.id)
+                    await conv.cancel_all()
+                else: 
+                    year = int(year_data)
+                    url = f"https://f1datas.com/api/v1/fastf1/session/gp?year={year}"
+                    response = requests.get(url).json()["Country"]
+                    country_tr = {
+                        "Bahrain_Grand_Prix": "گرندپری بحرین",
+                        "Saudi_Arabian_Grand_Prix": "گرندپری عربستان",
+                        "Australian_Grand_Prix": "گرندپری استرالیا",
+                        "Azerbaijan_Grand_Prix": "گرندپری آذربایجان",
+                        "United_States_Grand_Prix": "گرندپری آمریکا",
+                        "Miami_Grand_Prix": "گرندپری میامی",
+                        "Monaco_Grand_Prix": "گرندپری موناکو",
+                        "Spanish_Grand_Prix": "گرندپری اسپانیا",
+                        "Canadian_Grand_Prix": "گرندپری کانادا",
+                        "Austrian_Grand_Prix": "گرندپری اتریش",
+                        "British_Grand_Prix": "گرندپری بریتانیا",
+                        "Hungarian_Grand_Prix": "گرندپری مجارستان",
+                        "Belgian_Grand_Prix": "گرندپری بلژیک",
+                        "Dutch_Grand_Prix": "گرندپری هلند",
+                        "Italian_Grand_Prix": "گرندپری ایتالیا",
+                        "Singapore_Grand_Prix": "گرندپری سنگاپور",
+                        "Japanese_Grand_Prix": "گرندپری ژاپن",
+                        "Qatar_Grand_Prix": "گرندپری قطر",
+                        "Mexico_City_Grand_Prix": "گرندپری مکزیک",
+                        "São_Paulo_Grand_Prix": "گرندپری برزیل",
+                        "Abu_Dhabi_Grand_Prix": "گرندپری ابوظبی",
+                        "Las_Vegas_Grand_Prix": "گرندپری لاس وگاس",
+                        "Emilia_Romagna_Grand_Prix": "گرندپری امیلیا رومانیا",
+                        "Portuguese_Grand_Prix": "گرند پری پرتغال",
+                        "French_Grand_Prix": "گرند پری فرانسه",
+                        "Styrian_Grand_Prix": "گرند پری استراین",
+                        "Turkish_Grand_Prix": "گرند پری ترکیه",
+                        "Russian_Grand_Prix": "گرند پری روسیه",
+                        "Tuscan_Grand_Prix": "گرند پری توسکان",
+                        "Eifel_Grand_Prix": "گرند پری ایفل",
+                        "Sakhir_Grand_Prix": "گرند پری ساخیر",
+                        "Chinese_Grand_Prix": "گرند پری چین",
+                    }
+                    gp_keys = []
+                    for gp in response:
+                        if lang == 1:
+                            gp_text = gp["t"]
+                        else:
+                            gp_text = country_tr[gp["tr"]]
+                        gp_data = gp["t"].encode()
+                        key = Button.inline(gp_text, data=gp_data)
+                        gp_keys.append(key)
+                    result = []
+                    for i in range(0, len(gp_keys), 2):
+                        if i + 1 < len(gp_keys):
+                            result.append([gp_keys[i], gp_keys[i + 1]])
+                        else:
+                            result.append([gp_keys[i]])
+                    result.append([Button.inline(bot_text["cancel"], b'cancel')])
+                    ask_gp = await conv.send_message(bot_text["select_gp"], buttons=result)
+                    try:
+                        gp_res = await conv.wait_event(events.CallbackQuery(), timeout=60)
+                        await bot.delete_messages(user_id, ask_gp.id)
+                    except TimeoutError:
+                        await conv.send_message(bot_text["timeout_error"])
+                        await conv.cancel_all()
+                    gp_data = gp_res.data
+                    if gp_data == b'cancel':
+                        await conv.send_message(bot_text["canceled"])
+                        await conv.cancel_all()
+                    else:
+                        gp = gp_data.decode()
+                        url = f"https://f1datas.com/api/v1/fastf1/session?year={year}&country={gp}"
+                        sessions = requests.get(url).json()["sessions"]
+                        type_tr = {
+                            "Practice_1": "تمرین اول",
+                            "Practice_2": "تمرین دوم",
+                            "Practice_3": "تمرین سوم",
+                            "Sprint": "اسپرینت",
+                            "Sprint_Shootout": "اسپرینت شوت آوت",
+                            "Sprint_Qualifying": "تعیین خط اسپرینت",
+                            "Qualifying": "تعیین خط",
+                            "Race": "مسابقه"
+                        }
+                        sessions_keys = []
+                        for session in sessions:
+                            if lang == 1:
+                                session_text = session
+                            else:
+                                session_text = type_tr[session]
+                            session_key = [
+                                Button.inline(session_text, session.encode()),
+                            ]
+                            sessions_keys.append(session_key)
+                        ask_event = await event.reply(bot_text["select_session"], buttons=sessions_keys)
+                        try:
+                            session_res = await conv.wait_event(events.CallbackQuery(), timeout=60)
+                            await bot.delete_messages(user_id, ask_event.id)
+                        except TimeoutError:
+                            await conv.send_message(bot_text["timeout_error"])
+                            await conv.cancel_all()
+                        event_data = session_res.data
+                        if event_data == b'cancel':
+                            await conv.send_message(bot_text["canceled"])
+                            await conv.cancel_all()
+                        else:
+                            session = event_data.decode()
+                            loading = await conv.send_message(bot_text["loading"])
+                            BASE_DIR = Path(__file__).resolve().parent
+                            image_over = f"{year}-{gp}-{session}-overtake.png"
+                            image_base_over = fr"{BASE_DIR}\{image_over}"
+                            if os.path.exists(image_base_over) is False:
+                                try:
+                                    overtakepath = overtake(year, gp, session)
+                                except:
+                                    pass
+                            await bot.delete_messages(user_id, loading.id)
+                            await bot.send_file(user_id, caption="overtake", file=image_base_over)
+                            await conv.cancel_all()
         elif text == bot_text["top_speed"]:
             async with bot.conversation(user_id) as conv:
                 year_keys = [
@@ -645,7 +802,10 @@ async def pay(event):
                     }
                     gp_keys = []
                     for gp in response:
-                        gp_text = country_tr[gp["tr"]]
+                        if lang == 1:
+                            gp_text = gp["t"]
+                        else:
+                            gp_text = country_tr[gp["tr"]]
                         gp_data = gp["t"].encode()
                         key = Button.inline(gp_text, data=gp_data)
                         gp_keys.append(key)
@@ -683,7 +843,10 @@ async def pay(event):
                         }
                         sessions_keys = []
                         for session in sessions:
-                            session_text = type_tr[session]
+                            if lang == 1:
+                                session_text = session
+                            else:
+                                session_text = type_tr[session]
                             session_key = [
                                 Button.inline(session_text, session.encode()),
                             ]
@@ -716,6 +879,188 @@ async def pay(event):
                             await bot.send_file(user_id, caption="top speed", file=image_base_top)
                             await bot.send_file(user_id, caption="speed trap", file=image_base_trap)
                             await conv.cancel_all()
+        elif text == bot_text["map_viz"]:
+            async with bot.conversation(user_id) as conv:
+                year_keys = [
+                    [
+                        Button.inline("2024", b'2024')
+                    ],
+                    [
+                        Button.inline("2023", b'2023')
+                    ],
+                    [
+                        Button.inline("2022", b'2022')
+                    ],
+                    [
+                        Button.inline("2021", b'2021')
+                    ],
+                    [
+                        Button.inline("2020", b'2020')
+                    ],
+                    [
+                        Button.inline("2019", b'2019')
+                    ],
+                    [
+                        Button.inline("2018", b'2018')
+                    ],
+                    [
+                        Button.inline(bot_text["cancel"], b'cancel')
+                    ]
+                ]
+                ask_year = await conv.send_message(bot_text["select_year"], buttons=year_keys)
+                try:
+                    year_res = await conv.wait_event(events.CallbackQuery(), timeout=60)
+                    await bot.delete_messages(user_id, ask_year.id)
+                except TimeoutError:
+                    await conv.send_message(bot_text["timeout_error"])
+                    await conv.cancel_all()
+                year_data = year_res.data
+                if year_data == b'cancel':
+                    await conv.send_message(bot_text["canceled"])
+                    await bot.delete_messages(user_id, ask_year.id)
+                    await conv.cancel_all()
+                else: 
+                    year = int(year_data)
+                    url = f"https://f1datas.com/api/v1/fastf1/session/gp?year={year}"
+                    response = requests.get(url).json()["Country"]
+                    country_tr = {
+                        "Bahrain_Grand_Prix": "گرندپری بحرین",
+                        "Saudi_Arabian_Grand_Prix": "گرندپری عربستان",
+                        "Australian_Grand_Prix": "گرندپری استرالیا",
+                        "Azerbaijan_Grand_Prix": "گرندپری آذربایجان",
+                        "United_States_Grand_Prix": "گرندپری آمریکا",
+                        "Miami_Grand_Prix": "گرندپری میامی",
+                        "Monaco_Grand_Prix": "گرندپری موناکو",
+                        "Spanish_Grand_Prix": "گرندپری اسپانیا",
+                        "Canadian_Grand_Prix": "گرندپری کانادا",
+                        "Austrian_Grand_Prix": "گرندپری اتریش",
+                        "British_Grand_Prix": "گرندپری بریتانیا",
+                        "Hungarian_Grand_Prix": "گرندپری مجارستان",
+                        "Belgian_Grand_Prix": "گرندپری بلژیک",
+                        "Dutch_Grand_Prix": "گرندپری هلند",
+                        "Italian_Grand_Prix": "گرندپری ایتالیا",
+                        "Singapore_Grand_Prix": "گرندپری سنگاپور",
+                        "Japanese_Grand_Prix": "گرندپری ژاپن",
+                        "Qatar_Grand_Prix": "گرندپری قطر",
+                        "Mexico_City_Grand_Prix": "گرندپری مکزیک",
+                        "São_Paulo_Grand_Prix": "گرندپری برزیل",
+                        "Abu_Dhabi_Grand_Prix": "گرندپری ابوظبی",
+                        "Las_Vegas_Grand_Prix": "گرندپری لاس وگاس",
+                        "Emilia_Romagna_Grand_Prix": "گرندپری امیلیا رومانیا",
+                        "Portuguese_Grand_Prix": "گرند پری پرتغال",
+                        "French_Grand_Prix": "گرند پری فرانسه",
+                        "Styrian_Grand_Prix": "گرند پری استراین",
+                        "Turkish_Grand_Prix": "گرند پری ترکیه",
+                        "Russian_Grand_Prix": "گرند پری روسیه",
+                        "Tuscan_Grand_Prix": "گرند پری توسکان",
+                        "Eifel_Grand_Prix": "گرند پری ایفل",
+                        "Sakhir_Grand_Prix": "گرند پری ساخیر",
+                        "Chinese_Grand_Prix": "گرند پری چین",
+                    }
+                    gp_keys = []
+                    for gp in response:
+                        if lang == 1:
+                            gp_text = gp["t"]
+                        else:
+                            gp_text = country_tr[gp["tr"]]
+                        gp_data = str.encode(gp["t"] + ":" + str(gp["round_num"]))
+                        key = Button.inline(gp_text, data=gp_data)
+                        gp_keys.append(key)
+                    result = []
+                    for i in range(0, len(gp_keys), 2):
+                        if i + 1 < len(gp_keys):
+                            result.append([gp_keys[i], gp_keys[i + 1]])
+                        else:
+                            result.append([gp_keys[i]])
+                    result.append([Button.inline(bot_text["cancel"], b'cancel')])
+                    ask_gp = await conv.send_message(bot_text["select_gp"], buttons=result)
+                    try:
+                        gp_res = await conv.wait_event(events.CallbackQuery(), timeout=60)
+                        await bot.delete_messages(user_id, ask_gp.id)
+                    except TimeoutError:
+                        await conv.send_message(bot_text["timeout_error"])
+                        await conv.cancel_all()
+                    gp_data = gp_res.data
+                    if gp_data == b'cancel':
+                        await conv.send_message(bot_text["canceled"])
+                        await conv.cancel_all()
+                    else:
+                        gp_country = gp_data.decode().split(":")[0]
+                        url = f"https://f1datas.com/api/v1/fastf1/session?year={year}&country={gp_country}"
+                        sessions = requests.get(url).json()["sessions"]
+                        type_tr = {
+                            "Practice_1": "تمرین اول",
+                            "Practice_2": "تمرین دوم",
+                            "Practice_3": "تمرین سوم",
+                            "Sprint": "اسپرینت",
+                            "Sprint_Shootout": "اسپرینت شوت آوت",
+                            "Sprint_Qualifying": "تعیین خط اسپرینت",
+                            "Qualifying": "تعیین خط",
+                            "Race": "مسابقه"
+                        }
+                        sessions_keys = []
+                        for session in sessions:
+                            if lang == 1:
+                                session_text = session
+                            else:
+                                session_text = type_tr[session]
+                            session_key = [
+                                Button.inline(session_text, session.encode()),
+                            ]
+                            sessions_keys.append(session_key)
+                        ask_event = await event.reply(bot_text["select_session"], buttons=sessions_keys)
+                        try:
+                            session_res = await conv.wait_event(events.CallbackQuery(), timeout=60)
+                            await bot.delete_messages(user_id, ask_event.id)
+                        except TimeoutError:
+                            await conv.send_message(bot_text["timeout_error"])
+                            await conv.cancel_all()
+                        event_data = session_res.data
+                        if event_data == b'cancel':
+                            await conv.send_message(bot_text["canceled"])
+                            await conv.cancel_all()
+                        else:
+                            gp_round = int(gp_data.decode().split(":")[1])
+                            url = f"http://ergast.com/api/f1/{year}/{gp_round}/drivers.json"
+                            drivers = requests.get(url).json()["MRData"]["DriverTable"]["Drivers"]
+                            drivers_keys = []
+                            for driver in drivers:
+                                driver_name = driver["givenName"] + driver["familyName"]
+                                driver_code = driver["code"]
+                                key = Button.inline(driver_name, data=driver_code.encode())
+                                drivers_keys.append(key)
+                            result = []
+                            for dv in range(0, len(drivers_keys), 2):
+                                if dv + 1 < len(drivers_keys):
+                                    result.append([drivers_keys[dv], drivers_keys[dv + 1]])
+                                else:
+                                    result.append([drivers_keys[dv]])
+                            cancel_btn = [Button.inline(bot_text["cancel"], b'cancel')]
+                            result.append(cancel_btn)
+                            ask_driver = await conv.send_message(bot_text["ask_driver"], buttons=result)
+                            try:
+                                dr_event = await conv.wait_event(events.CallbackQuery(), timeout=60)
+                                await bot.delete_messages(user_id, ask_driver.id)
+                            except TimeoutError:
+                                await conv.send_message(bot_text["timeout_error"])
+                                await conv.cancel_all()
+                            driver_data = dr_event.data
+                            if driver_data == b'cancel':
+                                await conv.send_message(bot_text["canceled"])
+                                await conv.cancel_all()
+                            else:
+                                driver_code = driver_data.decode()
+                                session = event_data.decode()
+                                loading = await conv.send_message(bot_text["loading"])
+                                BASE_DIR = Path(__file__).resolve().parent
+                                image_viz = f"{year}-{gp_round}-{session}-map_viz.png"
+                                image_base_viz = fr"{BASE_DIR}\{image_viz}"
+                                if os.path.exists(image_base_viz) is False:
+                                    print(year, gp_round, session, driver_code)
+                                    image_viz_path = map_viz(year, gp_round, session, driver_code)
+                                await bot.delete_messages(user_id, loading.id)
+                                await bot.send_file(user_id, caption="map viz", file=image_base_viz)
+                                await conv.cancel_all()
         elif text == bot_text["add_grand"]:
             is_admin = check_admin(user_id)
             if is_admin is False:

@@ -1,0 +1,7 @@
+telethon
+python-socks[asyncio]
+matplotlib
+fastf1
+seaborn
+numpy
+pandas

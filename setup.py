@@ -14,3 +14,4 @@ cur.execute("CREATE TABLE IF NOT EXISTS drivers(for_grand,name,driver_id,avg,avg
 cur.execute("CREATE TABLE IF NOT EXISTS grand(num, name, close)")
 cur.execute("CREATE TABLE IF NOT EXISTS driver_score(user_id,driver_id,for_grand)")
 cur.execute("CREATE TABLE IF NOT EXISTS invite(user_id,invite_id)")
+cur.execute("CREATE TABLE IF NOT EXISTS admins(_id)")
