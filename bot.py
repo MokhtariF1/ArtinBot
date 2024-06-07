@@ -28,8 +28,8 @@ if proxy:
     proxy_type = config.PROXY_TYPE
     proxy_address = config.PROXY_ADDRESS
     proxy_port = config.PROXY_PORT
-    bot = TelegramClient(session_name, api_id, api_hash, proxy=(proxy_type, proxy_address, proxy_port))
-    # bot = TelegramClient(session_name, api_id, api_hash)
+    # bot = TelegramClient(session_name, api_id, api_hash, proxy=(proxy_type, proxy_address, proxy_port))
+    bot = TelegramClient(session_name, api_id, api_hash)
     # Create an instance of the TelegramClient
     bot.start(bot_token=bot_token)
     print("connected!")
@@ -314,6 +314,125 @@ async def pay(event):
                 ]
             ]
             await event.reply(bot_text["select"], buttons=keys)
+        elif text == bot_text["support"]:
+            keys = [
+                [
+                    Button.text(bot_text["connect_admin"],resize=1),
+                    Button.text(bot_text["idealization"])
+                ],
+                [
+                    Button.text(bot_text["back"])
+                ]
+            ]
+            await event.reply(bot_text["select"], buttons=keys)
+        elif text == bot_text["idealization"]:
+            async with bot.conversation(user_id, timeout=1000) as conv:
+                await conv.send_message(bot_text["question_image_idea"])
+                image_msg = await conv.get_response()
+                image_path = None
+                if image_msg.media is not None:
+                    image_path = await image_msg.download_media()
+                    await conv.send_message(bot_text["question_text_idea"])
+                    text = await conv.get_response()
+                    q_text = text.message
+                else:
+                    if image_msg.message == bot_text["cancel"]:
+                        key = [
+                            Button.text(bot_text["back"])
+                        ]
+                        await bot.send_message(user_id, bot_text['canceled'], buttons=key)
+                        return
+                    else:
+                        q_text = image_msg.message
+            channel = config.IDEALIZATION_CHANNEL
+            q_text += f"\n {user_id}"
+            await bot.send_message(channel, q_text, file=image_path)
+            await event.reply(bot_text["successfully"])
+        elif text == bot_text["tickets"]:
+            is_admin = check_admin(user_id)
+            if is_admin is False:
+                keys = [
+                    [Button.text(bot_text["archive"], resize=True)],
+                    [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
+                    [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
+                     Button.text(bot_text["rules"])],
+                ]
+                await event.reply(bot_text["select"], buttons=keys)
+            else:
+                find_count = len(cur.execute("SELECT * FROM tickets WHERE status='open'").fetchall())
+                if find_count == 0:
+                    await bot.send_message(user_id, bot_text["not_found"])
+                    return
+                await bot.send_message(user_id, bot_text['welcome_show_tickets'])
+                tickets = cur.execute("SELECT * FROM tickets WHERE status='open'").fetchall()[:5]
+                items_per_page = 5
+                pages = find_count // items_per_page
+                if find_count % items_per_page != 0:
+                    pages += 1
+                paginate_keys = paginate('show_ticket', 1, pages, ':')
+                for ticket in tickets:
+                    banner_media = ticket[0]
+                    banner_text = ticket[1]
+                    banner_user = ticket[3]
+                    ticket_count = ticket[2]
+                    full_question = f'{bot_text["ticket_text"]}:{banner_text}\n' \
+                                    f'{bot_text["ticket_count"]}:{ticket_count}\n' \
+                                    f'{bot_text["ticket_user_id"]}:`{banner_user}`'
+
+                    key = [
+                        Button.inline(bot_text['ticket_answer'], data=str.encode('ticket_answer:' + str(ticket_count))),
+                        Button.inline(bot_text['close_ticket'],data=str.encode('close_ticket:' + str(ticket_count))),
+                    ]
+                    try:
+                        await bot.send_message(user_id, full_question, file=banner_media, buttons=key)
+                    except:
+                        await bot.send_message(user_id,full_question, buttons=key)
+                try:
+                    await bot.send_message(user_id, bot_text['come_next'], buttons=paginate_keys)
+                except:
+                    pass
+        elif text == bot_text["connect_admin"]:
+            async with bot.conversation(user_id, timeout=1000) as conv:
+                await conv.send_message(bot_text["question_image"])
+                image_msg = await conv.get_response()
+                image_path = None
+                if image_msg.media is not None:
+                    image_path = await image_msg.download_media()
+                    await conv.send_message(bot_text["question_text"])
+                    text = await conv.get_response()
+                    q_text = text.message
+                else:
+                    if image_msg.message == bot_text["cancel"]:
+                        key = [
+                            Button.text(bot_text["back"])
+                        ]
+                        await bot.send_message(user_id, bot_text['canceled'], buttons=key)
+                        return
+                    else:
+                        q_text = image_msg.message
+                find_count = cur.execute("SELECT COUNT(*) FROM tickets").fetchone()[0] + 1
+                data = [
+                    (image_path, q_text, find_count, user_id, 'open')
+                ]
+                cur.executemany("INSERT INTO tickets(media,text,count,user_id,status) VALUES(?,?,?,?,?)", data)
+                con.commit()
+                key = [
+                    Button.text(bot_text["back"])
+                ]
+                await bot.send_message(user_id, bot_text["ticket_successfully"], buttons=key)
+                admins = cur.execute("SELECT * FROM admins").fetchall()
+                for admin in admins:
+                    ad_id = admin[0]
+                    print(ad_id)
+                    key = [
+                        Button.inline(bot_text["ticket_answer"],
+                        data=str.encode('ticket_answer:' + str(find_count)))
+                    ]
+                    await bot.send_message(ad_id,
+                                        bot_text["admin_notification"].format(num=find_count,
+                                                                                                            text=q_text,
+                                                                                                            id=user_id),
+                                        buttons=key)
         elif text == bot_text["search_in_channel"]:
             async with bot.conversation(user_id, timeout=1000) as conv:
                 await conv.send_message(bot_text["enter_hashtag"])
@@ -452,19 +571,60 @@ async def pay(event):
                 ]
                 await event.reply(bot_text["select"], buttons=keys)
             else:
+                pn_keys = [
+                    [
+                        Button.text(bot_text["management"]),
+                        Button.text(bot_text["users"], resize=1)
+                    ],
+                    [
+                        Button.text(bot_text["back"], resize=True)
+                    ]
+                ]
+                await event.reply(bot_text["select"], buttons=pn_keys)
+        elif text == bot_text["management"]:
+            is_admin = check_admin(user_id)
+            if is_admin is False:
+                keys = [
+                    [Button.text(bot_text["archive"], resize=True)],
+                    [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
+                    [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
+                     Button.text(bot_text["rules"])],
+                ]
+                await event.reply(bot_text["select"], buttons=keys)
+            else:
                 keys = [
                     [
                         Button.text(bot_text["words"], resize=True),
-                        Button.text(bot_text["grand"]),
-                        Button.text(bot_text["robot_statistics"]),
+                        Button.text(bot_text["grand"]), 
                     ],
                     [
-                        Button.text(bot_text["new_users"]),
-                        Button.text(bot_text["users_excel"])
+                        Button.text(bot_text["tickets"])
                     ],
                     [Button.text(bot_text['back'])]
                 ]
                 await event.reply(bot_text["select"], buttons=keys)
+        elif text == bot_text["users"]:
+            is_admin = check_admin(user_id)
+            if is_admin is False:
+                keys = [
+                    [Button.text(bot_text["archive"], resize=True)],
+                    [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
+                    [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
+                     Button.text(bot_text["rules"])],
+                ]
+                await event.reply(bot_text["select"], buttons=keys)
+            else:
+                us_keys = [
+                    [
+                        Button.text(bot_text["new_users"]),
+                        Button.text(bot_text["users_excel"]),
+                        Button.text(bot_text["robot_statistics"])
+                    ],
+                    [
+                        Button.text(bot_text['back'], resize=True)
+                    ],
+                ]
+                await event.reply(bot_text["select"], buttons=us_keys)
         elif text == bot_text["users_excel"]:
             users = cur.execute("SELECT * FROM users").fetchall()
             # Create a new Excel workbook
@@ -501,7 +661,7 @@ async def pay(event):
                 await event.reply(bot_text["select"], buttons=keys)
             else:
                 text = ""
-                users = cur.execute("SELECT * FROM users ORDER BY join_time ASC LIMIT 10;").fetchall()
+                users = cur.execute("SELECT * FROM users ORDER BY join_time DESC LIMIT 10;").fetchall()
                 for user in users:
                     get_user = await bot.get_entity(user[0])
                     user_id_ = get_user.id
@@ -1935,4 +2095,227 @@ async def see_score_handler(event):
             driver_text = f"{driver_name} : `{avg}`"
             text = text + driver_text + "\n\n"
         await event.reply(text)
+
+@bot.on(events.CallbackQuery(pattern='ticket_answer:*'))
+async def ticket_answer_handler(event):
+    user_id = event.original_update.user_id
+    lang = check_lang(user_id)
+    if lang == 1:
+        bot_text = config.EN_TEXT
+    else:
+        bot_text = config.TEXT
+    global q_text
+    answer_number = int(event.data.decode().split(':')[1])
+    # find_tk = db.tickets.find_one({'count': answer_number})
+    find_tk = cur.execute(f"SELECT * FROM tickets WHERE count={answer_number}").fetchone()
+    if find_tk is None:
+        await event.reply(bot_text['ticket_dl_error'])
+        return
+    else:
+        status = find_tk[4]
+        if status == 'close':
+            await event.reply(bot_text['close_error'])
+            return
+    tk_user_id = find_tk[3]
+    tk_text = find_tk[1]
+    async with bot.conversation(user_id, timeout=1000) as conv:
+        await conv.send_message(bot_text['question_image_answer'])
+        image_msg = await conv.get_response()
+        image_path = None
+        if image_msg.media is not None:
+            image_path = await image_msg.download_media()
+            msg1 = await conv.send_message(bot_text['question_text'])
+            text = await conv.get_response()
+            q_text = text.message
+        else:
+            if image_msg.message == bot_text['cancel']:
+                key = [
+                    Button.text(bot_text['back'])
+                ]
+                await bot.send_message(user_id, bot_text['successfully_cancelled'], buttons=key)
+                return
+            else:
+                q_text = image_msg.message
+    key = [
+        [
+            Button.text(bot_text['back'])
+        ]
+    ]
+    key_user = [
+        Button.inline(bot_text['ticket_answer_ad'],
+                      data=str.encode('user_ad:' + str(answer_number))),
+    ]
+    await bot.send_message(user_id, bot_text['answer_successfully'].format(num=answer_number),
+                           buttons=key)
+    try:
+        await bot.send_message(tk_user_id,
+                               bot_text['user_notification'].format(user_text=tk_text,
+                                                                                           admin_text=q_text),
+                               file=image_path, buttons=key_user)
+    except:
+        await bot.send_message(tk_user_id,
+                               bot_text['user_notification'].format(user_text=tk_text,
+                                                                                           admin_text=q_text),
+                               buttons=key_user)
+    try:
+        os.remove(image_path)
+    except:
+        pass
+
+@bot.on(events.CallbackQuery(pattern='user_ad:*'))
+async def user_ad_handler(event):
+    user_id = event.original_update.user_id
+    lang = check_lang(user_id)
+    if lang == 1:
+        bot_text = config.EN_TEXT
+    else:
+        bot_text = config.TEXT
+    global q_text
+    user_id = event.original_update.user_id
+    answer_number = int(event.data.decode().split(':')[1])
+    # find_tk = db.tickets.find_one({'count': answer_number})
+    find_tk = cur.execute(f"SELECT * FROM tickets WHERE count={answer_number}").fetchone()
+    if find_tk is None:
+        await event.reply(bot_text['ticket_dl_error'])
+        return
+    else:
+        status = find_tk[4]
+        if status == 'close':
+            await event.reply(bot_text['close_error'])
+            return
+        else:
+            pass
+    async with bot.conversation(user_id, timeout=1000) as conv:
+        await conv.send_message(bot_text['question_image_answer'])
+        image_msg = await conv.get_response(timeout=1000)
+        image_path = None
+        if image_msg.media is not None:
+            image_path = await image_msg.download_media()
+            msg1 = await conv.send_message(bot_text['question_text'])
+            text = await conv.get_response()
+            q_text = text.message
+        else:
+            if image_msg.message == bot_text['cancel']:
+                key = [
+                    Button.text(bot_text['back'])
+                ]
+                await bot.send_message(user_id, bot_text['successfully_cancelled'], buttons=key)
+                return
+            else:
+                q_text = image_msg.message
+    key = [
+        [
+            Button.text(bot_text['back'])
+        ]
+    ]
+    key_user = [
+        Button.inline(bot_text['ticket_answer'],
+                      data=str.encode('ticket_answer:' + str(answer_number))),
+    ]
+    await bot.send_message(user_id, bot_text['answer_successfully_user'], buttons=key)
+    admins = cur.execute("SELECT * FROM admins").fetchall()
+    for admin in admins:
+        ad_id = admin[0]
+        try:
+            await bot.send_message(int(ad_id),
+                                   bot_text['admin_notification_answer'].format(text=q_text,
+                                                                                                       num=answer_number,
+                                                                                                       id=user_id),
+                                   file=image_path, buttons=key_user)
+        except:
+            await bot.send_message(int(ad_id),
+                                   bot_text['admin_notification_answer'].format(text=q_text,
+                                                                                                       num=answer_number,
+                                                                                                       id=user_id),
+                                   buttons=key_user)
+    try:
+        os.remove(image_path)
+    except:
+        pass
+@bot.on(events.CallbackQuery(pattern='show_ticket:*'))
+async def show_ticket_handler(event):
+    user_id = event.sender_id
+    lang = check_lang(user_id)
+    if lang == 1:
+        bot_text = config.EN_TEXT
+    else:
+        bot_text = config.TEXT
+    back = Button.text(bot_text["back"], resize=True)
+    start_text = bot_text['select']
+    ch_admin = check_admin(user_id)
+    if ch_admin is False:
+        keys = [
+            [Button.text(bot_text["archive"], resize=True)],
+            [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
+            [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
+             Button.text(bot_text["rules"])],
+        ]
+        await event.reply(bot_text["select"], buttons=keys)
+        return
+    find_count = len(cur.execute("SELECT * FROM tickets").fetchall())
+    if find_count == 0:
+        await bot.send_message(user_id, bot_text['not_found'])
+        return
+    page_number = int(event.data.decode().split(':')[1])
+    skip_number = (page_number * 5) - 5
+    # find_connections = db.connections.find().skip(skip_number).limit(5)
+    find_tickets = cur.execute("SELECT * FROM tickets LIMIT 5 OFFSET ?;", (skip_number,)).fetchall()
+    items_per_page = 5
+    pages = find_count // items_per_page
+    if find_count % items_per_page != 0:
+        pages += 1
+    paginate_keys = paginate('show_ticket', page_number, pages, ':')
+    for ticket in find_tickets:
+        banner_media = ticket[0]
+        banner_text = ticket[1]
+        banner_user = ticket[3]
+        ticket_count = ticket[2]
+        full_question = f'{bot_text["ticket_text"]}:{banner_text}\n' \
+                        f'{bot_text["ticket_count"]}:{ticket_count}\n' \
+                        f'{bot_text["ticket_user_id"]}:`{banner_user}`'
+
+        key = [
+            Button.inline(bot_text['ticket_answer'], data=str.encode('ticket_answer:' + str(ticket_count))),
+            Button.inline(bot_text['close_ticket'],data=str.encode('close_ticket:' + str(ticket_count))),
+        ]
+        try:
+            await bot.send_message(user_id, full_question, file=banner_media, buttons=key)
+        except:
+            await bot.send_message(user_id,full_question, buttons=key)
+    try:
+        await bot.send_message(user_id, bot_text['come_next'], buttons=paginate_keys)
+    except:
+        pass
+
+@bot.on(events.CallbackQuery(pattern="close_ticket:*"))
+async def close_ticket_handler(event):
+    user_id = event.sender_id
+    lang = check_lang(user_id)
+    if lang == 1:
+        bot_text = config.EN_TEXT
+    else:
+        bot_text = config.TEXT
+    is_admin = check_admin(user_id)
+    if is_admin is False:
+        keys = [
+            [Button.text(bot_text["archive"], resize=True)],
+            [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
+            [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
+             Button.text(bot_text["rules"])],
+        ]
+        await event.reply(bot_text["select"], buttons=keys)
+        return
+    ticket_num = event.data.decode().split(":")[1]
+    ticket = cur.execute(f"SELECT * FROM tickets WHERE count = {ticket_num}").fetchone()
+    if ticket is None:
+        await event.reply(bot_text["ticket_not_found"])
+        return
+    if ticket[4] == "open":
+        cur.execute(f"UPDATE tickets SET status = 'close' WHERE count = {ticket_num}")
+        con.commit()
+        await event.reply(bot_text["ticket_closed"])
+    else:
+        cur.execute(f"UPDATE tickets SET status = 'open' WHERE count = {ticket_num}")
+        con.commit()
+        await event.reply(bot_text["ticket_opened"])
 bot.run_until_disconnected()

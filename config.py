@@ -23,6 +23,7 @@ DB_NAME = "bot.db"
 CHANNEL_ID = "https://t.me/F1DataOfficial"
 CHANNEL_ID_PLUS = "https://t.me/RacePlusIran"
 CALLBACK_URL = "https://f1datas.com/payment"
+IDEALIZATION_CHANNEL = "https://t.me/ideasf1"
 
 
 async def join_check(user_id, cli):
@@ -220,8 +221,42 @@ TEXT = {
     "new_users": "کاربران جدید",
     "users_excel": "اکسل کاربران",
     "users_excel_caption": "فایل اکسل کاربران ربات",
-    "dont_time": "مسابقه هنوز شروع نشده است!"
-}
+    "dont_time": "مسابقه هنوز شروع نشده است!",
+    "idealization": "ایده پردازی",
+    "connect_admin": "ارتباط با پشتیبانی",
+    "question_image": "در صورت نیاز به تصویر ، تصویر را ارسال کنید(اگر به تصویر نیاز ندارید متن تیکت خود را ارسال کنید)"
+                      "\n برای لغو عملیات ثبت تیکت **لغو** را ارسال کنید❗",
+    "question_text": "متن خود را وارد کنید:👇",
+    "ticket_successfully": "تیکت با موفقیت ثبت شد✅\nدر اسرع وقت به تیکت پاسخ داده خواهد شد✅",
+    "ticket_answer": "📮ثبت پاسخ📮",
+    "admin_notification": "تیکت جدیدی ثبت شد❗\nمتن تیکت:{text}\nشماره تیکت:{num}\nآیدی عددی کاربر:`{id}`",
+    "ticket_dl_error": "❗این تیکت حذف شده است❗",
+    "close_error": "❗این تیکت بسته شده است❗",
+    "question_image_answer": "در صورت نیاز به تصویر ، تصویر را ارسال کنید"
+                             "(اگر به تصویر نیاز ندارید متن پاسخ خود را ارسال کنید)"
+                             " \n برای لغو عملیات ثبت پاسخ **لغو** را ارسال کنید❗",
+    "ticket_answer_ad": "📮ثبت پاسخ برای ادمین📮",
+    "answer_successfully": "پاسخ با موفقیت ثبت شد✅\nپاسخ به تیکت شماره:{num}",
+    "user_notification":
+        "پاسخی از طرف ادمین برای تیکت شما ارسال شد!\nمتن تیکت شما:{user_text}\n\n**پاسخ ادمین**:{admin_text}",
+    "answer_successfully_user": "✅پاسخ با موفقیت برای ادمین ارسال شد✅",
+    "admin_notification_answer": "پاسخ جدیدی از طرف کاربران ثبت شد❗"
+                                 "\nمتن پاسخ:{text}\nبر روی تیکت شماره:{num}\nآیدی عددی کاربر:`{id}`",
+    "question_image_idea": "درصورت نیاز به تصویر، تصویر خود را ارسال کنید:\nدر غیر این صورت متن ایده خود را ارسال کنید:",
+    "question_text_idea": "متن ایده خود را ارسال کنید:",
+    "management": "مدیریت",
+    "users": "کاربران",
+    "tickets": "مشاهده تیکت ها",
+    "welcome_show_tickets": "تیکت های ثبت شده:👇",
+    "ticket_text": "📝متن تیکت:",
+    "ticket_count": "🔄شماره تیکت:",
+    "ticket_user_id": "آیدی عددی کاربر:",
+    "close_ticket": "🔐بستن تیکت🔐",
+    "ticket_not_found": "تیکت حذف شده است❗",
+    "ticket_opened": "تیکت با موفقیت باز شد✅",
+    "ticket_closed": "تیکت با موفقیت بسته شد✅",
+
+} 
 
 EN_TEXT = {
     "EN_SELECTED": "English 🏴󠁧󠁢󠁥󠁮󠁧󠁿 󠁧󠁢󠁥󠁮language was selected",
@@ -355,5 +390,35 @@ otherwise the payment will not be confirmed and the money will be returned to yo
     "new_users": "New users",
     "users_excel": "Excel Users",
     "users_excel_caption": "Excel file of robot users",
-    "dont_time": "The race has not started yet!"
+    "dont_time": "The race has not started yet!",
+    "idealization": "Idealization",
+    "connect_admin": "Communication with support",
+    "question_image": "If you need an image, send the image (if you don't need an image, send the text of your ticket)\n To cancel the ticket registration operation, send **Cancel**❗",
+    "question_text": "Enter your text:",
+    "ticket_successfully": "Ticket successfully registered \n will answer the ticket as soon as possible",
+    "ticket_answer": "📮register answer📮",
+    "admin_notification": "A new ticket has been registered❗\nTicket text: {text}\nTicket number: {num}\nUser numeric ID: `{id}`",
+    "ticket_dl_error": "❗ This ticket has been removed.",
+    "close_error": "❗ This ticket is closed.",
+    "question_image_answer": "If you need an image, send the image (if you don't need an image, send your answer text)\n To cancel the registration operation, send **cancel**❗",
+    "ticket_answer_ad": "📮 Answer for Admin📮",
+    "answer_successfully": "Answer successfully registered \n Reply to Ticket Number: {Num}",
+    "user_notification":
+        "A response from the admin has been sent to your ticket!\nYour ticket text:{user_text}\n\n**Admin's response**:{admin_text}",
+    "answer_successfully_user": "Submitted the answer successfully to the admin✅",
+    "admin_notification_answer": "A new response was recorded by users"
+                                 "\n Text Reply: {Text} \n on ATICATION NUMBER: {Num} \n User Numerical ID: `{ID}`",
+    "question_image_idea": "If you need an image, send the image\n otherwise, send the text of your idea",
+    "question_text_idea": "Send the text of your idea:",
+    "management": "Management",
+    "users": "Users",
+    "tickets": "View tickets",
+    "welcome_show_tickets": "Registered tickets:👇",
+    "ticket_text": "📝Ticket text:",
+    "ticket_count": "🔄Ticket Number:",
+    "ticket_user_id": "User Numerical ID:",
+    "close_ticket": "🔐Close Ticket🔐",
+    "ticket_not_found": "Ticket has been removed❗",
+    "ticket_opened": "The ticket opened✅",
+    "ticket_closed": "The ticket closed✅",
 }
