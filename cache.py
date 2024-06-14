@@ -5,7 +5,7 @@ import pymongo
 from pymongo import MongoClient
 
 
-class Cache:
+class CacheMongo:
     data: dict
     client: MongoClient
     db: pymongo.database.Database
