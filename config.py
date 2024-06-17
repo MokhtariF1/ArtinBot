@@ -5,7 +5,7 @@ import re
 
 API_ID = 86576
 API_HASH = "385886b58b21b7f3762e1cde2d651925"
-ENV = 0
+ENV = 1
 if ENV:
     BOT_TOKEN = "7185706687:AAEkVBiMGDh0IigJs0iJBSSL1i7U7mN1e2k"
     PROXY = False
@@ -229,7 +229,7 @@ TEXT = {
     "question_text": "متن خود را وارد کنید:👇",
     "ticket_successfully": "تیکت با موفقیت ثبت شد✅\nدر اسرع وقت به تیکت پاسخ داده خواهد شد✅",
     "ticket_answer": "📮ثبت پاسخ📮",
-    "admin_notification": "تیکت جدیدی ثبت شد❗\nمتن تیکت:{text}\nشماره تیکت:{num}\nآیدی عددی کاربر:`{id}`",
+    "admin_notification": "تیکت جدیدی ثبت شد❗\nمتن تیکت:{text}\nشماره تیکت:{num}\nآیدی عددی کاربر:`{id}`\nنام فرد درخواست کننده:{name}\nآیدی فرد درخواست کننده:{username}",
     "ticket_dl_error": "❗این تیکت حذف شده است❗",
     "close_error": "❗این تیکت بسته شده است❗",
     "question_image_answer": "در صورت نیاز به تصویر ، تصویر را ارسال کنید"
@@ -241,7 +241,7 @@ TEXT = {
         "پاسخی از طرف ادمین برای تیکت شما ارسال شد!\nمتن تیکت شما:{user_text}\n\n**پاسخ ادمین**:{admin_text}",
     "answer_successfully_user": "✅پاسخ با موفقیت برای ادمین ارسال شد✅",
     "admin_notification_answer": "پاسخ جدیدی از طرف کاربران ثبت شد❗"
-                                 "\nمتن پاسخ:{text}\nبر روی تیکت شماره:{num}\nآیدی عددی کاربر:`{id}`",
+                                 "\nمتن پاسخ:{text}\nبر روی تیکت شماره:{num}\nآیدی عددی کاربر:`{id}`\nنام فرد:{name}\nآیدی فرد:{username}",
     "question_image_idea": "درصورت نیاز به تصویر، تصویر خود را ارسال کنید:\nدر غیر این صورت متن ایده خود را ارسال کنید:",
     "question_text_idea": "متن ایده خود را ارسال کنید:\nبرای لغو کلمه *کنسل* را ارسال کنید",
     "management": "مدیریت",
@@ -258,6 +258,7 @@ TEXT = {
     "rpm": "آر پی ام",
     "ask_driver_one": "راننده اول را انتخاب کنید:",
     "ask_driver_two": "راننده دوم را انتخاب کنید:",
+    "map_break": "مپ بریک"
 } 
 
 EN_TEXT = {
@@ -399,7 +400,7 @@ otherwise the payment will not be confirmed and the money will be returned to yo
     "question_text": "Enter your text:",
     "ticket_successfully": "Ticket successfully registered \n will answer the ticket as soon as possible",
     "ticket_answer": "📮register answer📮",
-    "admin_notification": "A new ticket has been registered❗\nTicket text: {text}\nTicket number: {num}\nUser numeric ID: `{id}`",
+    "admin_notification": "A new ticket has been registered❗\nTicket text: {text}\nTicket number: {num}\nUser numeric ID: `{id}`\nUser Full Name:{name}\nUserName: {username}",
     "ticket_dl_error": "❗ This ticket has been removed.",
     "close_error": "❗ This ticket is closed.",
     "question_image_answer": "If you need an image, send the image (if you don't need an image, send your answer text)\n To cancel the registration operation, send **cancel**❗",
@@ -409,7 +410,7 @@ otherwise the payment will not be confirmed and the money will be returned to yo
         "A response from the admin has been sent to your ticket!\nYour ticket text:{user_text}\n\n**Admin's response**:{admin_text}",
     "answer_successfully_user": "Submitted the answer successfully to the admin✅",
     "admin_notification_answer": "A new response was recorded by users"
-                                 "\n Text Reply: {Text} \n on ATICATION NUMBER: {Num} \n User Numerical ID: `{ID}`",
+                                 "\n Text Reply: {Text} \n on ATICATION NUMBER: {Num} \n User Numerical ID: `{ID}`\nUser Full Name: {name}\nUsername:{username}",
     "question_image_idea": "If you need an image, send the image\n otherwise, send the text of your idea",
     "question_text_idea": "Send the text of your idea:",
     "management": "Management",
@@ -426,4 +427,7 @@ otherwise the payment will not be confirmed and the money will be returned to yo
     "rpm": "RPM",
     "ask_driver_one": "Choose the first driver:",
     "ask_driver_two": "Choose the second driver:",
+    "map_break": "Map Brake",
+
+
 }

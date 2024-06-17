@@ -1,10 +1,5 @@
-from fastf1 import get_event_schedule, get_event, Cache
+from fastf1 import get_event_schedule, get_event
 from cache import CacheMongo
-from pathlib import Path
-BASE_DIR = Path(__file__).resolve().parent
-print(BASE_DIR)
-test = Cache()
-t = test.enable_cache(f"{BASE_DIR}/cache")
 class Manager:     
     def _handle_tr(self, text: str):
         result = str(text).split(" ")

@@ -437,6 +437,73 @@ def speed_rpm_delta(year, gp, identifier, driver_one, driver_two):
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])
     plt.savefig(rpm_path)
 
+def map_brake(year, gp, identifier, driver):
+    # Load session data
+    session = ff1.get_session(year, gp, identifier)
+    weekend = session.event
+    session.load()
+
+    # Extract fastest lap for the driver
+    lap = session.laps.pick_driver(driver).pick_fastest()
+
+    # Extract telemetry data
+    x = lap.telemetry['X']
+    y = lap.telemetry['Y']
+    brake = lap.telemetry['Brake']
+    time = lap.telemetry['Time']
+
+    # Remove duplicate x values
+    unique_indices = np.unique(x, return_index=True)[1]
+    x_unique = x.iloc[np.sort(unique_indices)]
+    y_unique = y.iloc[np.sort(unique_indices)]
+    brake_unique = brake.iloc[np.sort(unique_indices)]
+    time_unique = time.iloc[np.sort(unique_indices)]
+
+    # Create line segments for track visualization
+    points = np.array([x_unique, y_unique]).T.reshape(-1, 1, 2)
+    segments = np.concatenate([points[:-1], points[1:]], axis=1)
+
+    # Create figure and axes
+    fig, ax = plt.subplots(figsize=(14, 10), dpi=100)
+
+    # Plot background track line
+    ax.plot(x_unique, y_unique, color='gray', linestyle='-', linewidth=8, zorder=1)
+
+    # Brake Visualization
+    brake_cmap = plt.cm.Reds
+    brake_norm = plt.Normalize(0, 1)
+
+    # Create a collection with segments colored by brake intensity
+    lc_brake = LineCollection(segments, cmap=brake_cmap, norm=brake_norm, linewidths=4, zorder=2)
+    lc_brake.set_array(brake_unique)
+    ax.add_collection(lc_brake)
+
+    # Add color bar for brake intensity
+    cbar_brake = plt.colorbar(lc_brake, ax=ax, orientation='horizontal', pad=0.05)
+    cbar_brake.set_label('Brake Intensity')
+
+    # Add title and labels
+    ax.set_title(f'{weekend.name} {year} - {driver} - Brake Visualization', fontsize=20, fontweight='bold')
+    ax.set_xlabel('X Position (m)', fontsize=14)
+    ax.set_ylabel('Y Position (m)', fontsize=14)
+
+    # Add grid lines
+    ax.grid(True, linestyle='--', alpha=0.7)
+
+    # Add watermarks
+    plt.text(0.5, 0.02, 'F1Datas.Com', fontsize=12, color='black', ha='center', va='bottom', alpha=0.7,
+            transform=plt.gca().transAxes)
+    plt.text(0.5, 0.98, 'F1 Data IQ', fontsize=12, color='black', ha='center', va='top', transform=plt.gca().transAxes)
+
+    # Set aspect of the plot to be equal
+    ax.set_aspect('equal', 'box')
+
+    # Tight layout
+    plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+
+    # Show plot
+    map_brake_path = f"{year}-{gp}-{identifier}-{driver}-map_brake"
+    plt.savefig(map_brake_path)
 
 # start = time.time()
 # try:
