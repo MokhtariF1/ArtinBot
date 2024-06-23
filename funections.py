@@ -1,4 +1,5 @@
 import fastf1 as ff1
+from fastf1 import plotting
 from fastf1.core import Laps
 import pandas as pd
 import numpy as np
@@ -505,6 +506,317 @@ def map_brake(year, gp, identifier, driver):
     map_brake_path = f"{year}-{gp}-{identifier}-{driver}-map_brake"
     plt.savefig(map_brake_path)
 
+
+def lap_times(year, gp, identifire):
+    # enabling misc_mpl_mods will turn on minor grid lines that clutters the plot
+    plotting.setup_mpl(mpl_timedelta_support=False, misc_mpl_mods=False)
+
+    ###############################################################################
+    # Load the race session
+
+    race = ff1.get_session(year, gp, identifire)
+    race.load()
+
+    ###############################################################################
+    # Get all the laps for the point finishers only.
+    # Filter out slow laps (yellow flag, VSC, pitstops etc.)
+    # as they distort the graph axis.
+    point_finishers = race.drivers[:10]
+    driver_laps = race.laps.pick_drivers(point_finishers).pick_quicklaps()
+    driver_laps = driver_laps.reset_index()
+
+    ###############################################################################
+    # To plot the drivers by finishing order,
+    # we need to get their three-letter abbreviations in the finishing order.
+    finishing_order = [race.get_driver(i)["Abbreviation"] for i in point_finishers]
+
+    ###############################################################################
+    # We need to modify the DRIVER_COLORS palette.
+    # Its keys are the driver's full names but we need the keys to be the drivers'
+    # three-letter abbreviations.
+    # We can do this with the DRIVER_TRANSLATE mapping.
+    driver_colors = {abv: plotting.DRIVER_COLORS[driver] for abv,
+                    driver in plotting.DRIVER_TRANSLATE.items()}
+
+    ###############################################################################
+    # First create the violin plots to show the distributions.
+    # Then use the swarm plot to show the actual laptimes.
+
+    # create the figure
+    fig, ax = plt.subplots(figsize=(10, 5))
+
+    # Seaborn doesn't have proper timedelta support
+    # so we have to convert timedelta to float (in seconds)
+    driver_laps["LapTime(s)"] = driver_laps["LapTime"].dt.total_seconds()
+
+    sns.violinplot(data=driver_laps,
+                x="Driver",
+                y="LapTime(s)",
+                hue="Driver",
+                inner=None,
+                density_norm="area",
+                order=finishing_order,
+                palette=driver_colors
+                )
+
+    sns.swarmplot(data=driver_laps,
+                x="Driver",
+                y="LapTime(s)",
+                order=finishing_order,
+                hue="Compound",
+                palette=ff1.plotting.COMPOUND_COLORS,
+                hue_order=["SOFT", "MEDIUM", "HARD"],
+                linewidth=0,
+                size=4,
+                )
+    # sphinx_gallery_defer_figures
+
+    ###############################################################################
+    # Make the plot more aesthetic
+    ax.set_xlabel("Driver")
+    ax.set_ylabel("Lap Time (s)")
+    plt.suptitle(f"{year} {gp} Lap Time Distributions")
+    sns.despine(left=True, bottom=True)
+
+    plt.tight_layout()
+    lap_times_path = f"{year}-{gp}-{identifire}-lap_times.png"
+    plt.savefig(lap_times_path)
+
+
+def down_force(year, gp, session_type):
+    team_colors = {
+    'Mercedes': '#00D2BE',
+    'Red Bull Racing': '#1E41FF',
+    'Ferrari': '#DC0000',
+    'McLaren': '#FF8700',
+    'Alpine': '#0090FF',
+    'AlphaTauri': '#4E7C9B',
+    'Aston Martin': '#006F62',
+    'Williams': '#005AFF',
+    'Alfa Romeo': '#900000',
+    'RB': '#6692FF',
+    'Kick Sauber': '#52E252',
+    'Haas F1 Team': '#FFFFFF'
+}
+
+    # Load the session data
+
+    session = ff1.get_session(year, gp, session_type)
+    session.load()
+
+    # Get all drivers
+    drivers = session.drivers
+
+    # Create a DataFrame to store results
+    results = []
+
+    for driver in drivers:
+        driver_laps = session.laps.pick_driver(driver)
+        fastest_lap = driver_laps.pick_fastest()
+        
+        if fastest_lap.empty or pd.isna(fastest_lap['DriverNumber']):
+            print(f"Skipping driver {driver} due to invalid DriverNumber")
+            continue
+        
+        try:
+            telemetry = fastest_lap.get_car_data().add_distance()
+        except KeyError as e:
+            print(f"Skipping driver {driver} due to KeyError: {e}")
+            continue
+        
+        speed_data = telemetry['Speed']
+        
+        average_speed = speed_data.mean()
+        top_speed = speed_data.max()
+        
+        result = 100 * (average_speed / top_speed)
+        
+        driver_name = session.get_driver(driver)['LastName'][:3].upper()
+        team_name = session.get_driver(driver)['TeamName']
+        
+        results.append({
+            'Driver': driver_name,
+            'Average Speed': average_speed,
+            'Top Speed': top_speed,
+            'Result': result,
+            'Team': team_name
+        })
+
+    # Convert results to DataFrame
+    df_results = pd.DataFrame(results)
+
+    # Sort the DataFrame by the Result column
+    df_results = df_results.sort_values(by='Result', ascending=False)
+
+    # Plot the results
+    plt.figure(figsize=(14, 9), facecolor='black')
+    ax = plt.gca()
+    ax.set_facecolor('black')
+
+    bars = plt.bar(df_results['Driver'], df_results['Result'], color=[team_colors[team] for team in df_results['Team']])
+    plt.xlabel('Driver', color='white')
+    plt.ylabel('Result', color='white')
+    plt.title(f'{gp} {year} {session_type}', color='white')
+    plt.xticks(rotation=45, color='white')
+    plt.yticks(color='white')
+    plt.grid(color='gray', linestyle='--', linewidth=0.5, axis='y', alpha=0.7)
+
+    # Add the result value on top of each bar
+    for bar in bars:
+        yval = bar.get_height()
+        plt.text(bar.get_x() + bar.get_width()/2, yval, f'{yval:.2f}', ha='center', va='bottom', color='white')
+
+    # Add average line
+    mean_result = df_results['Result'].mean()
+    plt.axhline(mean_result, color='red', linewidth=1.5, linestyle='--')
+    plt.text(len(df_results) - 1, mean_result, f'Mean: {mean_result:.2f}', color='red', ha='center', va='bottom')
+
+    # Add team names below driver names
+    for i, (driver, team) in enumerate(zip(df_results['Driver'], df_results['Team'])):
+        plt.text(i, -2, team, ha='center', va='top', color='white', fontsize=8, rotation=45)
+
+    # Add description text below the plot
+    plt.figtext(0.5, -0.15, f"Data obtained from fastest lap telemetry in the {year} {gp} GP race session using FAST F1 library", wrap=True, horizontalalignment='center', fontsize=10, color='white')
+    plt.figtext(0.5, -0.2, "The plot shows the 100 * (Average Speed Of Fastest Lap / Top Speed Reached On Fastest Lap) for each driver", wrap=True, horizontalalignment='center', fontsize=10, color='white')
+
+    # Add watermark
+    plt.figtext(0.95, 0.05, 'F1 DATA IQ', fontsize=30, color='gray', ha='right', va='bottom', alpha=0.5, rotation=30)
+
+    # Display the plot
+    plt.tight_layout(rect=[0, 0, 1, 0.95])  # Adjust layout to fit description text
+    down_force_path = f"{year}-{gp}-{session_type}-down_force.png"
+    plt.savefig(down_force_path)
+    return down_force_path
+TEAM_COLORS = {
+    'Mercedes': '#00D2BE',
+    'Ferrari': '#DC0000',
+    'Red Bull': '#1E41FF',
+    'McLaren': '#FF8700',
+    'Renault': '#FFF500',
+    'AlphaTauri': '#4E7C9B',
+    'Racing Point': '#F596C8',
+    'Alfa Romeo': '#900000',
+    'Haas': '#FFFFFF',
+    'Williams': '#0082FA'
+}
+
+def load_session(year, grand_prix, session_type):
+    # Load the session
+    session = ff1.get_session(year, grand_prix, session_type)
+    session.load()
+    return session
+
+def calculate_metrics(session):
+    drivers = session.drivers
+    zero_to_hundred_times = {}
+    tire_compounds = {}
+    team_colors = {}
+    max_speeds = {}
+    max_accelerations = {}
+
+    for drv in drivers:
+        driver_info = session.get_driver(drv)
+        driver_code = driver_info['Abbreviation']
+        team_name = driver_info['TeamName']
+        
+        try:
+            # Load laps for the driver
+            laps = session.laps.pick_driver(driver_code)
+            
+            # Assuming the race start is the first lap
+            first_lap = laps.iloc[0]
+            telemetry = first_lap.get_telemetry()
+            
+            # Get the tire compound used at the start
+            tire_compounds[driver_code] = first_lap['Compound']
+            team_colors[driver_code] = TEAM_COLORS.get(team_name, '#FFFFFF')  # Default to white if team color is not found
+            
+            # Filter necessary columns to avoid dtype issues
+            telemetry = telemetry[['Time', 'Speed']]
+            
+            # Calculate acceleration
+            telemetry['Acceleration'] = telemetry['Speed'].diff() / telemetry['Time'].diff().dt.total_seconds()
+            
+            # Find the time when speed goes from 0 to 100 km/h
+            start_time = None
+            end_time = None
+            for i in range(1, len(telemetry)):
+                if telemetry['Speed'].iloc[i] > 0 and start_time is None:
+                    start_time = telemetry['Time'].iloc[i]
+                if telemetry['Speed'].iloc[i] >= 100:
+                    end_time = telemetry['Time'].iloc[i]
+                    break
+            
+            if start_time is not None and end_time is not None:
+                zero_to_hundred_time = end_time - start_time
+                zero_to_hundred_times[driver_code] = round(zero_to_hundred_time.total_seconds(), 3)
+            
+            # Calculate max speed and acceleration
+            max_speeds[driver_code] = telemetry['Speed'].max()
+            max_accelerations[driver_code] = telemetry['Acceleration'].max()
+        
+        except Exception as e:
+            print(f"Could not process driver {driver_code}: {e}")
+    
+    return zero_to_hundred_times, tire_compounds, team_colors, max_speeds, max_accelerations
+
+def save_metrics(zero_to_hundred_times, max_speeds, max_accelerations, filename='metrics.csv'):
+    metrics_df = pd.DataFrame({
+        'Driver': zero_to_hundred_times.keys(),
+        'Zero to Hundred Time': zero_to_hundred_times.values(),
+        'Max Speed': max_speeds.values(),
+        'Max Acceleration': max_accelerations.values()
+    })
+    metrics_df.to_csv(filename, index=False)
+
+def plot_metrics(zero_to_hundred_times, tire_compounds, team_colors, max_speeds, max_accelerations, year, grand_prix, session_type):
+    metrics_df = pd.DataFrame({
+        'Driver': zero_to_hundred_times.keys(),
+        'Zero to Hundred Time': zero_to_hundred_times.values(),
+        'Max Speed': max_speeds.values(),
+        'Max Acceleration': max_accelerations.values()
+    })
+    metrics_df['Tire Compound'] = metrics_df['Driver'].map(tire_compounds)
+    metrics_df['Team Color'] = metrics_df['Driver'].map(team_colors)
+    metrics_df = metrics_df.sort_values(by='Zero to Hundred Time')
+    
+    plotting.setup_mpl()
+    fig, ax = plt.subplots(figsize=(14, 10))
+    fig.patch.set_facecolor('#2e2e2e')
+    ax.set_facecolor('#2e2e2e')
+
+    bars = ax.barh(metrics_df['Driver'], metrics_df['Zero to Hundred Time'], color=metrics_df['Team Color'])
+    ax.set_xlabel('Time (seconds)', fontsize=14, fontweight='bold', color='white')
+    ax.set_ylabel('Driver', fontsize=14, fontweight='bold', color='white')
+    ax.set_title(f'Time to Accelerate from 0 to 100 km/h with Tire Compounds\n{year} {grand_prix}', fontsize=24, fontweight='bold', color='white')
+    ax.grid(True, which='both', linestyle='--', linewidth=0.7, color='gray')
+    ax.tick_params(axis='x', colors='white')
+    ax.tick_params(axis='y', colors='white')
+
+    for bar, tire in zip(bars, metrics_df['Tire Compound']):
+        width = bar.get_width()
+        label_y_pos = bar.get_y() + bar.get_height() / 2
+        ax.text(width, label_y_pos, f'{width:.3f} ({tire})', va='center', ha='left', color='white', fontsize=12)
+
+    # Add watermark
+    fig.text(0.5, 0.5, 'F1 DATA IQ', fontsize=50, color='gray', ha='center', va='center', alpha=0.5, rotation=30)
+
+    plt.tight_layout()
+    reaction_path = f"{year}-{grand_prix}-{session_type}-reaction.png"
+    plt.savefig(reaction_path)
+    return fig, ax, reaction_path
+
+def start_reaction(year, gp, identifire):
+    session = load_session(year, gp, identifire)
+    zero_to_hundred_times, tire_compounds, team_colors, max_speeds, max_accelerations = calculate_metrics(session)
+
+    # Save metrics to CSV
+    save_metrics(zero_to_hundred_times, max_speeds, max_accelerations)
+
+    # Plot metrics
+    fig, ax, reaction_path = plot_metrics(zero_to_hundred_times, tire_compounds, team_colors, max_speeds, max_accelerations, year, gp, identifire)
+    return reaction_path
+    
 # start = time.time()
 # try:
 #     test = speed_rpm_delta(2024, 'Bahrain Grand Prix', "R", "VER", "HAM")

@@ -3,15 +3,16 @@ from random import randint
 import openpyxl
 from datetime import datetime
 import pandas as pd
-from telethon.sync import TelegramClient, events, Button
+from telethon import TelegramClient, events, Button
+from telethon.errors.rpcerrorlist import UserIsBlockedError
 from telethon.tl.functions.channels import GetParticipantsRequest, GetFullChannelRequest
 from telethon.tl.types import ChannelParticipantsSearch, InputChannel
 from telethon.tl.types import PeerUser, PeerChat, PeerChannel
 import config
 import sqlite3
 from navlib import paginate
-from datetime import datetime
-from funections import top_speed, overtake, map_viz, speed_rpm_delta, map_brake
+from datetime import datetime, timedelta
+from funections import top_speed, overtake, map_viz, speed_rpm_delta, map_brake, lap_times, down_force, start_reaction
 from pathlib import Path
 import os
 import time
@@ -29,8 +30,8 @@ if proxy:
     proxy_type = config.PROXY_TYPE
     proxy_address = config.PROXY_ADDRESS
     proxy_port = config.PROXY_PORT
-    # bot = TelegramClient(session_name, api_id, api_hash, proxy=(proxy_type, proxy_address, proxy_port))
-    bot = TelegramClient(session_name, api_id, api_hash)
+    bot = TelegramClient(session_name, api_id, api_hash, proxy=(proxy_type, proxy_address, proxy_port))
+    # bot = TelegramClient(session_name, api_id, api_hash)
     # Create an instance of the TelegramClient
     bot.start(bot_token=bot_token)
     print("connected!")
@@ -43,6 +44,7 @@ else:
 con = sqlite3.connect(config.DB_NAME)
 cur = con.cursor()
 manager = Manager()
+user_messages = {}
 drivers_translate = {
     "Max_Verstappen": "مکس ورستپن",
     "Liam_Lawson": "لیام لاوسون",
@@ -74,6 +76,17 @@ drivers_translate = {
     "Nico_Hülkenberg": "نیکو هالکنبرگ",
     "Kevin_Magnussen": "کوین مگنوسن"
 }
+
+def check_and_limit(user_id):
+    current_time = time.time()
+    if user_id not in user_messages:
+        user_messages[user_id] = []
+    user_messages[user_id] = [t for t in user_messages[user_id] if current_time - t < 30]
+    user_messages[user_id].append(current_time)
+    if len(user_messages[user_id]) > 10:
+        return True
+    return False
+
 
 def check_admin(user_id):
     is_admin = cur.execute(f"SELECT * FROM admins WHERE _id = {user_id}").fetchone()
@@ -160,6 +173,9 @@ async def save_msg(event):
 @bot.on(events.NewMessage())
 async def pay(event):
     user_id = event.sender_id
+    if check_and_limit(user_id):
+        await event.reply("شما بیش از حد مجاز پیام ارسال کرده‌اید. لطفاً 30 ثانیه صبر کنید.")
+        return
     lang = check_lang(user_id)
     if lang == 1:
         bot_text = config.EN_TEXT
@@ -270,6 +286,19 @@ async def pay(event):
                 ]
             await event.reply(bot_text["EN_SELECTED"], buttons= keys)
         elif text == bot_text["rules_show"]:
+            keys = [
+                [
+                    Button.text(bot_text["technical_rules"], resize=1),
+                    Button.text(bot_text["copy_right"])
+                ],
+                [
+                    Button.text(bot_text["back"])
+                ]
+            ]
+            await event.reply(bot_text["select"], buttons=keys)
+        elif text == bot_text["technical_rules"]:
+            await event.reply(bot_text["rules_text"])
+        elif text == bot_text["copy_right"]:
             await event.reply(bot_text["rules_text"])
         elif text == bot_text["archive"]:
             keys = [
@@ -281,7 +310,7 @@ async def pay(event):
                     Button.text(bot_text["data_archive"])
                 ],
                 [
-                    Button.text(bot_text["soon"]),
+                    Button.text(bot_text["championship_calendar"]),
                     Button.text(bot_text["scores"]),
                     Button.text(bot_text["soon"]),
                 ],
@@ -290,6 +319,12 @@ async def pay(event):
                 ]
             ]
             await event.reply(bot_text["select"], buttons=keys)
+        elif text == bot_text["fantasy"]:
+            await event.reply(bot_text["coming_soon"])
+        elif text == bot_text["reply"]:
+            await event.reply(bot_text["coming_soon"])
+        elif text == bot_text["championship_calendar"]:
+            await event.reply(bot_text["coming_soon"])
         elif text == bot_text["account"]:
             keys = [
                 [
@@ -348,10 +383,13 @@ async def pay(event):
             if q_text == bot_text["cancel"] or q_text == bot_text["back"]:
                 await conv.send_message(bot_text["canceled"])
                 await conv.cancel_all()
-            
-            channel = config.IDEALIZATION_CHANNEL
-            q_text += f"\n {user_id}"
-            await bot.send_message(channel, q_text, file=image_path)
+            if lang == 1:
+                full_text = f"idea text: **{q_text}**\nuser id: `{user_id}`"
+            else:
+                full_text = f"متن ایده: **{q_text}**\nآیدی کاربر: `{user_id}`"
+            admins = cur.execute("SELECT * FROM admins").fetchall()
+            for admin in admins:
+                await bot.send_message(int(admin[0]), full_text, file=image_path)
             await event.reply(bot_text["successfully"])
         elif text == bot_text["tickets"]:
             is_admin = check_admin(user_id)
@@ -511,33 +549,51 @@ async def pay(event):
             if len(start_parameter) == 2:
                 if start_parameter[1] != "check":
                     start_parameter = int(start_parameter[1])
-                    print(start_parameter)
                     if start_parameter != user_id:
-                        print("hi1")
+                        find_user = cur.execute(f"SELECT * FROM users WHERE id = {start_parameter}").fetchone()
+                        sub_count = find_user[4]
+                        user_score = find_user[5]
                         find_invite = cur.execute(f"SELECT * FROM invite WHERE user_id = {user_id} AND invite_id = "
                                                 f"{start_parameter}").fetchone()
-                        print(find_invite)
                         if find_invite is None:
-                            print("hi")
+                            find_invites = len(cur.execute(f"SELECT * FROM invite WHERE invite_id = {start_parameter}").fetchall())
+                            if find_invites + 1 == 3:
+                                await bot.send_message(start_parameter, bot_text["three_sub_count"])
+                                cur.execute(f"UPDATE users SET score = {user_score + 10} WHERE id = {start_parameter}")
+                                con.commit()
+                            elif find_invites + 1 == 5:
+                                await bot.send_message(start_parameter, bot_text["five_sub_count"])
+                                cur.execute(f"UPDATE users SET sub_count = {user_score + 20} WHERE id = {start_parameter}")
+                                con.commit()
                             data = [
                                 (user_id, start_parameter)
                             ]
                             cur.executemany(f"INSERT INTO invite VALUES (?,?)", data)
                             con.commit()
-                            find_user = cur.execute(f"SELECT * FROM users WHERE id = {start_parameter}").fetchone()
-                            sub_count = find_user[4]
-                            cur.execute(f"UPDATE users SET sub_count = {sub_count + 1} WHERE id = {start_parameter}")
+                            score_sub = user_score + config.SUB_COIN
+                            print(score_sub)
+                            cur.execute(f"UPDATE users SET score = {score_sub} WHERE id = {start_parameter}")
                             con.commit()
+                            sub_score = sub_count + 1
+                            print(sub_score)
+                            cur.execute(f"UPDATE users SET sub_count = {sub_score} WHERE id = {start_parameter}")
+                            con.commit()
+
 
             user = cur.execute(f"SELECT * FROM users WHERE id={user_id}").fetchone()
             if user is None:
                 currentDateAndTime = datetime.now()
+                score_time = currentDateAndTime + timedelta(days=1)
                 currentTime = currentDateAndTime.strftime("%Y-%m-%d %H:%M:%S")
+                current_score_time = score_time.strftime("%Y-%m-%d %H:%M:%S")
+                start_score_add = config.START_SCORE + config.DAILY_COIN
                 data = [
-                    (user_id, None, False, currentTime, 0, 0, 0, 0, 0),
+                    (user_id, None, False, currentTime, 0, start_score_add, 0, 0, 0, current_score_time, 1),
                 ]
-                cur.executemany(f"INSERT INTO users VALUES (?,?,?,?,?,?,?,?,?)", data)
+                cur.executemany(f"INSERT INTO users VALUES (?,?,?,?,?,?,?,?,?,?,?)", data)
                 con.commit()
+                await event.reply(bot_text["start_score"])
+                await event.reply(bot_text["daily_coin"])
                 keys = [
                     [Button.inline(bot_text["en"], b'lang:en'),
                      Button.inline(bot_text["fa"], b'lang:fa')
@@ -611,11 +667,228 @@ async def pay(event):
                         Button.text(bot_text["grand"]), 
                     ],
                     [
-                        Button.text(bot_text["tickets"])
+                        Button.text(bot_text["tickets"]),
+                        Button.text(bot_text["coin_management"])
+                    ],
+                    [
+                        Button.text(bot_text["grand_time"])
                     ],
                     [Button.text(bot_text['back'])]
                 ]
                 await event.reply(bot_text["select"], buttons=keys)
+        elif text == bot_text["grand_time"]:
+            is_admin = check_admin(user_id)
+            if is_admin is False:
+                keys = [
+                    [Button.text(bot_text["archive"], resize=True)],
+                    [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
+                    [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
+                     Button.text(bot_text["rules"])],
+                ]
+                await event.reply(bot_text["select"], buttons=keys)
+            else:
+                keys = [
+                    [
+                        Button.text(bot_text["add_grand_time"]),
+                        Button.text(bot_text["show_grand_time"])
+                    ],
+                    [
+                        Button.text(bot_text["back"], resize=True)
+                    ]
+                ]
+                await event.reply(bot_text["select"], buttons=keys)
+        elif text == bot_text["add_grand_time"]:
+            is_admin = check_admin(user_id)
+            if is_admin is False:
+                keys = [
+                    [Button.text(bot_text["archive"], resize=True)],
+                    [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
+                    [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
+                     Button.text(bot_text["rules"])],
+                ]
+                await event.reply(bot_text["select"], buttons=keys)
+            else:
+                async with bot.conversation(user_id, timeout=1000) as conv:
+                    await conv.send_message(bot_text["ask_grand"])
+                    grand_prix = await conv.get_response()
+                    grand_prix = grand_prix.raw_text
+                    if grand_prix == bot_text["cancel"]:
+                        await conv.send_message(bot_text["canceled"])
+                        return
+                    await conv.send_message(bot_text["ask_grand_event"])
+                    session_type = await conv.get_response()
+                    session_type = session_type.raw_text
+                    await conv.send_message(bot_text["ask_time"])
+                    grand_time = await conv.get_response()
+                    grand_time = grand_time.raw_text
+                    time_num = randint(1000, 9999)
+                    cur.execute(f"INSERT INTO grand_time VALUES (?,?,?,?)", (grand_prix, session_type, grand_time, time_num))
+                    con.commit()
+                    await conv.send_message(bot_text["successfully"])
+                    await conv.cancel_all()
+        elif text == bot_text["show_grand_time"]:
+            find_count = len(cur.execute("SELECT * FROM grand_time").fetchall())
+            if find_count == 0:
+                await event.reply(bot_text['not_found'])
+                return
+            await event.reply(bot_text['welcome_show_time'])
+            find_grands = cur.execute("SELECT * FROM grand_time").fetchall()[:5]
+            items_per_page = 5
+            pages = find_count // items_per_page
+            if find_count % items_per_page != 0:
+                pages += 1
+            paginate_keys = paginate('show_time', 1, pages, ':')
+            for grand in find_grands:
+                grand_num = grand[3]
+                grand_name = grand[0]
+                grand_time = grand[2]
+                grand_event = grand[1]
+                key = [
+                    [
+                        Button.inline(bot_text['delete_grand'], 'delete_time:' + str(grand_num)),
+                    ]
+                ]
+                full_channel = f'{bot_text["grand_name"]}:{grand_name}\n{bot_text["time_event"]}:{grand_event}\n{bot_text["time"]}:`{grand_time}`'
+                await bot.send_message(user_id, full_channel, buttons=key)
+            try:
+                await bot.send_message(user_id, bot_text['come_next'], buttons=paginate_keys)
+            except:
+                pass
+        elif text == bot_text["coin_management"]:
+            is_admin = check_admin(user_id)
+            if is_admin is False:
+                keys = [
+                    [Button.text(bot_text["archive"], resize=True)],
+                    [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
+                    [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
+                     Button.text(bot_text["rules"])],
+                ]
+                await event.reply(bot_text["select"], buttons=keys)
+            else:
+                keys = [
+                    [
+                        Button.text(bot_text["all_coin"], resize=1),
+                        Button.text(bot_text["one_coin"])
+                    ],
+                    [
+                        Button.text(bot_text["back"])
+                    ]
+                ]
+                await event.reply(bot_text["select"], buttons=keys)
+        elif text == bot_text["all_coin"]:
+            is_admin = check_admin(user_id)
+            if is_admin is False:
+                keys = [
+                    [Button.text(bot_text["archive"], resize=True)],
+                    [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
+                    [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
+                     Button.text(bot_text["rules"])],
+                ]
+                await event.reply(bot_text["select"], buttons=keys)
+            else:
+                async with bot.conversation(user_id) as conv:
+                    ask_coin = await conv.send_message(bot_text["ask_all_coin"])
+                    while True:
+                        try:
+                            amount = await conv.get_response(timeout=120)
+                            amount = int(amount.raw_text)
+                            break
+                        except ValueError:
+                            await conv.send_message(bot_text["just_num"])
+                        except TimeoutError:
+                            await conv.send_message(bot_text["timeout_error"])
+                            await bot.delete_messages(user_id, ask_coin.id)
+                            return
+                    loading_coins = await event.reply(bot_text["adding_coin_to_users"])
+                    users = cur.execute("SELECT id,score FROM users").fetchall()
+                    for user in users:
+                        score = int(user[1]) + amount
+                        user_num_id = user[0]
+                        cur.execute(f"UPDATE users SET score = {score} WHERE id = {user_num_id}")
+                        con.commit()
+                        try:
+                            await bot.send_message(user_num_id, bot_text["coin_from_admin"].format(coin=amount))
+                        except UserIsBlockedError:
+                            pass
+                    await bot.delete_messages(user_id, loading_coins.id)
+                    await event.reply(bot_text["coins_added"])
+        elif text == bot_text["one_coin"]:
+            is_admin = check_admin(user_id)
+            if is_admin is False:
+                keys = [
+                    [Button.text(bot_text["archive"], resize=True)],
+                    [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
+                    [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
+                     Button.text(bot_text["rules"])],
+                ]
+                await event.reply(bot_text["select"], buttons=keys)
+            else:
+                async with bot.conversation(user_id) as conv:
+                    action_keys = [
+                        [
+                            Button.inline(bot_text["low_off"], data=b'low_off')
+                        ],
+                        [
+                            Button.inline(bot_text["add_coin"], data=b'add_coin')
+                        ]
+                    ]
+                    ask_action = await conv.send_message(bot_text["select"], buttons=action_keys)
+                    try:
+                        action = await conv.wait_event(events.CallbackQuery(), timeout=120)
+                        action = action.data
+                    except TimeoutError:
+                        await conv.send_message(bot_text["timeout_error"])
+                        await bot.delete_messages(user_id, ask_action.id)
+                        return
+                    ask_user_id = await conv.send_message(bot_text["enter_user_id"])
+                    while True:
+                        try:
+                            user_id_get = await conv.get_response(timeout=120)
+                            user_id_get = int(user_id_get.raw_text)
+                            break
+                        except ValueError:
+                            await conv.send_message(bot_text["just_num"])
+                        except TimeoutError:
+                            await conv.send_message(bot_text["timeout_error"])
+                            await bot.delete_messages(user_id, ask_user_id.id)
+                            return
+                    find_user = cur.execute(f"SELECT score FROM users WHERE id = {user_id_get}").fetchone()
+                    if find_user is None:
+                        await event.reply(bot_text["not_found"])
+                        return
+                    else:
+                        ask_amount = await conv.send_message(bot_text["enter_coin_amount"])
+                        while True:
+                            try:
+                                amount = await conv.get_response(timeout=120)
+                                amount = int(amount.raw_text)
+                                break
+                            except ValueError:
+                                await conv.send_message(bot_text["just_num"])
+                            except TimeoutError:
+                                await conv.send_message(bot_text["timeout_error"])
+                                await bot.delete_messages(user_id, ask_amount.id)
+                                return
+                        loading_coin = await conv.send_message(bot_text["loading_coin"])
+                        if action == b"add_coin":
+                            user_score = find_user[0] + amount
+                            cur.execute(f"UPDATE users SET score = {user_score} WHERE id = {user_id_get}")
+                            con.commit()
+                        elif action == b"low_off":
+                            user_score = find_user[0] - amount
+                            cur.execute(f"UPDATE users SET score = {user_score} WHERE id = {user_id_get}")
+                            con.commit()
+                        else:
+                            await conv.send_message(bot_text["action_not_found"])
+                            return
+                        await bot.delete_messages(user_id, loading_coin.id)
+                        await conv.send_message(bot_text["coin_added"])
+                        if action == b"add_coin":
+                            await bot.send_message(user_id_get, bot_text["coin_added_notification"].format(coin=amount))
+                            await conv.cancel_all()
+                        else:
+                            await bot.send_message(user_id_get, bot_text["coin_low_off"].format(coin=amount))
+                            await conv.cancel_all()                            
         elif text == bot_text["users"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
@@ -634,10 +907,102 @@ async def pay(event):
                         Button.text(bot_text["robot_statistics"])
                     ],
                     [
+                        Button.text(bot_text["users_coin_gt"]),
+                        Button.text(bot_text["users_sub_count"]),
+                    ],
+                    [
+                        Button.text(bot_text["users_level"])
+                    ],
+                    [
                         Button.text(bot_text['back'], resize=True)
                     ],
                 ]
                 await event.reply(bot_text["select"], buttons=us_keys)
+        elif text == bot_text["users_level"]:
+            is_admin = check_admin(user_id)
+            if is_admin is False:
+                keys = [
+                    [Button.text(bot_text["archive"], resize=True)],
+                    [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
+                    [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
+                     Button.text(bot_text["rules"])],
+                ]
+                await event.reply(bot_text["select"], buttons=keys)
+            else:
+                async with bot.conversation(user_id) as conv:
+                    ask_user_id = await conv.send_message(bot_text["enter_user_id"])
+                    while True:
+                        try:
+                            user_id_get = await conv.get_response(timeout=120)
+                            user_id_get = int(user_id_get.raw_text)
+                            break
+                        except ValueError:
+                            await conv.send_message(bot_text["just_num"])
+                        except TimeoutError:
+                            await conv.send_message(bot_text["timeout_error"])
+                            await bot.delete_messages(user_id, ask_user_id.id)
+                            return
+                    find_user = cur.execute(f"SELECT * FROM users WHERE id = {user_id_get}").fetchone()
+                    if find_user is None:
+                        await event.reply(bot_text["not_found"])
+                        return
+                    else:
+                        keys = [
+                            [
+                                Button.inline(bot_text["level_one"], b'1')
+                            ],
+                            [
+                                Button.inline(bot_text["level_two"], b'2')
+                            ],
+                            [
+                                Button.inline(bot_text["level_three"], b'3')
+                            ]
+                        ]
+                        ask_level = await conv.send_message(bot_text["select"], buttons=keys)
+                        try:
+                            level = await conv.wait_event(events.CallbackQuery())
+                            level = level.data
+                        except TimeoutError:
+                            await conv.send_message(bot_text["timeout_error"])
+                            await bot.delete_messages(user_id, ask_level.id)
+                            return
+                        if level == b'1':
+                            level = 1
+                        elif level == b'2':
+                            level = 2
+                        elif level == b'3':
+                            level = 3
+                        else:
+                            await conv.send_message(bot_text["action_not_found"])
+                            return
+                        cur.execute(f"UPDATE users SET level = {level} WHERE id = {user_id_get}")
+                        con.commit()
+                        await conv.send_message(bot_text["level_updated"])
+                        await conv.cancel_all()
+        elif text == bot_text["users_coin_gt"]:
+            users = cur.execute(f"SELECT * FROM users ORDER BY score DESC LIMIT 10").fetchall()
+            if lang == 1:
+                text = "Top users by score:\n"
+            else:
+                text = "برترین کاربران بر اساس امتیاز:\n"
+            for user in users:
+                if lang == 1:
+                    text += f"User id: `{user[0]}`\nUserScore: **{user[5]}**" + "\n➖➖➖➖➖➖➖➖\n"
+                else:
+                    text += f"آیدی عددی: `{user[0]}`\nامتیاز: **{user[5]}**" + "\n➖➖➖➖➖➖➖➖\n"
+            await event.reply(text)
+        elif text == bot_text["users_sub_count"]:
+            users = cur.execute(f"SELECT * FROM users ORDER BY sub_count DESC LIMIT 10").fetchall()
+            if lang == 1:
+                text = "Top users by sub-count:\n"
+            else:
+                text = "برترین کاربران بر اساس زیر مجموعه:\n"
+            for user in users:
+                if lang == 1:
+                    text += f"User id: `{user[0]}`\nUserSubCount: **{user[4]}**" + "\n➖➖➖➖➖➖➖➖\n"
+                else:
+                    text += f"آیدی عددی: `{user[0]}`\n زیر مجموعه: **{user[4]}**" + "\n➖➖➖➖➖➖➖➖\n"
+            await event.reply(text)
         elif text == bot_text["users_excel"]:
             users = cur.execute("SELECT * FROM users").fetchall()
             # Create a new Excel workbook
@@ -824,7 +1189,12 @@ async def pay(event):
                 ],
                 [
                     Button.text(bot_text["rpm"]),
-                    Button.text(bot_text["map_break"])
+                    Button.text(bot_text["map_break"]),
+                    Button.text(bot_text["lap_times"])
+                ],
+                [
+                    Button.text(bot_text["down_force"]),
+                    Button.text(bot_text["start_reaction"])
                 ],
                 [
                     Button.text(bot_text["back"], resize=1)
@@ -865,7 +1235,8 @@ async def pay(event):
                     await bot.delete_messages(user_id, ask_year.id)
                 except TimeoutError:
                     await conv.send_message(bot_text["timeout_error"])
-                    await conv.cancel_all()
+                    await bot.delete_messages(user_id, ask_year.id)
+                    return
                 year_data = year_res.data
                 if year_data == b'cancel':
                     await conv.send_message(bot_text["canceled"])
@@ -930,27 +1301,14 @@ async def pay(event):
                         await bot.delete_messages(user_id, ask_gp.id)
                     except TimeoutError:
                         await conv.send_message(bot_text["timeout_error"])
-                        await conv.cancel_all()
+                        await bot.delete_messages(user_id, ask_gp.id)
+                        return
                     gp_data = gp_res.data
                     if gp_data == b'cancel':
                         await conv.send_message(bot_text["canceled"])
                         await conv.cancel_all()
                     else:
                         gp = gp_data.decode()
-                        check_date = f"https://ergast.com/api/f1/{year}.json"
-                        check_date = requests.get(check_date).json()["MRData"]["RaceTable"]["Races"]
-                        for grand in check_date:
-                            if grand["raceName"] == gp:
-                                now = datetime.today()
-                                now = f"{now.year}-{now.month}-{now.day}"
-                                now = datetime.strptime(now, "%Y-%m-%d")
-                                now = time.mktime(now.timetuple())
-                                race_time = grand["date"]
-                                race = datetime.strptime(race_time, "%Y-%m-%d")
-                                race_time = time.mktime(race.timetuple())
-                                if now < race_time:
-                                    await conv.send_message(bot_text["dont_time"])
-                                    return
                         sessions = manager.get_session(year=year, country=gp)["sessions"]
                         type_tr = {
                             "Sprint": "اسپرینت",
@@ -975,14 +1333,56 @@ async def pay(event):
                             await bot.delete_messages(user_id, ask_event.id)
                         except TimeoutError:
                             await conv.send_message(bot_text["timeout_error"])
-                            await conv.cancel_all()
+                            await bot.delete_messages(user_id, ask_event.id)
+                            return
                         event_data = session_res.data
                         if event_data == b'cancel':
                             await conv.send_message(bot_text["canceled"])
                             await conv.cancel_all()
                         else:
                             session = event_data.decode()
-                            loading = await conv.send_message(bot_text["loading"])
+                            print(session)
+                            print(type_tr[session])
+                            # ساعت مسابقه به عنوان یک رشته
+                            race_hour = cur.execute(f"SELECT time FROM grand_time WHERE grand = '{gp}' AND session_type = '{session}';").fetchone()
+                            if race_hour is None:
+                                await conv.send_message(bot_text["problem"])
+                                return
+                            race_hour = race_hour[0]
+                            # دریافت تاریخ مسابقه از API
+                            check_date = f"https://ergast.com/api/f1/{year}.json"
+                            check_date = requests.get(check_date).json()["MRData"]["RaceTable"]["Races"]
+
+                            for grand in check_date:
+                                if grand["raceName"] == gp:
+                                    now = datetime.now()
+                                    now_date_str = f"{now.year}-{now.month:02d}-{now.day:02d}"
+                                    now_time_str = now.strftime("%H:%M:%S")
+                                    
+                                    # ترکیب تاریخ و ساعت فعلی
+                                    now_datetime_str = f"{now_date_str} {now_time_str}"
+                                    now_datetime = datetime.strptime(now_datetime_str, "%Y-%m-%d %H:%M:%S")
+                                    
+                                    if session == "Race":
+                                        race_date = grand["date"]
+                                    elif session == "Sprint":
+                                        race_date = grand["Sprint"]["date"]
+                                    else:
+                                        await conv.send_message(bot_text["action_not_found"])
+                                        return
+                                    
+                                    # ترکیب تاریخ و ساعت مسابقه
+                                    race_datetime_str = f"{race_date} {race_hour}"
+                                    race_datetime = datetime.strptime(race_datetime_str, "%Y-%m-%d %H:%M:%S")
+                                    
+                                    if now_datetime < race_datetime:
+                                        await conv.send_message(bot_text["dont_time"])
+                                        return
+                            print(country_tr[gp.replace(" ", "_")])
+                            if lang == 1:
+                                loading = await conv.send_message(bot_text["loading"].format(year=year, gp=gp, event=session))
+                            else:
+                                loading = await conv.send_message(bot_text["loading"].format(year=year, gp=country_tr[gp.replace(" ", "_")], event=type_tr[session]))
                             BASE_DIR = Path(__file__).resolve().parent
                             image_over = f"{year}-{gp}-{session}-overtake.png"
                             image_base_over = fr"{BASE_DIR}/{image_over}"
@@ -994,6 +1394,21 @@ async def pay(event):
                             await bot.delete_messages(user_id, loading.id)
                             await bot.send_file(user_id, caption="overtake", file=image_base_over)
                             await bot.send_file(user_id, caption="overtake", file=image_base_over, force_document=True)
+                            user_find = cur.execute(f"SELECT * FROM users WHERE id = {user_id}").fetchone()
+                            user_level = user_find[10]
+                            if user_level == 1:
+                                user_score = user_find[5]
+                                user_score -= 1
+                                cur.execute(f"UPDATE users SET score = {user_score} WHERE id = {user_id}")
+                                con.commit()
+                                await event.reply(bot_text["score_data"].format(coin=1))
+                            elif user_level == 2:
+                                user_score = user_find[5]
+                                user_score -= 1
+                                cur.execute(f"UPDATE users SET score = {user_score} WHERE id = {user_id}")
+                                con.commit()
+                                await event.reply(bot_text["score_data"].format(coin=1))
+                            
                             await conv.cancel_all()
         elif text == bot_text["top_speed"]:
             async with bot.conversation(user_id) as conv:
@@ -1029,7 +1444,8 @@ async def pay(event):
                     await bot.delete_messages(user_id, ask_year.id)
                 except TimeoutError:
                     await conv.send_message(bot_text["timeout_error"])
-                    await conv.cancel_all()
+                    await bot.delete_messages(user_id, ask_year.id)
+                    return
                 year_data = year_res.data
                 if year_data == b'cancel':
                     await conv.send_message(bot_text["canceled"])
@@ -1094,27 +1510,14 @@ async def pay(event):
                         await bot.delete_messages(user_id, ask_gp.id)
                     except TimeoutError:
                         await conv.send_message(bot_text["timeout_error"])
-                        await conv.cancel_all()
+                        await bot.delete_messages(user_id, ask_gp.id)
+                        return
                     gp_data = gp_res.data
                     if gp_data == b'cancel':
                         await conv.send_message(bot_text["canceled"])
                         await conv.cancel_all()
                     else:
-                        gp = gp_data.decode()
-                        check_date = f"https://ergast.com/api/f1/{year}.json"
-                        check_date = requests.get(check_date).json()["MRData"]["RaceTable"]["Races"]
-                        for grand in check_date:
-                            if grand["raceName"] == gp:
-                                now = datetime.today()
-                                now = f"{now.year}-{now.month}-{now.day}"
-                                now = datetime.strptime(now, "%Y-%m-%d")
-                                now = time.mktime(now.timetuple())
-                                race_time = grand["date"]
-                                race = datetime.strptime(race_time, "%Y-%m-%d")
-                                race_time = time.mktime(race.timetuple())
-                                if now < race_time:
-                                    await conv.send_message(bot_text["dont_time"])
-                                    return           
+                        gp = gp_data.decode()        
                         # url = f"https://f1datas.com/api/v1/fastf1/session?year={year}&country={gp}"
                         sessions = manager.get_session(year=year, country=gp)["sessions"]
                         # sessions = requests.get(url).json()["sessions"]
@@ -1144,14 +1547,60 @@ async def pay(event):
                             await bot.delete_messages(user_id, ask_event.id)
                         except TimeoutError:
                             await conv.send_message(bot_text["timeout_error"])
-                            await conv.cancel_all()
+                            await bot.delete_messages(user_id, ask_event.id)
+                            return
                         event_data = session_res.data
                         if event_data == b'cancel':
                             await conv.send_message(bot_text["canceled"])
                             await conv.cancel_all()
                         else:
                             session = event_data.decode()
-                            loading = await conv.send_message(bot_text["loading"])
+                            race_hour = cur.execute(f"SELECT time FROM grand_time WHERE grand = '{gp}' AND session_type = '{session}';").fetchone()
+                            if race_hour is None:
+                                await conv.send_message(bot_text["problem"])
+                                return
+                            race_hour = race_hour[0]
+                            # دریافت تاریخ مسابقه از API
+                            check_date = f"https://ergast.com/api/f1/{year}.json"
+                            check_date = requests.get(check_date).json()["MRData"]["RaceTable"]["Races"]
+
+                            for grand in check_date:
+                                if grand["raceName"] == gp:
+                                    now = datetime.now()
+                                    now_date_str = f"{now.year}-{now.month:02d}-{now.day:02d}"
+                                    now_time_str = now.strftime("%H:%M:%S")
+                                    
+                                    # ترکیب تاریخ و ساعت فعلی
+                                    now_datetime_str = f"{now_date_str} {now_time_str}"
+                                    now_datetime = datetime.strptime(now_datetime_str, "%Y-%m-%d %H:%M:%S")
+                                    
+                                    if session == "Race":
+                                        race_date = grand["date"]
+                                    elif session == "Sprint":
+                                        race_date = grand["Sprint"]["date"]
+                                    elif session == "Practice_1":
+                                        race_date = grand["FirstPractice"]["date"]
+                                    elif session == "Practice_2":
+                                        race_date = grand["SecondPractice"]["date"]
+                                    elif session == "Practice_3":
+                                        race_date = grand["ThirdPractice"]["date"]
+                                    elif session == "Qualifying":
+                                        race_date = grand["Qualifying"]["date"]
+                                    else:
+                                        await conv.send_message(bot_text["action_not_found"])
+                                        return
+                                    
+                                    # ترکیب تاریخ و ساعت مسابقه
+                                    race_datetime_str = f"{race_date} {race_hour}"
+                                    race_datetime = datetime.strptime(race_datetime_str, "%Y-%m-%d %H:%M:%S")
+                                    
+                                    if now_datetime < race_datetime:
+                                        await conv.send_message(bot_text["dont_time"])
+                                        return
+                            if lang == 1:
+                                loading = await conv.send_message(bot_text["loading"].format(year=year, gp=gp, event=session))
+                            else:
+                                loading = await conv.send_message(bot_text["loading"].format(year=year, gp=country_tr[gp.replace(" ", "_")], event=type_tr[session.replace(" ", "_")]))
                             BASE_DIR = Path(__file__).resolve().parent
                             image_top = f"{year}-{gp}-{session}-top_speed.png"
                             image_base_top = fr"{BASE_DIR}/{image_top}"
@@ -1167,6 +1616,241 @@ async def pay(event):
                             await bot.send_file(user_id, caption="speed trap", file=image_base_trap)
                             await bot.send_file(user_id, caption="top speed", file=image_base_top, force_document=True)
                             await bot.send_file(user_id, caption="speed trap", file=image_base_trap, force_document=True)
+                            user_find = cur.execute(f"SELECT * FROM users WHERE id = {user_id}").fetchone()
+                            user_level = user_find[10]
+                            if user_level == 1:
+                                user_score = user_find[5]
+                                user_score -= 2
+                                cur.execute(f"UPDATE users SET score = {user_score} WHERE id = {user_id}")
+                                con.commit()
+                                await event.reply(bot_text["score_data"].format(coin=2))
+                            elif user_level == 2:
+                                user_score = user_find[5]
+                                user_score -= 1
+                                cur.execute(f"UPDATE users SET score = {user_score} WHERE id = {user_id}")
+                                con.commit()
+                                await event.reply(bot_text["score_data"].format(coin=1))
+                            elif user_level == 3:
+                                user_score = user_find[5]
+                                user_score -= 1
+                                cur.execute(f"UPDATE users SET score = {user_score} WHERE id = {user_id}")
+                                con.commit()
+                                await event.reply(bot_text["score_data"].format(coin=1))
+                            await conv.cancel_all()
+        elif text == bot_text["lap_times"]:
+            async with bot.conversation(user_id) as conv:
+                year_keys = [
+                    [
+                        Button.inline("2024", b'2024')
+                    ],
+                    [
+                        Button.inline("2023", b'2023')
+                    ],
+                    [
+                        Button.inline("2022", b'2022')
+                    ],
+                    [
+                        Button.inline("2021", b'2021')
+                    ],
+                    [
+                        Button.inline("2020", b'2020')
+                    ],
+                    [
+                        Button.inline("2019", b'2019')
+                    ],
+                    [
+                        Button.inline("2018", b'2018')
+                    ],
+                    [
+                        Button.inline(bot_text["cancel"], b'cancel')
+                    ]
+                ]
+                ask_year = await conv.send_message(bot_text["select_year"], buttons=year_keys)
+                try:
+                    year_res = await conv.wait_event(events.CallbackQuery(), timeout=60)
+                    await bot.delete_messages(user_id, ask_year.id)
+                except TimeoutError:
+                    await conv.send_message(bot_text["timeout_error"])
+                    await bot.delete_messages(user_id, ask_year.id)
+                    return
+                year_data = year_res.data
+                if year_data == b'cancel':
+                    await conv.send_message(bot_text["canceled"])
+                    await bot.delete_messages(user_id, ask_year.id)
+                    await conv.cancel_all()
+                else: 
+                    year = int(year_data)
+                    response = manager.get_event(year=year)["Country"]
+                    country_tr = {
+                        "Bahrain_Grand_Prix": "گرندپری بحرین",
+                        "Saudi_Arabian_Grand_Prix": "گرندپری عربستان",
+                        "Australian_Grand_Prix": "گرندپری استرالیا",
+                        "Azerbaijan_Grand_Prix": "گرندپری آذربایجان",
+                        "United_States_Grand_Prix": "گرندپری آمریکا",
+                        "Miami_Grand_Prix": "گرندپری میامی",
+                        "Monaco_Grand_Prix": "گرندپری موناکو",
+                        "Spanish_Grand_Prix": "گرندپری اسپانیا",
+                        "Canadian_Grand_Prix": "گرندپری کانادا",
+                        "Austrian_Grand_Prix": "گرندپری اتریش",
+                        "British_Grand_Prix": "گرندپری بریتانیا",
+                        "Hungarian_Grand_Prix": "گرندپری مجارستان",
+                        "Belgian_Grand_Prix": "گرندپری بلژیک",
+                        "Dutch_Grand_Prix": "گرندپری هلند",
+                        "Italian_Grand_Prix": "گرندپری ایتالیا",
+                        "Singapore_Grand_Prix": "گرندپری سنگاپور",
+                        "Japanese_Grand_Prix": "گرندپری ژاپن",
+                        "Qatar_Grand_Prix": "گرندپری قطر",
+                        "Mexico_City_Grand_Prix": "گرندپری مکزیک",
+                        "São_Paulo_Grand_Prix": "گرندپری برزیل",
+                        "Abu_Dhabi_Grand_Prix": "گرندپری ابوظبی",
+                        "Las_Vegas_Grand_Prix": "گرندپری لاس وگاس",
+                        "Emilia_Romagna_Grand_Prix": "گرندپری امیلیا رومانیا",
+                        "Portuguese_Grand_Prix": "گرند پری پرتغال",
+                        "French_Grand_Prix": "گرند پری فرانسه",
+                        "Styrian_Grand_Prix": "گرند پری استراین",
+                        "Turkish_Grand_Prix": "گرند پری ترکیه",
+                        "Russian_Grand_Prix": "گرند پری روسیه",
+                        "Tuscan_Grand_Prix": "گرند پری توسکان",
+                        "Eifel_Grand_Prix": "گرند پری ایفل",
+                        "Sakhir_Grand_Prix": "گرند پری ساخیر",
+                        "Chinese_Grand_Prix": "گرند پری چین",
+                    }
+                    gp_keys = []
+                    for gp in response:
+                        if lang == 1:
+                            gp_text = gp["t"]
+                        else:
+                            gp_text = country_tr[gp["tr"]]
+                        gp_data = gp["t"].encode()
+                        key = Button.inline(gp_text, data=gp_data)
+                        gp_keys.append(key)
+                    result = []
+                    for i in range(0, len(gp_keys), 2):
+                        if i + 1 < len(gp_keys):
+                            result.append([gp_keys[i], gp_keys[i + 1]])
+                        else:
+                            result.append([gp_keys[i]])
+                    result.append([Button.inline(bot_text["cancel"], b'cancel')])
+                    ask_gp = await conv.send_message(bot_text["select_gp"], buttons=result)
+                    try:
+                        gp_res = await conv.wait_event(events.CallbackQuery(), timeout=60)
+                        await bot.delete_messages(user_id, ask_gp.id)
+                    except TimeoutError:
+                        await conv.send_message(bot_text["timeout_error"])
+                        await bot.delete_messages(user_id, ask_gp.id)
+                        return
+                    gp_data = gp_res.data
+                    if gp_data == b'cancel':
+                        await conv.send_message(bot_text["canceled"])
+                        await conv.cancel_all()
+                    else:
+                        gp = gp_data.decode()        
+                        # url = f"https://f1datas.com/api/v1/fastf1/session?year={year}&country={gp}"
+                        sessions = manager.get_session(year=year, country=gp)["sessions"]
+                        # sessions = requests.get(url).json()["sessions"]
+                        type_tr = {
+                            "Practice_1": "تمرین اول",
+                            "Practice_2": "تمرین دوم",
+                            "Practice_3": "تمرین سوم",
+                            "Sprint": "اسپرینت",
+                            "Sprint_Shootout": "اسپرینت شوت آوت",
+                            "Sprint_Qualifying": "تعیین خط اسپرینت",
+                            "Qualifying": "تعیین خط",
+                            "Race": "مسابقه"
+                        }
+                        sessions_keys = []
+                        for session in sessions:
+                            if lang == 1:
+                                session_text = session
+                            else:
+                                session_text = type_tr[session]
+                            session_key = [
+                                Button.inline(session_text, session.encode()),
+                            ]
+                            sessions_keys.append(session_key)
+                        ask_event = await event.reply(bot_text["select_session"], buttons=sessions_keys)
+                        try:
+                            session_res = await conv.wait_event(events.CallbackQuery(), timeout=60)
+                            await bot.delete_messages(user_id, ask_event.id)
+                        except TimeoutError:
+                            await conv.send_message(bot_text["timeout_error"])
+                            await bot.delete_messages(user_id, ask_event.id)
+                            return
+                        event_data = session_res.data
+                        if event_data == b'cancel':
+                            await conv.send_message(bot_text["canceled"])
+                            await conv.cancel_all()
+                        else:
+                            session = event_data.decode()
+                            race_hour = cur.execute(f"SELECT time FROM grand_time WHERE grand = '{gp}' AND session_type = '{session}';").fetchone()
+                            if race_hour is None:
+                                await conv.send_message(bot_text["problem"])
+                                return
+                            race_hour = race_hour[0]
+                            # دریافت تاریخ مسابقه از API
+                            check_date = f"https://ergast.com/api/f1/{year}.json"
+                            check_date = requests.get(check_date).json()["MRData"]["RaceTable"]["Races"]
+
+                            for grand in check_date:
+                                if grand["raceName"] == gp:
+                                    now = datetime.now()
+                                    now_date_str = f"{now.year}-{now.month:02d}-{now.day:02d}"
+                                    now_time_str = now.strftime("%H:%M:%S")
+                                    
+                                    # ترکیب تاریخ و ساعت فعلی
+                                    now_datetime_str = f"{now_date_str} {now_time_str}"
+                                    now_datetime = datetime.strptime(now_datetime_str, "%Y-%m-%d %H:%M:%S")
+                                    
+                                    if session == "Race":
+                                        race_date = grand["date"]
+                                    elif session == "Sprint":
+                                        race_date = grand["Sprint"]["date"]
+                                    elif session == "Practice_1":
+                                        race_date = grand["FirstPractice"]["date"]
+                                    elif session == "Practice_2":
+                                        race_date = grand["SecondPractice"]["date"]
+                                    elif session == "Practice_3":
+                                        race_date = grand["ThirdPractice"]["date"]
+                                    elif session == "Qualifying":
+                                        race_date = grand["Qualifying"]["date"]
+                                    else:
+                                        await conv.send_message(bot_text["action_not_found"])
+                                        return
+                                    
+                                    # ترکیب تاریخ و ساعت مسابقه
+                                    race_datetime_str = f"{race_date} {race_hour}"
+                                    race_datetime = datetime.strptime(race_datetime_str, "%Y-%m-%d %H:%M:%S")
+                                    
+                                    if now_datetime < race_datetime:
+                                        await conv.send_message(bot_text["dont_time"])
+                                        return
+                            if lang == 1:
+                                loading = await conv.send_message(bot_text["loading"].format(year=year, gp=gp, event=session))
+                            else:
+                                loading = await conv.send_message(bot_text["loading"].format(year=year, gp=country_tr[gp.replace(" ", "_")], event=type_tr[session.replace(" ", "_")]))
+                            BASE_DIR = Path(__file__).resolve().parent
+                            image_lap = f"{year}-{gp}-{session}-lap_times.png"
+                            image_base_lap = fr"{BASE_DIR}/{image_lap}"
+                            if os.path.exists(image_base_lap) is False:
+                                lap_times_path = lap_times(year, gp, session)
+                            await bot.delete_messages(user_id, loading.id)
+                            await bot.send_file(user_id, caption="Lap Times", file=image_base_lap)
+                            await bot.send_file(user_id, caption="Lap Times", file=image_base_lap, force_document=True)
+                            user_find = cur.execute(f"SELECT * FROM users WHERE id = {user_id}").fetchone()
+                            user_level = user_find[10]
+                            if user_level == 1:
+                                user_score = user_find[5]
+                                user_score -= 2
+                                cur.execute(f"UPDATE users SET score = {user_score} WHERE id = {user_id}")
+                                con.commit()
+                                await event.reply(bot_text["score_data"].format(coin=2))
+                            elif user_level == 2:
+                                user_score = user_find[5]
+                                user_score -= 1
+                                cur.execute(f"UPDATE users SET score = {user_score} WHERE id = {user_id}")
+                                con.commit()
+                                await event.reply(bot_text["score_data"].format(coin=1))
+
                             await conv.cancel_all()
         elif text == bot_text["rpm"]:
             async with bot.conversation(user_id) as conv:
@@ -1202,7 +1886,8 @@ async def pay(event):
                     await bot.delete_messages(user_id, ask_year.id)
                 except TimeoutError:
                     await conv.send_message(bot_text["timeout_error"])
-                    await conv.cancel_all()
+                    await bot.delete_messages(user_id, ask_year.id)
+                    return
                 year_data = year_res.data
                 if year_data == b'cancel':
                     await conv.send_message(bot_text["canceled"])
@@ -1267,27 +1952,14 @@ async def pay(event):
                         await bot.delete_messages(user_id, ask_gp.id)
                     except TimeoutError:
                         await conv.send_message(bot_text["timeout_error"])
-                        await conv.cancel_all()
+                        await bot.delete_messages(user_id, ask_gp.id)
+                        return
                     gp_data = gp_res.data
                     if gp_data == b'cancel':
                         await conv.send_message(bot_text["canceled"])
                         await conv.cancel_all()
                     else:
                         gp_country = gp_data.decode().split(":")[0]
-                        check_date = f"https://ergast.com/api/f1/{year}.json"
-                        check_date = requests.get(check_date).json()["MRData"]["RaceTable"]["Races"]
-                        for grand in check_date:
-                            if grand["raceName"] == gp_country:
-                                now = datetime.today()
-                                now = f"{now.year}-{now.month}-{now.day}"
-                                now = datetime.strptime(now, "%Y-%m-%d")
-                                now = time.mktime(now.timetuple())
-                                race_time = grand["date"]
-                                race = datetime.strptime(race_time, "%Y-%m-%d")
-                                race_time = time.mktime(race.timetuple())
-                                if now < race_time:
-                                    await conv.send_message(bot_text["dont_time"])
-                                    return
                         gp_round = int(gp_data.decode().split(":")[1])
                         sessions = manager.get_session(year=year, country=gp_round)["sessions"]
                         type_tr = {
@@ -1316,12 +1988,56 @@ async def pay(event):
                             await bot.delete_messages(user_id, ask_event.id)
                         except TimeoutError:
                             await conv.send_message(bot_text["timeout_error"])
-                            await conv.cancel_all()
+                            await bot.delete_messages(user_id, ask_event.id)
+                            return
                         event_data = session_res.data
                         if event_data == b'cancel':
                             await conv.send_message(bot_text["canceled"])
                             await conv.cancel_all()
                         else:
+                            session = event_data.decode()
+                            race_hour = cur.execute(f"SELECT time FROM grand_time WHERE grand = '{gp}' AND session_type = '{session}';").fetchone()
+                            if race_hour is None:
+                                await conv.send_message(bot_text["problem"])
+                                return
+                            race_hour = race_hour[0]
+                            # دریافت تاریخ مسابقه از API
+                            check_date = f"https://ergast.com/api/f1/{year}.json"
+                            check_date = requests.get(check_date).json()["MRData"]["RaceTable"]["Races"]
+
+                            for grand in check_date:
+                                if grand["raceName"] == gp:
+                                    now = datetime.now()
+                                    now_date_str = f"{now.year}-{now.month:02d}-{now.day:02d}"
+                                    now_time_str = now.strftime("%H:%M:%S")
+                                    
+                                    # ترکیب تاریخ و ساعت فعلی
+                                    now_datetime_str = f"{now_date_str} {now_time_str}"
+                                    now_datetime = datetime.strptime(now_datetime_str, "%Y-%m-%d %H:%M:%S")
+                                    
+                                    if session == "Race":
+                                        race_date = grand["date"]
+                                    elif session == "Sprint":
+                                        race_date = grand["Sprint"]["date"]
+                                    elif session == "Practice_1":
+                                        race_date = grand["FirstPractice"]["date"]
+                                    elif session == "Practice_2":
+                                        race_date = grand["SecondPractice"]["date"]
+                                    elif session == "Practice_3":
+                                        race_date = grand["ThirdPractice"]["date"]
+                                    elif session == "Qualifying":
+                                        race_date = grand["Qualifying"]["date"]
+                                    else:
+                                        await conv.send_message(bot_text["action_not_found"])
+                                        return
+                                    
+                                    # ترکیب تاریخ و ساعت مسابقه
+                                    race_datetime_str = f"{race_date} {race_hour}"
+                                    race_datetime = datetime.strptime(race_datetime_str, "%Y-%m-%d %H:%M:%S")
+                                    
+                                    if now_datetime < race_datetime:
+                                        await conv.send_message(bot_text["dont_time"])
+                                        return
                             url = f"http://ergast.com/api/f1/{year}/{gp_round}/drivers.json"
                             drivers = requests.get(url).json()["MRData"]["DriverTable"]["Drivers"]
                             drivers_keys = []
@@ -1347,7 +2063,8 @@ async def pay(event):
                                 await bot.delete_messages(user_id, ask_driver.id)
                             except TimeoutError:
                                 await conv.send_message(bot_text["timeout_error"])
-                                await conv.cancel_all()
+                                await bot.delete_messages(user_id, ask_driver.id)
+                                return
                             driver_data = dr_event.data
                             if driver_data == b'cancel':
                                 await conv.send_message(bot_text["canceled"])
@@ -1379,7 +2096,8 @@ async def pay(event):
                                     await bot.delete_messages(user_id, ask_driver.id)
                                 except TimeoutError:
                                     await conv.send_message(bot_text["timeout_error"])
-                                    await conv.cancel_all()
+                                    await bot.delete_messages(user_id, ask_driver.id)
+                                    return
                                 driver_data_two = dr_event.data
                                 if driver_data == b"cancel":
                                     await conv.send_message(bot_text["canceled"])
@@ -1388,7 +2106,10 @@ async def pay(event):
                                     driver_one_code = driver_data.decode()
                                     driver_two_code = driver_data_two.decode()
                                     session = event_data.decode()
-                                    loading = await conv.send_message(bot_text["loading"])
+                                    if lang == 1:
+                                        loading = await conv.send_message(bot_text["loading"].format(year=year, gp=gp_country, event=session))
+                                    else:
+                                        loading = await conv.send_message(bot_text["loading"].format(year=year, gp=country_tr[gp_country.replace(" ", "_")], event=type_tr[session.replace(" ", "_")]))
                                     BASE_DIR = Path(__file__).resolve().parent
                                     image_rpm = f"{year}-{gp_round}-{session}-{driver_one_code}-{driver_two_code}-rpm.png"
                                     image_base_rpm = fr"{BASE_DIR}/{image_rpm}"
@@ -1397,6 +2118,26 @@ async def pay(event):
                                     await bot.delete_messages(user_id, loading.id)
                                     await bot.send_file(user_id, caption="rpm", file=image_base_rpm)
                                     await bot.send_file(user_id, caption="rpm", file=image_base_rpm, force_document=True)
+                                    user_find = cur.execute(f"SELECT * FROM users WHERE id = {user_id}").fetchone()
+                                    user_level = user_find[10]
+                                    if user_level == 1:
+                                        user_score = user_find[5]
+                                        user_score -= 3
+                                        cur.execute(f"UPDATE users SET score = {user_score} WHERE id = {user_id}")
+                                        con.commit()
+                                        await event.reply(bot_text["score_data"].format(coin=3))
+                                    elif user_level == 2:
+                                        user_score = user_find[5]
+                                        user_score -= 2
+                                        cur.execute(f"UPDATE users SET score = {user_score} WHERE id = {user_id}")
+                                        con.commit()
+                                        await event.reply(bot_text["score_data"].format(coin=2))
+                                    elif user_level == 3:
+                                        user_score = user_find[5]
+                                        user_score -= 1
+                                        cur.execute(f"UPDATE users SET score = {user_score} WHERE id = {user_id}")
+                                        con.commit()
+                                        await event.reply(bot_text["score_data"].format(coin=1))
                                     await conv.cancel_all()
         elif text == bot_text["map_viz"]:
             async with bot.conversation(user_id) as conv:
@@ -1432,7 +2173,8 @@ async def pay(event):
                     await bot.delete_messages(user_id, ask_year.id)
                 except TimeoutError:
                     await conv.send_message(bot_text["timeout_error"])
-                    await conv.cancel_all()
+                    await bot.delete_messages(user_id, ask_year.id)
+                    return
                 year_data = year_res.data
                 if year_data == b'cancel':
                     await conv.send_message(bot_text["canceled"])
@@ -1497,27 +2239,14 @@ async def pay(event):
                         await bot.delete_messages(user_id, ask_gp.id)
                     except TimeoutError:
                         await conv.send_message(bot_text["timeout_error"])
-                        await conv.cancel_all()
+                        await bot.delete_messages(user_id, ask_gp.id)
+                        return
                     gp_data = gp_res.data
                     if gp_data == b'cancel':
                         await conv.send_message(bot_text["canceled"])
                         await conv.cancel_all()
                     else:
                         gp_country = gp_data.decode().split(":")[0]
-                        check_date = f"https://ergast.com/api/f1/{year}.json"
-                        check_date = requests.get(check_date).json()["MRData"]["RaceTable"]["Races"]
-                        for grand in check_date:
-                            if grand["raceName"] == gp_country:
-                                now = datetime.today()
-                                now = f"{now.year}-{now.month}-{now.day}"
-                                now = datetime.strptime(now, "%Y-%m-%d")
-                                now = time.mktime(now.timetuple())
-                                race_time = grand["date"]
-                                race = datetime.strptime(race_time, "%Y-%m-%d")
-                                race_time = time.mktime(race.timetuple())
-                                if now < race_time:
-                                    await conv.send_message(bot_text["dont_time"])
-                                    return
                         gp_round = int(gp_data.decode().split(":")[1])
                         sessions = manager.get_session(year=year, country=gp_round)["sessions"]
                         type_tr = {
@@ -1546,12 +2275,56 @@ async def pay(event):
                             await bot.delete_messages(user_id, ask_event.id)
                         except TimeoutError:
                             await conv.send_message(bot_text["timeout_error"])
-                            await conv.cancel_all()
+                            await bot.delete_messages(user_id, ask_event.id)
+                            return
                         event_data = session_res.data
                         if event_data == b'cancel':
                             await conv.send_message(bot_text["canceled"])
                             await conv.cancel_all()
                         else:
+                            session = event_data.decode()
+                            race_hour = cur.execute(f"SELECT time FROM grand_time WHERE grand = '{gp}' AND session_type = '{session}';").fetchone()
+                            if race_hour is None:
+                                await conv.send_message(bot_text["problem"])
+                                return
+                            race_hour = race_hour[0]
+                            # دریافت تاریخ مسابقه از API
+                            check_date = f"https://ergast.com/api/f1/{year}.json"
+                            check_date = requests.get(check_date).json()["MRData"]["RaceTable"]["Races"]
+
+                            for grand in check_date:
+                                if grand["raceName"] == gp:
+                                    now = datetime.now()
+                                    now_date_str = f"{now.year}-{now.month:02d}-{now.day:02d}"
+                                    now_time_str = now.strftime("%H:%M:%S")
+                                    
+                                    # ترکیب تاریخ و ساعت فعلی
+                                    now_datetime_str = f"{now_date_str} {now_time_str}"
+                                    now_datetime = datetime.strptime(now_datetime_str, "%Y-%m-%d %H:%M:%S")
+                                    
+                                    if session == "Race":
+                                        race_date = grand["date"]
+                                    elif session == "Sprint":
+                                        race_date = grand["Sprint"]["date"]
+                                    elif session == "Practice_1":
+                                        race_date = grand["FirstPractice"]["date"]
+                                    elif session == "Practice_2":
+                                        race_date = grand["SecondPractice"]["date"]
+                                    elif session == "Practice_3":
+                                        race_date = grand["ThirdPractice"]["date"]
+                                    elif session == "Qualifying":
+                                        race_date = grand["Qualifying"]["date"]
+                                    else:
+                                        await conv.send_message(bot_text["action_not_found"])
+                                        return
+                                    
+                                    # ترکیب تاریخ و ساعت مسابقه
+                                    race_datetime_str = f"{race_date} {race_hour}"
+                                    race_datetime = datetime.strptime(race_datetime_str, "%Y-%m-%d %H:%M:%S")
+                                    
+                                    if now_datetime < race_datetime:
+                                        await conv.send_message(bot_text["dont_time"])
+                                        return
                             url = f"http://ergast.com/api/f1/{year}/{gp_round}/drivers.json"
                             drivers = requests.get(url).json()["MRData"]["DriverTable"]["Drivers"]
                             drivers_keys = []
@@ -1577,7 +2350,8 @@ async def pay(event):
                                 await bot.delete_messages(user_id, ask_driver.id)
                             except TimeoutError:
                                 await conv.send_message(bot_text["timeout_error"])
-                                await conv.cancel_all()
+                                await bot.delete_messages(user_id, ask_driver.id)
+                                return
                             driver_data = dr_event.data
                             if driver_data == b'cancel':
                                 await conv.send_message(bot_text["canceled"])
@@ -1585,7 +2359,10 @@ async def pay(event):
                             else:
                                 driver_code = driver_data.decode()
                                 session = event_data.decode()
-                                loading = await conv.send_message(bot_text["loading"])
+                                if lang == 1:
+                                    loading = await conv.send_message(bot_text["loading"].format(year=year, gp=gp_country, event=session))
+                                else:
+                                    loading = await conv.send_message(bot_text["loading"].format(year=year, gp=country_tr[gp_country.replace(" ", "_")], event=type_tr[session.replace(" ", "_")]))
                                 BASE_DIR = Path(__file__).resolve().parent
                                 image_viz = f"{year}-{gp_round}-{session}-{driver_code}-map_viz.png"
                                 image_base_viz = fr"{BASE_DIR}/{image_viz}"
@@ -1595,6 +2372,20 @@ async def pay(event):
                                 await bot.delete_messages(user_id, loading.id)
                                 await bot.send_file(user_id, caption="map viz", file=image_base_viz)
                                 await bot.send_file(user_id, caption="map viz", file=image_base_viz, force_document=True)
+                                user_find = cur.execute(f"SELECT * FROM users WHERE id = {user_id}").fetchone()
+                                user_level = user_find[10]
+                                if user_level == 1:
+                                    user_score = user_find[5]
+                                    user_score -= 2
+                                    cur.execute(f"UPDATE users SET score = {user_score} WHERE id = {user_id}")
+                                    con.commit()
+                                    await event.reply(bot_text["score_data"].format(coin=2))
+                                elif user_level == 2:
+                                    user_score = user_find[5]
+                                    user_score -= 1
+                                    cur.execute(f"UPDATE users SET score = {user_score} WHERE id = {user_id}")
+                                    con.commit()
+                                    await event.reply(bot_text["score_data"].format(coin=1))
                                 await conv.cancel_all()
         elif text == bot_text["map_break"]:
             async with bot.conversation(user_id) as conv:
@@ -1630,7 +2421,8 @@ async def pay(event):
                     await bot.delete_messages(user_id, ask_year.id)
                 except TimeoutError:
                     await conv.send_message(bot_text["timeout_error"])
-                    await conv.cancel_all()
+                    await bot.delete_messages(user_id, ask_year.id)
+                    return
                 year_data = year_res.data
                 if year_data == b'cancel':
                     await conv.send_message(bot_text["canceled"])
@@ -1695,27 +2487,14 @@ async def pay(event):
                         await bot.delete_messages(user_id, ask_gp.id)
                     except TimeoutError:
                         await conv.send_message(bot_text["timeout_error"])
-                        await conv.cancel_all()
+                        await bot.delete_messages(user_id, ask_gp.id)
+                        return
                     gp_data = gp_res.data
                     if gp_data == b'cancel':
                         await conv.send_message(bot_text["canceled"])
                         await conv.cancel_all()
                     else:
                         gp_country = gp_data.decode().split(":")[0]
-                        check_date = f"https://ergast.com/api/f1/{year}.json"
-                        check_date = requests.get(check_date).json()["MRData"]["RaceTable"]["Races"]
-                        for grand in check_date:
-                            if grand["raceName"] == gp_country:
-                                now = datetime.today()
-                                now = f"{now.year}-{now.month}-{now.day}"
-                                now = datetime.strptime(now, "%Y-%m-%d")
-                                now = time.mktime(now.timetuple())
-                                race_time = grand["date"]
-                                race = datetime.strptime(race_time, "%Y-%m-%d")
-                                race_time = time.mktime(race.timetuple())
-                                if now < race_time:
-                                    await conv.send_message(bot_text["dont_time"])
-                                    return
                         gp_round = int(gp_data.decode().split(":")[1])
                         sessions = manager.get_session(year=year, country=gp_round)["sessions"]
                         type_tr = {
@@ -1744,12 +2523,56 @@ async def pay(event):
                             await bot.delete_messages(user_id, ask_event.id)
                         except TimeoutError:
                             await conv.send_message(bot_text["timeout_error"])
-                            await conv.cancel_all()
+                            await bot.delete_messages(user_id, ask_event.id)
+                            return
                         event_data = session_res.data
                         if event_data == b'cancel':
                             await conv.send_message(bot_text["canceled"])
                             await conv.cancel_all()
                         else:
+                            session = event_data.decode()
+                            race_hour = cur.execute(f"SELECT time FROM grand_time WHERE grand = '{gp}' AND session_type = '{session}';").fetchone()
+                            if race_hour is None:
+                                await conv.send_message(bot_text["problem"])
+                                return
+                            race_hour = race_hour[0]
+                            # دریافت تاریخ مسابقه از API
+                            check_date = f"https://ergast.com/api/f1/{year}.json"
+                            check_date = requests.get(check_date).json()["MRData"]["RaceTable"]["Races"]
+
+                            for grand in check_date:
+                                if grand["raceName"] == gp:
+                                    now = datetime.now()
+                                    now_date_str = f"{now.year}-{now.month:02d}-{now.day:02d}"
+                                    now_time_str = now.strftime("%H:%M:%S")
+                                    
+                                    # ترکیب تاریخ و ساعت فعلی
+                                    now_datetime_str = f"{now_date_str} {now_time_str}"
+                                    now_datetime = datetime.strptime(now_datetime_str, "%Y-%m-%d %H:%M:%S")
+                                    
+                                    if session == "Race":
+                                        race_date = grand["date"]
+                                    elif session == "Sprint":
+                                        race_date = grand["Sprint"]["date"]
+                                    elif session == "Practice_1":
+                                        race_date = grand["FirstPractice"]["date"]
+                                    elif session == "Practice_2":
+                                        race_date = grand["SecondPractice"]["date"]
+                                    elif session == "Practice_3":
+                                        race_date = grand["ThirdPractice"]["date"]
+                                    elif session == "Qualifying":
+                                        race_date = grand["Qualifying"]["date"]
+                                    else:
+                                        await conv.send_message(bot_text["action_not_found"])
+                                        return
+                                    
+                                    # ترکیب تاریخ و ساعت مسابقه
+                                    race_datetime_str = f"{race_date} {race_hour}"
+                                    race_datetime = datetime.strptime(race_datetime_str, "%Y-%m-%d %H:%M:%S")
+                                    
+                                    if now_datetime < race_datetime:
+                                        await conv.send_message(bot_text["dont_time"])
+                                        return
                             url = f"http://ergast.com/api/f1/{year}/{gp_round}/drivers.json"
                             drivers = requests.get(url).json()["MRData"]["DriverTable"]["Drivers"]
                             drivers_keys = []
@@ -1775,7 +2598,8 @@ async def pay(event):
                                 await bot.delete_messages(user_id, ask_driver.id)
                             except TimeoutError:
                                 await conv.send_message(bot_text["timeout_error"])
-                                await conv.cancel_all()
+                                await bot.delete_messages(user_id, ask_driver.id)
+                                return
                             driver_data = dr_event.data
                             if driver_data == b'cancel':
                                 await conv.send_message(bot_text["canceled"])
@@ -1783,7 +2607,10 @@ async def pay(event):
                             else:
                                 driver_code = driver_data.decode()
                                 session = event_data.decode()
-                                loading = await conv.send_message(bot_text["loading"])
+                                if lang == 1:
+                                    loading = await conv.send_message(bot_text["loading"].format(year=year, gp=gp_country, event=session))
+                                else:
+                                    loading = await conv.send_message(bot_text["loading"].format(year=year, gp=country_tr[gp_country.replace(" ", "_")], event=type_tr[session.replace(" ", "_")]))
                                 BASE_DIR = Path(__file__).resolve().parent
                                 image_map = f"{year}-{gp_round}-{session}-{driver_code}-map_brake.png"
                                 image_base_map = fr"{BASE_DIR}/{image_map}"
@@ -1793,7 +2620,461 @@ async def pay(event):
                                 await bot.delete_messages(user_id, loading.id)
                                 await bot.send_file(user_id, caption="map brake", file=image_base_map)
                                 await bot.send_file(user_id, caption="map brake", file=image_base_map, force_document=True)
+                                user_find = cur.execute(f"SELECT * FROM users WHERE id = {user_id}").fetchone()
+                                user_level = user_find[10]
+                                if user_level == 1:
+                                    user_score = user_find[5]
+                                    user_score -= 1
+                                    cur.execute(f"UPDATE users SET score = {user_score} WHERE id = {user_id}")
+                                    con.commit()
+                                    await event.reply(bot_text["score_data"].format(coin=1))
+                                elif user_level == 2:
+                                    user_score = user_find[5]
+                                    user_score -= 1
+                                    cur.execute(f"UPDATE users SET score = {user_score} WHERE id = {user_id}")
+                                    con.commit()
+                                    await event.reply(bot_text["score_data"].format(coin=1))
                                 await conv.cancel_all()
+        elif text == bot_text["down_force"]:
+            async with bot.conversation(user_id) as conv:
+                year_keys = [
+                    [
+                        Button.inline("2024", b'2024')
+                    ],
+                    [
+                        Button.inline("2023", b'2023')
+                    ],
+                    [
+                        Button.inline("2022", b'2022')
+                    ],
+                    [
+                        Button.inline("2021", b'2021')
+                    ],
+                    [
+                        Button.inline("2020", b'2020')
+                    ],
+                    [
+                        Button.inline("2019", b'2019')
+                    ],
+                    [
+                        Button.inline("2018", b'2018')
+                    ],
+                    [
+                        Button.inline(bot_text["cancel"], b'cancel')
+                    ]
+                ]
+                ask_year = await conv.send_message(bot_text["select_year"], buttons=year_keys)
+                try:
+                    year_res = await conv.wait_event(events.CallbackQuery(), timeout=60)
+                    await bot.delete_messages(user_id, ask_year.id)
+                except TimeoutError:
+                    await conv.send_message(bot_text["timeout_error"])
+                    await bot.delete_messages(user_id, ask_year.id)
+                    return
+                year_data = year_res.data
+                if year_data == b'cancel':
+                    await conv.send_message(bot_text["canceled"])
+                    await bot.delete_messages(user_id, ask_year.id)
+                    await conv.cancel_all()
+                else: 
+                    year = int(year_data)
+                    response = manager.get_event(year=year)["Country"]
+                    country_tr = {
+                        "Bahrain_Grand_Prix": "گرندپری بحرین",
+                        "Saudi_Arabian_Grand_Prix": "گرندپری عربستان",
+                        "Australian_Grand_Prix": "گرندپری استرالیا",
+                        "Azerbaijan_Grand_Prix": "گرندپری آذربایجان",
+                        "United_States_Grand_Prix": "گرندپری آمریکا",
+                        "Miami_Grand_Prix": "گرندپری میامی",
+                        "Monaco_Grand_Prix": "گرندپری موناکو",
+                        "Spanish_Grand_Prix": "گرندپری اسپانیا",
+                        "Canadian_Grand_Prix": "گرندپری کانادا",
+                        "Austrian_Grand_Prix": "گرندپری اتریش",
+                        "British_Grand_Prix": "گرندپری بریتانیا",
+                        "Hungarian_Grand_Prix": "گرندپری مجارستان",
+                        "Belgian_Grand_Prix": "گرندپری بلژیک",
+                        "Dutch_Grand_Prix": "گرندپری هلند",
+                        "Italian_Grand_Prix": "گرندپری ایتالیا",
+                        "Singapore_Grand_Prix": "گرندپری سنگاپور",
+                        "Japanese_Grand_Prix": "گرندپری ژاپن",
+                        "Qatar_Grand_Prix": "گرندپری قطر",
+                        "Mexico_City_Grand_Prix": "گرندپری مکزیک",
+                        "São_Paulo_Grand_Prix": "گرندپری برزیل",
+                        "Abu_Dhabi_Grand_Prix": "گرندپری ابوظبی",
+                        "Las_Vegas_Grand_Prix": "گرندپری لاس وگاس",
+                        "Emilia_Romagna_Grand_Prix": "گرندپری امیلیا رومانیا",
+                        "Portuguese_Grand_Prix": "گرند پری پرتغال",
+                        "French_Grand_Prix": "گرند پری فرانسه",
+                        "Styrian_Grand_Prix": "گرند پری استراین",
+                        "Turkish_Grand_Prix": "گرند پری ترکیه",
+                        "Russian_Grand_Prix": "گرند پری روسیه",
+                        "Tuscan_Grand_Prix": "گرند پری توسکان",
+                        "Eifel_Grand_Prix": "گرند پری ایفل",
+                        "Sakhir_Grand_Prix": "گرند پری ساخیر",
+                        "Chinese_Grand_Prix": "گرند پری چین",
+                    }
+                    gp_keys = []
+                    for gp in response:
+                        if lang == 1:
+                            gp_text = gp["t"]
+                        else:
+                            gp_text = country_tr[gp["tr"]]
+                        gp_data = gp["t"].encode()
+                        key = Button.inline(gp_text, data=gp_data)
+                        gp_keys.append(key)
+                    result = []
+                    for i in range(0, len(gp_keys), 2):
+                        if i + 1 < len(gp_keys):
+                            result.append([gp_keys[i], gp_keys[i + 1]])
+                        else:
+                            result.append([gp_keys[i]])
+                    result.append([Button.inline(bot_text["cancel"], b'cancel')])
+                    ask_gp = await conv.send_message(bot_text["select_gp"], buttons=result)
+                    try:
+                        gp_res = await conv.wait_event(events.CallbackQuery(), timeout=60)
+                        await bot.delete_messages(user_id, ask_gp.id)
+                    except TimeoutError:
+                        await conv.send_message(bot_text["timeout_error"])
+                        await bot.delete_messages(user_id, ask_gp.id)
+                        return
+                    gp_data = gp_res.data
+                    if gp_data == b'cancel':
+                        await conv.send_message(bot_text["canceled"])
+                        await conv.cancel_all()
+                    else:
+                        gp = gp_data.decode()        
+                        # url = f"https://f1datas.com/api/v1/fastf1/session?year={year}&country={gp}"
+                        sessions = manager.get_session(year=year, country=gp)["sessions"]
+                        # sessions = requests.get(url).json()["sessions"]
+                        type_tr = {
+                            "Practice_1": "تمرین اول",
+                            "Practice_2": "تمرین دوم",
+                            "Practice_3": "تمرین سوم",
+                            "Sprint": "اسپرینت",
+                            "Sprint_Shootout": "اسپرینت شوت آوت",
+                            "Sprint_Qualifying": "تعیین خط اسپرینت",
+                            "Qualifying": "تعیین خط",
+                            "Race": "مسابقه"
+                        }
+                        sessions_keys = []
+                        for session in sessions:
+                            if lang == 1:
+                                session_text = session
+                            else:
+                                session_text = type_tr[session]
+                            session_key = [
+                                Button.inline(session_text, session.encode()),
+                            ]
+                            sessions_keys.append(session_key)
+                        ask_event = await event.reply(bot_text["select_session"], buttons=sessions_keys)
+                        try:
+                            session_res = await conv.wait_event(events.CallbackQuery(), timeout=60)
+                            await bot.delete_messages(user_id, ask_event.id)
+                        except TimeoutError:
+                            await conv.send_message(bot_text["timeout_error"])
+                            await bot.delete_messages(user_id, ask_event.id)
+                            return
+                        event_data = session_res.data
+                        if event_data == b'cancel':
+                            await conv.send_message(bot_text["canceled"])
+                            await conv.cancel_all()
+                        else:
+                            session = event_data.decode()
+                            race_hour = cur.execute(f"SELECT time FROM grand_time WHERE grand = '{gp}' AND session_type = '{session}';").fetchone()
+                            if race_hour is None:
+                                await conv.send_message(bot_text["problem"])
+                                return
+                            race_hour = race_hour[0]
+                            # دریافت تاریخ مسابقه از API
+                            check_date = f"https://ergast.com/api/f1/{year}.json"
+                            check_date = requests.get(check_date).json()["MRData"]["RaceTable"]["Races"]
+
+                            for grand in check_date:
+                                if grand["raceName"] == gp:
+                                    now = datetime.now()
+                                    now_date_str = f"{now.year}-{now.month:02d}-{now.day:02d}"
+                                    now_time_str = now.strftime("%H:%M:%S")
+                                    
+                                    # ترکیب تاریخ و ساعت فعلی
+                                    now_datetime_str = f"{now_date_str} {now_time_str}"
+                                    now_datetime = datetime.strptime(now_datetime_str, "%Y-%m-%d %H:%M:%S")
+                                    
+                                    if session == "Race":
+                                        race_date = grand["date"]
+                                    elif session == "Sprint":
+                                        race_date = grand["Sprint"]["date"]
+                                    elif session == "Practice_1":
+                                        race_date = grand["FirstPractice"]["date"]
+                                    elif session == "Practice_2":
+                                        race_date = grand["SecondPractice"]["date"]
+                                    elif session == "Practice_3":
+                                        race_date = grand["ThirdPractice"]["date"]
+                                    elif session == "Qualifying":
+                                        race_date = grand["Qualifying"]["date"]
+                                    else:
+                                        await conv.send_message(bot_text["action_not_found"])
+                                        return
+                                    
+                                    # ترکیب تاریخ و ساعت مسابقه
+                                    race_datetime_str = f"{race_date} {race_hour}"
+                                    race_datetime = datetime.strptime(race_datetime_str, "%Y-%m-%d %H:%M:%S")
+                                    
+                                    if now_datetime < race_datetime:
+                                        await conv.send_message(bot_text["dont_time"])
+                                        return
+                            if lang == 1:
+                                loading = await conv.send_message(bot_text["loading"].format(year=year, gp=gp, event=session))
+                            else:
+                                loading = await conv.send_message(bot_text["loading"].format(year=year, gp=country_tr[gp.replace(" ", "_")], event=type_tr[session.replace(" ", "_")]))
+                            BASE_DIR = Path(__file__).resolve().parent
+                            image_force = f"{year}-{gp}-{session}-down_force.png"
+                            image_base_force = fr"{BASE_DIR}/{image_force}"
+                            if os.path.exists(image_base_force) is False:
+                                down_force_path = down_force(year, gp, session)
+                            await bot.delete_messages(user_id, loading.id)
+                            await bot.send_file(user_id, caption="Down Force", file=image_base_force)
+                            await bot.send_file(user_id, caption="Down Force", file=image_base_force, force_document=True)
+                            user_find = cur.execute(f"SELECT * FROM users WHERE id = {user_id}").fetchone()
+                            user_level = user_find[10]
+                            if user_level == 1:
+                                user_score = user_find[5]
+                                user_score -= 2
+                                cur.execute(f"UPDATE users SET score = {user_score} WHERE id = {user_id}")
+                                con.commit()
+                                await event.reply(bot_text["score_data"].format(coin=2))
+                            elif user_level == 2:
+                                user_score = user_find[5]
+                                user_score -= 1
+                                cur.execute(f"UPDATE users SET score = {user_score} WHERE id = {user_id}")
+                                con.commit()
+                                await event.reply(bot_text["score_data"].format(coin=1))
+                            elif user_level == 3:
+                                user_score = user_find[5]
+                                user_score -= 1
+                                cur.execute(f"UPDATE users SET score = {user_score} WHERE id = {user_id}")
+                                con.commit()
+                                await event.reply(bot_text["score_data"].format(coin=1))
+                            await conv.cancel_all()
+        elif text == bot_text["start_reaction"]:
+            async with bot.conversation(user_id) as conv:
+                year_keys = [
+                    [
+                        Button.inline("2024", b'2024')
+                    ],
+                    [
+                        Button.inline("2023", b'2023')
+                    ],
+                    [
+                        Button.inline("2022", b'2022')
+                    ],
+                    [
+                        Button.inline("2021", b'2021')
+                    ],
+                    [
+                        Button.inline("2020", b'2020')
+                    ],
+                    [
+                        Button.inline("2019", b'2019')
+                    ],
+                    [
+                        Button.inline("2018", b'2018')
+                    ],
+                    [
+                        Button.inline(bot_text["cancel"], b'cancel')
+                    ]
+                ]
+                ask_year = await conv.send_message(bot_text["select_year"], buttons=year_keys)
+                try:
+                    year_res = await conv.wait_event(events.CallbackQuery(), timeout=60)
+                    await bot.delete_messages(user_id, ask_year.id)
+                except TimeoutError:
+                    await conv.send_message(bot_text["timeout_error"])
+                    await bot.delete_messages(user_id, ask_year.id)
+                    return
+                year_data = year_res.data
+                if year_data == b'cancel':
+                    await conv.send_message(bot_text["canceled"])
+                    await bot.delete_messages(user_id, ask_year.id)
+                    await conv.cancel_all()
+                else: 
+                    year = int(year_data)
+                    response = manager.get_event(year=year)["Country"]
+                    country_tr = {
+                        "Bahrain_Grand_Prix": "گرندپری بحرین",
+                        "Saudi_Arabian_Grand_Prix": "گرندپری عربستان",
+                        "Australian_Grand_Prix": "گرندپری استرالیا",
+                        "Azerbaijan_Grand_Prix": "گرندپری آذربایجان",
+                        "United_States_Grand_Prix": "گرندپری آمریکا",
+                        "Miami_Grand_Prix": "گرندپری میامی",
+                        "Monaco_Grand_Prix": "گرندپری موناکو",
+                        "Spanish_Grand_Prix": "گرندپری اسپانیا",
+                        "Canadian_Grand_Prix": "گرندپری کانادا",
+                        "Austrian_Grand_Prix": "گرندپری اتریش",
+                        "British_Grand_Prix": "گرندپری بریتانیا",
+                        "Hungarian_Grand_Prix": "گرندپری مجارستان",
+                        "Belgian_Grand_Prix": "گرندپری بلژیک",
+                        "Dutch_Grand_Prix": "گرندپری هلند",
+                        "Italian_Grand_Prix": "گرندپری ایتالیا",
+                        "Singapore_Grand_Prix": "گرندپری سنگاپور",
+                        "Japanese_Grand_Prix": "گرندپری ژاپن",
+                        "Qatar_Grand_Prix": "گرندپری قطر",
+                        "Mexico_City_Grand_Prix": "گرندپری مکزیک",
+                        "São_Paulo_Grand_Prix": "گرندپری برزیل",
+                        "Abu_Dhabi_Grand_Prix": "گرندپری ابوظبی",
+                        "Las_Vegas_Grand_Prix": "گرندپری لاس وگاس",
+                        "Emilia_Romagna_Grand_Prix": "گرندپری امیلیا رومانیا",
+                        "Portuguese_Grand_Prix": "گرند پری پرتغال",
+                        "French_Grand_Prix": "گرند پری فرانسه",
+                        "Styrian_Grand_Prix": "گرند پری استراین",
+                        "Turkish_Grand_Prix": "گرند پری ترکیه",
+                        "Russian_Grand_Prix": "گرند پری روسیه",
+                        "Tuscan_Grand_Prix": "گرند پری توسکان",
+                        "Eifel_Grand_Prix": "گرند پری ایفل",
+                        "Sakhir_Grand_Prix": "گرند پری ساخیر",
+                        "Chinese_Grand_Prix": "گرند پری چین",
+                    }
+                    gp_keys = []
+                    for gp in response:
+                        if lang == 1:
+                            gp_text = gp["t"]
+                        else:
+                            gp_text = country_tr[gp["tr"]]
+                        gp_data = gp["t"].encode()
+                        key = Button.inline(gp_text, data=gp_data)
+                        gp_keys.append(key)
+                    result = []
+                    for i in range(0, len(gp_keys), 2):
+                        if i + 1 < len(gp_keys):
+                            result.append([gp_keys[i], gp_keys[i + 1]])
+                        else:
+                            result.append([gp_keys[i]])
+                    result.append([Button.inline(bot_text["cancel"], b'cancel')])
+                    ask_gp = await conv.send_message(bot_text["select_gp"], buttons=result)
+                    try:
+                        gp_res = await conv.wait_event(events.CallbackQuery(), timeout=60)
+                        await bot.delete_messages(user_id, ask_gp.id)
+                    except TimeoutError:
+                        await conv.send_message(bot_text["timeout_error"])
+                        await bot.delete_messages(user_id, ask_gp.id)
+                        return
+                    gp_data = gp_res.data
+                    if gp_data == b'cancel':
+                        await conv.send_message(bot_text["canceled"])
+                        await conv.cancel_all()
+                    else:
+                        gp = gp_data.decode() 
+                        # url = f"https://f1datas.com/api/v1/fastf1/session?year={year}&country={gp}"
+                        sessions = manager.get_session(year=year, country=gp)["sessions"]
+                        # sessions = requests.get(url).json()["sessions"]
+                        type_tr = {
+                            "Practice_1": "تمرین اول",
+                            "Practice_2": "تمرین دوم",
+                            "Practice_3": "تمرین سوم",
+                            "Sprint": "اسپرینت",
+                            "Sprint_Shootout": "اسپرینت شوت آوت",
+                            "Sprint_Qualifying": "تعیین خط اسپرینت",
+                            "Qualifying": "تعیین خط",
+                            "Race": "مسابقه"
+                        }
+                        sessions_keys = []
+                        for session in sessions:
+                            if lang == 1:
+                                session_text = session
+                            else:
+                                session_text = type_tr[session]
+                            session_key = [
+                                Button.inline(session_text, session.encode()),
+                            ]
+                            sessions_keys.append(session_key)
+                        ask_event = await event.reply(bot_text["select_session"], buttons=sessions_keys)
+                        try:
+                            session_res = await conv.wait_event(events.CallbackQuery(), timeout=60)
+                            await bot.delete_messages(user_id, ask_event.id)
+                        except TimeoutError:
+                            await conv.send_message(bot_text["timeout_error"])
+                            await bot.delete_messages(user_id, ask_event.id)
+                            return
+                        event_data = session_res.data
+                        if event_data == b'cancel':
+                            await conv.send_message(bot_text["canceled"])
+                            await conv.cancel_all()
+                        else:
+                            session = event_data.decode()
+                            race_hour = cur.execute(f"SELECT time FROM grand_time WHERE grand = '{gp}' AND session_type = '{session}';").fetchone()
+                            if race_hour is None:
+                                await conv.send_message(bot_text["problem"])
+                                return
+                            race_hour = race_hour[0]
+                            # دریافت تاریخ مسابقه از API
+                            check_date = f"https://ergast.com/api/f1/{year}.json"
+                            check_date = requests.get(check_date).json()["MRData"]["RaceTable"]["Races"]
+
+                            for grand in check_date:
+                                if grand["raceName"] == gp:
+                                    now = datetime.now()
+                                    now_date_str = f"{now.year}-{now.month:02d}-{now.day:02d}"
+                                    now_time_str = now.strftime("%H:%M:%S")
+                                    
+                                    # ترکیب تاریخ و ساعت فعلی
+                                    now_datetime_str = f"{now_date_str} {now_time_str}"
+                                    now_datetime = datetime.strptime(now_datetime_str, "%Y-%m-%d %H:%M:%S")
+                                    
+                                    if session == "Race":
+                                        race_date = grand["date"]
+                                    elif session == "Sprint":
+                                        race_date = grand["Sprint"]["date"]
+                                    elif session == "Practice_1":
+                                        race_date = grand["FirstPractice"]["date"]
+                                    elif session == "Practice_2":
+                                        race_date = grand["SecondPractice"]["date"]
+                                    elif session == "Practice_3":
+                                        race_date = grand["ThirdPractice"]["date"]
+                                    elif session == "Qualifying":
+                                        race_date = grand["Qualifying"]["date"]
+                                    else:
+                                        await conv.send_message(bot_text["action_not_found"])
+                                        return
+                                    
+                                    # ترکیب تاریخ و ساعت مسابقه
+                                    race_datetime_str = f"{race_date} {race_hour}"
+                                    race_datetime = datetime.strptime(race_datetime_str, "%Y-%m-%d %H:%M:%S")
+                                    
+                                    if now_datetime < race_datetime:
+                                        await conv.send_message(bot_text["dont_time"])
+                                        return
+                            if lang == 1:
+                                loading = await conv.send_message(bot_text["loading"].format(year=year, gp=gp, event=session))
+                            else:
+                                loading = await conv.send_message(bot_text["loading"].format(year=year, gp=country_tr[gp.replace(" ", "_")], event=type_tr[session.replace(" ", "_")]))
+                            BASE_DIR = Path(__file__).resolve().parent
+                            image_reaction = f"{year}-{gp}-{session}-reaction.png"
+                            image_base_reaction = fr"{BASE_DIR}/{image_reaction}"
+                            if os.path.exists(image_base_reaction) is False:
+                                start_reaction_path = start_reaction(year, gp, session)
+                            await bot.delete_messages(user_id, loading.id)
+                            await bot.send_file(user_id, caption="Reaction", file=image_base_reaction)
+                            await bot.send_file(user_id, caption="Reaction", file=image_base_reaction, force_document=True)
+                            user_find = cur.execute(f"SELECT * FROM users WHERE id = {user_id}").fetchone()
+                            user_level = user_find[10]
+                            if user_level == 1:
+                                user_score = user_find[5]
+                                user_score -= 2
+                                cur.execute(f"UPDATE users SET score = {user_score} WHERE id = {user_id}")
+                                con.commit()
+                                await event.reply(bot_text["score_data"].format(coin=2))
+                            elif user_level == 2:
+                                user_score = user_find[5]
+                                user_score -= 1
+                                cur.execute(f"UPDATE users SET score = {user_score} WHERE id = {user_id}")
+                                con.commit()
+                                await event.reply(bot_text["score_data"].format(coin=1))
+                            elif user_level == 3:
+                                user_score = user_find[5]
+                                user_score -= 1
+                                cur.execute(f"UPDATE users SET score = {user_score} WHERE id = {user_id}")
+                                con.commit()
+                                await event.reply(bot_text["score_data"].format(coin=1))
+                            await conv.cancel_all()
         elif text == bot_text["add_grand"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
@@ -1906,6 +3187,13 @@ async def pay(event):
                 protection = user[7]
                 fantasy = user[6]
                 validity = user[8]
+                user_level = user[10]
+                if user_level == 1:
+                    user_level = bot_text["level_one"]
+                elif user_level == 2:
+                    user_level = bot_text["level_two"]
+                elif user_level == 3:
+                    user_level = bot_text["level_three"]
                 tel_user = await bot.get_entity(user_id)
                 first_name = tel_user.first_name
                 last_name = tel_user.last_name
@@ -1924,12 +3212,13 @@ async def pay(event):
                                 "⭐️score count: {score}\n" \
                                 "💵amount of support: {protection}\n" \
                                 "💎fantasy coins: {fantasy}\n" \
-                                "💳validity: {validity}\n".format(num_id=c_tag, join_date=join_date,
+                                "💳validity: {validity}\n" \
+                                "🌟level: {user_level}".format(num_id=c_tag, join_date=join_date,
                                                                       sub_count=sub_count,
                                                                       protection=protection, score=score,
                                                                       fantasy=fantasy,
                                                                       validity=validity, name=a_tag, username=username,
-                                                                      btag=b_tag)
+                                                                      btag=b_tag,user_level=user_level)
                 else:
                     b_tag = f'<b>📜 اطلاعات کاربری شما به شرح ذیل می باشد:</b>'
                     full_text = "{btag}\n\n" \
@@ -1941,12 +3230,14 @@ async def pay(event):
                                 "⭐️تعداد امتیاز: {score}\n" \
                                 "💵مقدار حمایت: {protection}\n" \
                                 "💎تعداد سکه فانتزی: {fantasy}\n" \
-                                "💳میزان اعتبار: {validity}\n".format(num_id=c_tag, join_date=join_date,
+                                "💳میزان اعتبار: {validity}\n" \
+                                "🌟سطح: {user_level}".format(num_id=c_tag, join_date=join_date,
                                                                       sub_count=sub_count,
                                                                       protection=protection, score=score,
                                                                       fantasy=fantasy,
                                                                       validity=validity, name=a_tag, username=username,
-                                                                      btag=b_tag)
+                                                                      btag=b_tag,
+                                                                      user_level=user_level)
 
                 await bot.send_message(user_id, full_text,
                                        parse_mode='html')
@@ -2145,6 +3436,10 @@ async def pay_hand(event):
             if pay[3] == bot_text["dinner"]:
                 cur.execute(f"UPDATE users SET lastd = {True} WHERE id={user_id}")
                 con.commit()
+            score = cur.execute(f"SELECT score FROM users WHERE id = {user_id}").fetchone()[0]
+            score += 5
+            cur.execute(f"UPDATE users SET score = {score} WHERE id = {user_id}")
+            con.commit()
             await event.reply(bot_text["pay_verified"])
             return
     else:
@@ -2350,6 +3645,33 @@ async def del_grand(event):
         con.commit()
         await bot.send_message(user_id, bot_text["deleted"])
 
+@bot.on(events.CallbackQuery(pattern="delete_time:*"))
+async def del_time(event):
+    user_id = event.sender_id
+    lang = check_lang(user_id)
+    if lang == 1:
+        bot_text = config.EN_TEXT
+    else:
+        bot_text = config.TEXT
+    back = Button.text(bot_text["back"], resize=True)
+    is_admin = check_admin(user_id)
+    if is_admin is False:
+        keys = [
+            [Button.text(bot_text["archive"], resize=True)],
+            [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
+            [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
+             Button.text(bot_text["rules"])],
+        ]
+        await event.reply(bot_text["select"], buttons=keys)
+        return
+    grand_num = event.data.decode().split(":")[1]
+    find_btn = cur.execute(f"SELECT * FROM grand_time WHERE time_num = {grand_num}").fetchone()
+    if find_btn is None:
+        await bot.send_message(user_id, bot_text["time_not_found"])
+    else:
+        cur.execute(f"DELETE FROM grand_time WHERE time_num = {grand_num}")
+        con.commit()
+        await bot.send_message(user_id, bot_text["deleted"])
 
 @bot.on(events.CallbackQuery(pattern="close_grand:*"))
 async def close_grand_handler(event):
@@ -2383,7 +3705,6 @@ async def close_grand_handler(event):
         cur.execute(f"UPDATE grand SET close = {True} WHERE num = '{grand_num}'")
         con.commit()
         await event.reply(bot_text["grand_closed"])
-
 
 @bot.on(events.CallbackQuery(pattern="get_drivers:*"))
 async def get_drivers_handler(event):
