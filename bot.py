@@ -3188,11 +3188,11 @@ async def pay(event):
                 fantasy = user[6]
                 validity = user[8]
                 user_level = user[10]
-                if user_level == 1:
+                if user_level == "1":
                     user_level = bot_text["level_one"]
-                elif user_level == 2:
+                elif user_level == "2":
                     user_level = bot_text["level_two"]
-                elif user_level == 3:
+                elif user_level == "3":
                     user_level = bot_text["level_three"]
                 tel_user = await bot.get_entity(user_id)
                 first_name = tel_user.first_name
