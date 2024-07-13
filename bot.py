@@ -1347,8 +1347,6 @@ async def pay(event):
                             await conv.cancel_all()
                         else:
                             session = event_data.decode()
-                            print(session)
-                            print(type_tr[session])
                             # ساعت مسابقه به عنوان یک رشته
                             race_hour = cur.execute(f"SELECT time FROM grand_time WHERE grand = '{gp}' AND session_type = '{session}';").fetchone()
                             if race_hour is None:
@@ -2002,7 +2000,7 @@ async def pay(event):
                             await conv.cancel_all()
                         else:
                             session = event_data.decode()
-                            race_hour = cur.execute(f"SELECT time FROM grand_time WHERE grand = '{gp}' AND session_type = '{session}';").fetchone()
+                            race_hour = cur.execute(f"SELECT time FROM grand_time WHERE grand = '{gp_country}' AND session_type = '{session}';").fetchone()
                             if race_hour is None:
                                 await conv.send_message(bot_text["problem"])
                                 return
@@ -2289,7 +2287,7 @@ async def pay(event):
                             await conv.cancel_all()
                         else:
                             session = event_data.decode()
-                            race_hour = cur.execute(f"SELECT time FROM grand_time WHERE grand = '{gp}' AND session_type = '{session}';").fetchone()
+                            race_hour = cur.execute(f"SELECT time FROM grand_time WHERE grand = '{gp_country}' AND session_type = '{session}';").fetchone()
                             if race_hour is None:
                                 await conv.send_message(bot_text["problem"])
                                 return
@@ -2537,7 +2535,7 @@ async def pay(event):
                             await conv.cancel_all()
                         else:
                             session = event_data.decode()
-                            race_hour = cur.execute(f"SELECT time FROM grand_time WHERE grand = '{gp}' AND session_type = '{session}';").fetchone()
+                            race_hour = cur.execute(f"SELECT time FROM grand_time WHERE grand = '{gp_country}' AND session_type = '{session}';").fetchone()
                             if race_hour is None:
                                 await conv.send_message(bot_text["problem"])
                                 return
