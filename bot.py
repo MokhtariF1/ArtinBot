@@ -30,8 +30,8 @@ if proxy:
     proxy_type = config.PROXY_TYPE
     proxy_address = config.PROXY_ADDRESS
     proxy_port = config.PROXY_PORT
-    bot = TelegramClient(session_name, api_id, api_hash, proxy=(proxy_type, proxy_address, proxy_port))
-    # bot = TelegramClient(session_name, api_id, api_hash)
+    # bot = TelegramClient(session_name, api_id, api_hash, proxy=(proxy_type, proxy_address, proxy_port))
+    bot = TelegramClient(session_name, api_id, api_hash)
     # Create an instance of the TelegramClient
     bot.start(bot_token=bot_token)
     print("connected!")
@@ -83,7 +83,7 @@ def check_and_limit(user_id):
         user_messages[user_id] = []
     user_messages[user_id] = [t for t in user_messages[user_id] if current_time - t < 30]
     user_messages[user_id].append(current_time)
-    if len(user_messages[user_id]) > 10:
+    if len(user_messages[user_id]) > 20:
         return True
     return False
 
@@ -173,9 +173,10 @@ async def save_msg(event):
 @bot.on(events.NewMessage())
 async def pay(event):
     user_id = event.sender_id
-    if check_and_limit(user_id):
-        await event.reply("شما بیش از حد مجاز پیام ارسال کرده‌اید. لطفاً 30 ثانیه صبر کنید.")
-        return
+    if check_admin(user_id) is False:
+        if check_and_limit(user_id):
+            await event.reply("شما بیش از حد مجاز پیام ارسال کرده‌اید. لطفاً 30 ثانیه صبر کنید.")
+            return
     lang = check_lang(user_id)
     if lang == 1:
         bot_text = config.EN_TEXT
@@ -232,6 +233,8 @@ async def pay(event):
                 ]
             ]
             await event.reply(bot_text["select"], buttons=keys)
+        elif text == bot_text["account_setup"]:
+            await event.reply(bot_text["soon"])
         elif text == bot_text["language"]:
             keys = [
                 [
@@ -1183,18 +1186,21 @@ async def pay(event):
         elif text == bot_text["data_archive"]:
             keys = [
                 [
-                    Button.text(bot_text["top_speed"]),
-                    Button.text(bot_text["overtake"]),
-                    Button.text(bot_text["map_viz"])
-                ],
-                [
                     Button.text(bot_text["rpm"]),
-                    Button.text(bot_text["map_break"]),
-                    Button.text(bot_text["lap_times"])
                 ],
                 [
+                    Button.text(bot_text["top_speed"]),
+                    Button.text(bot_text["map_viz"]),
+                ],
+                [
+                    Button.text(bot_text["lap_times"]),
                     Button.text(bot_text["down_force"]),
-                    Button.text(bot_text["start_reaction"])
+                    Button.text(bot_text["start_reaction"]),
+                ],
+                [
+                    Button.text(bot_text["soon"]),
+                    Button.text(bot_text["overtake"]),
+                    Button.text(bot_text["map_break"]),
                 ],
                 [
                     Button.text(bot_text["back"], resize=1)
@@ -3175,6 +3181,8 @@ async def pay(event):
                     await bot.send_message(user_id, bot_text['come_next'], buttons=paginate_keys)
                 except:
                     pass
+        elif text == bot_text["personal_account"]:
+            await event.reply(bot_text["soon"])
         elif text == bot_text["user_information"]:
             user = cur.execute(f"SELECT * FROM users WHERE id = {user_id}").fetchone()
             if user is None:
@@ -3208,12 +3216,12 @@ async def pay(event):
                                 "🌐id: {username}\n" \
                                 "👤number id: {num_id}\n" \
                                 "🕰join date: {join_date}\n" \
-                                "💰sub collection count: {sub_count}\n" \
+                                "🌟level: {user_level}\n" \
                                 "⭐️score count: {score}\n" \
-                                "💵amount of support: {protection}\n" \
-                                "💎fantasy coins: {fantasy}\n" \
                                 "💳validity: {validity}\n" \
-                                "🌟level: {user_level}".format(num_id=c_tag, join_date=join_date,
+                                "💰sub collection count: {sub_count}\n" \
+                                "💵amount of support: {protection}\n" \
+                                "💎fantasy coins: {fantasy}\n".format(num_id=c_tag, join_date=join_date,
                                                                       sub_count=sub_count,
                                                                       protection=protection, score=score,
                                                                       fantasy=fantasy,
@@ -3226,19 +3234,19 @@ async def pay(event):
                                 "🌐آیدی: {username}\n" \
                                 "👤آیدی عددی: {num_id}\n" \
                                 "🕰زمان عضویت: {join_date}\n" \
-                                "💰تعداد زیر مجموعه: {sub_count}\n" \
+                                "🌟سطح عضویت: {user_level}\n" \
                                 "⭐️تعداد امتیاز: {score}\n" \
-                                "💵مقدار حمایت: {protection}\n" \
-                                "💎تعداد سکه فانتزی: {fantasy}\n" \
                                 "💳میزان اعتبار: {validity}\n" \
-                                "🌟سطح: {user_level}".format(num_id=c_tag, join_date=join_date,
+                                "💰تعداد زیر مجموعه: {sub_count}\n" \
+                                "💵مقدار حمایت: {protection}\n" \
+                                "💎تعداد سکه فانتزی: {fantasy}\n".format(num_id=c_tag, join_date=join_date,
                                                                       sub_count=sub_count,
                                                                       protection=protection, score=score,
                                                                       fantasy=fantasy,
                                                                       validity=validity, name=a_tag, username=username,
                                                                       btag=b_tag,
                                                                       user_level=user_level)
-
+                full_text += "\n🆔 @F1DATAIQBOT"
                 await bot.send_message(user_id, full_text,
                                        parse_mode='html')
         elif text == bot_text["sub_collection"]:
@@ -3326,7 +3334,7 @@ async def pay(event):
                 if name.media is not None:
                     await conv.send_message(bot_text["dont_image"])
                     return
-                if name.raw_text == bot_text["cancel"]:
+                if name.raw_text == bot_text["cancel"] or name.raw_text == bot_text["back"]:
                     await conv.send_message(bot_text["canceled"])
                     return
                 pay_num = randint(10000, 99999)
@@ -3335,7 +3343,7 @@ async def pay(event):
                 if phone.media is not None:
                     await conv.send_message(bot_text["dont_image"])
                     return
-                if phone.raw_text == bot_text["cancel"]:
+                if phone.raw_text == bot_text["cancel"] or phone.raw_text == bot_text["back"]:
                     await conv.send_message(bot_text["canceled"])
                     return
                 await conv.send_message(bot_text["email"])
@@ -3343,7 +3351,7 @@ async def pay(event):
                 if mail.media is not None:
                     await conv.send_message(bot_text["dont_image"])
                     return
-                if mail.raw_text == bot_text["cancel"]:
+                if mail.raw_text == bot_text["cancel"] or mail.raw_text == bot_text["back"]:
                     await conv.send_message(bot_text["canceled"])
                     return
                 await conv.send_message(bot_text["desc"])
@@ -3351,7 +3359,7 @@ async def pay(event):
                 if desc.media is not None:
                     await conv.send_message(bot_text["dont_image"])
                     return
-                if desc.raw_text == bot_text["cancel"]:
+                if desc.raw_text == bot_text["cancel"] or desc.raw_text == bot_text["back"]:
                     await conv.send_message(bot_text["canceled"])
                     return
                 name = name.raw_text
