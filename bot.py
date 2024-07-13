@@ -1208,6 +1208,18 @@ async def pay(event):
             ]
             await event.reply(bot_text["select"], buttons=keys)
         elif text == bot_text["overtake"]:
+            user_find = cur.execute(f"SELECT * FROM users WHERE id = {user_id}").fetchone()
+            user_scores = user_find[5]
+            user_level = user_find[10]
+            score_dict = {
+                "1": 1,
+                "2": 1,
+                "3": 0,
+            }
+            score_get = score_dict[f"{user_level}"]
+            if user_scores - score_get <= 0:
+                await event.reply(bot_text["coin_not_enough"])
+                return
             async with bot.conversation(user_id) as conv:
                 year_keys = [
                     [
