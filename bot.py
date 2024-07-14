@@ -48,8 +48,9 @@ user_messages = {}
 drivers_translate = {
     "Max_Verstappen": "مکس ورستپن",
     "Nyck_de Vries": "نیک دوریس",
+    "German_Grand_Prix": "گرندپری آلمان",
     "Liam_Lawson": "لیام لاوسون",
-    "Kimi_Räikkönen": "کیمی رایکونن",                                                                                                       
+    "Kimi_Räikkönen": "کیمی رایکونن",                                                                                          
     "Sergio_Pérez": "سرجیو پرز",
     "Lewis_Hamilton": "لوئیس همیلتون",
     "George_Russell": "جورج راسل",
@@ -2829,10 +2830,8 @@ async def pay(event):
                         await conv.send_message(bot_text["canceled"])
                         await conv.cancel_all()
                     else:
-                        gp = gp_data.decode() 
-                        # url = f"https://f1datas.com/api/v1/fastf1/session?year={year}&country={gp}"
-                        sessions = manager.get_session(year=year, country=gp)["sessions"]
-                        # sessions = requests.get(url).json()["sessions"]
+                        gp = gp_data.decode()
+                        session = "Race"
                         type_tr = {
                             "Practice_1": "تمرین اول",
                             "Practice_2": "تمرین دوم",
@@ -2843,105 +2842,81 @@ async def pay(event):
                             "Qualifying": "تعیین خط",
                             "Race": "مسابقه"
                         }
-                        sessions_keys = []
-                        for session in sessions:
-                            if lang == 1:
-                                session_text = session
-                            else:
-                                session_text = type_tr[session]
-                            session_key = [
-                                Button.inline(session_text, session.encode()),
-                            ]
-                            sessions_keys.append(session_key)
-                        ask_event = await event.reply(bot_text["select_session"], buttons=sessions_keys)
-                        try:
-                            session_res = await conv.wait_event(events.CallbackQuery(), timeout=60)
-                            await bot.delete_messages(user_id, ask_event.id)
-                        except TimeoutError:
-                            await conv.send_message(bot_text["timeout_error"])
-                            await bot.delete_messages(user_id, ask_event.id)
+                        race_hour = cur.execute(f"SELECT time FROM grand_time WHERE grand = '{gp}' AND session_type = '{session}';").fetchone()
+                        if race_hour is None:
+                            await conv.send_message(bot_text["problem"])
                             return
-                        event_data = session_res.data
-                        if event_data == b'cancel':
-                            await conv.send_message(bot_text["canceled"])
-                            await conv.cancel_all()
-                        else:
-                            session = event_data.decode()
-                            race_hour = cur.execute(f"SELECT time FROM grand_time WHERE grand = '{gp}' AND session_type = '{session}';").fetchone()
-                            if race_hour is None:
-                                await conv.send_message(bot_text["problem"])
-                                return
-                            race_hour = race_hour[0]
-                            # دریافت تاریخ مسابقه از API
-                            check_date = f"https://ergast.com/api/f1/{year}.json"
-                            check_date = requests.get(check_date).json()["MRData"]["RaceTable"]["Races"]
+                        race_hour = race_hour[0]
+                        # دریافت تاریخ مسابقه از API
+                        check_date = f"https://ergast.com/api/f1/{year}.json"
+                        check_date = requests.get(check_date).json()["MRData"]["RaceTable"]["Races"]
 
-                            for grand in check_date:
-                                if grand["raceName"] == gp:
-                                    now = datetime.now()
-                                    now_date_str = f"{now.year}-{now.month:02d}-{now.day:02d}"
-                                    now_time_str = now.strftime("%H:%M:%S")
-                                    
-                                    # ترکیب تاریخ و ساعت فعلی
-                                    now_datetime_str = f"{now_date_str} {now_time_str}"
-                                    now_datetime = datetime.strptime(now_datetime_str, "%Y-%m-%d %H:%M:%S")
-                                    
-                                    if session == "Race":
-                                        race_date = grand["date"]
-                                    elif session == "Sprint":
-                                        race_date = grand["Sprint"]["date"]
-                                    elif session == "Practice_1":
-                                        race_date = grand["FirstPractice"]["date"]
-                                    elif session == "Practice_2":
-                                        race_date = grand["SecondPractice"]["date"]
-                                    elif session == "Practice_3":
-                                        race_date = grand["ThirdPractice"]["date"]
-                                    elif session == "Qualifying":
-                                        race_date = grand["Qualifying"]["date"]
-                                    else:
-                                        await conv.send_message(bot_text["action_not_found"])
-                                        return
-                                    
-                                    # ترکیب تاریخ و ساعت مسابقه
-                                    race_datetime_str = f"{race_date} {race_hour}"
-                                    race_datetime = datetime.strptime(race_datetime_str, "%Y-%m-%d %H:%M:%S")
-                                    
-                                    if now_datetime < race_datetime:
-                                        await conv.send_message(bot_text["dont_time"])
-                                        return
-                            if lang == 1:
-                                loading = await conv.send_message(bot_text["loading"].format(year=year, gp=gp, event=session))
-                            else:
-                                loading = await conv.send_message(bot_text["loading"].format(year=year, gp=country_tr[gp.replace(" ", "_")], event=type_tr[session.replace(" ", "_")]))
-                            BASE_DIR = Path(__file__).resolve().parent
-                            image_reaction = f"{year}-{gp}-{session}-reaction.png"
-                            image_base_reaction = fr"{BASE_DIR}/{image_reaction}"
-                            if os.path.exists(image_base_reaction) is False:
-                                start_reaction_path = start_reaction(year, gp, session)
-                            await bot.delete_messages(user_id, loading.id)
-                            await bot.send_file(user_id, caption="Reaction", file=image_base_reaction)
-                            await bot.send_file(user_id, caption="Reaction", file=image_base_reaction, force_document=True)
-                            user_find = cur.execute(f"SELECT * FROM users WHERE id = {user_id}").fetchone()
-                            user_level = user_find[10]
-                            if user_level == "1":
-                                user_score = user_find[5]
-                                user_score -= 2
-                                cur.execute(f"UPDATE users SET score = {user_score} WHERE id = {user_id}")
-                                con.commit()
-                                await event.reply(bot_text["score_data"].format(coin=2))
-                            elif user_level == "2":
-                                user_score = user_find[5]
-                                user_score -= 1
-                                cur.execute(f"UPDATE users SET score = {user_score} WHERE id = {user_id}")
-                                con.commit()
-                                await event.reply(bot_text["score_data"].format(coin=1))
-                            elif user_level == "3":
-                                user_score = user_find[5]
-                                user_score -= 1
-                                cur.execute(f"UPDATE users SET score = {user_score} WHERE id = {user_id}")
-                                con.commit()
-                                await event.reply(bot_text["score_data"].format(coin=1))
-                            await conv.cancel_all()
+                        for grand in check_date:
+                            if grand["raceName"] == gp:
+                                now = datetime.now()
+                                now_date_str = f"{now.year}-{now.month:02d}-{now.day:02d}"
+                                now_time_str = now.strftime("%H:%M:%S")
+                                
+                                # ترکیب تاریخ و ساعت فعلی
+                                now_datetime_str = f"{now_date_str} {now_time_str}"
+                                now_datetime = datetime.strptime(now_datetime_str, "%Y-%m-%d %H:%M:%S")
+                                
+                                if session == "Race":
+                                    race_date = grand["date"]
+                                elif session == "Sprint":
+                                    race_date = grand["Sprint"]["date"]
+                                elif session == "Practice_1":
+                                    race_date = grand["FirstPractice"]["date"]
+                                elif session == "Practice_2":
+                                    race_date = grand["SecondPractice"]["date"]
+                                elif session == "Practice_3":
+                                    race_date = grand["ThirdPractice"]["date"]
+                                elif session == "Qualifying":
+                                    race_date = grand["Qualifying"]["date"]
+                                else:
+                                    await conv.send_message(bot_text["action_not_found"])
+                                    return
+                                
+                                # ترکیب تاریخ و ساعت مسابقه
+                                race_datetime_str = f"{race_date} {race_hour}"
+                                race_datetime = datetime.strptime(race_datetime_str, "%Y-%m-%d %H:%M:%S")
+                                
+                                if now_datetime < race_datetime:
+                                    await conv.send_message(bot_text["dont_time"])
+                                    return
+                        if lang == 1:
+                            loading = await conv.send_message(bot_text["loading"].format(year=year, gp=gp, event=session))
+                        else:
+                            loading = await conv.send_message(bot_text["loading"].format(year=year, gp=country_tr[gp.replace(" ", "_")], event=type_tr[session.replace(" ", "_")]))
+                        BASE_DIR = Path(__file__).resolve().parent
+                        image_reaction = f"{year}-{gp}-{session}-reaction.png"
+                        image_base_reaction = fr"{BASE_DIR}/{image_reaction}"
+                        if os.path.exists(image_base_reaction) is False:
+                            start_reaction_path = start_reaction(year, gp, session)
+                        await bot.delete_messages(user_id, loading.id)
+                        await bot.send_file(user_id, caption="Reaction", file=image_base_reaction)
+                        await bot.send_file(user_id, caption="Reaction", file=image_base_reaction, force_document=True)
+                        user_find = cur.execute(f"SELECT * FROM users WHERE id = {user_id}").fetchone()
+                        user_level = user_find[10]
+                        if user_level == "1":
+                            user_score = user_find[5]
+                            user_score -= 2
+                            cur.execute(f"UPDATE users SET score = {user_score} WHERE id = {user_id}")
+                            con.commit()
+                            await event.reply(bot_text["score_data"].format(coin=2))
+                        elif user_level == "2":
+                            user_score = user_find[5]
+                            user_score -= 1
+                            cur.execute(f"UPDATE users SET score = {user_score} WHERE id = {user_id}")
+                            con.commit()
+                            await event.reply(bot_text["score_data"].format(coin=1))
+                        elif user_level == "3":
+                            user_score = user_find[5]
+                            user_score -= 1
+                            cur.execute(f"UPDATE users SET score = {user_score} WHERE id = {user_id}")
+                            con.commit()
+                            await event.reply(bot_text["score_data"].format(coin=1))
+                        await conv.cancel_all()
         elif text == bot_text["add_grand"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
