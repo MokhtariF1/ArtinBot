@@ -49,6 +49,7 @@ drivers_translate = {
     "Max_Verstappen": "مکس ورستپن",
     "Nyck_de Vries": "نیک دوریس",
     "Liam_Lawson": "لیام لاوسون",
+    "Kimi_Räikkönen": "کیمی رایکونن",                                                                                                       
     "Sergio_Pérez": "سرجیو پرز",
     "Lewis_Hamilton": "لوئیس همیلتون",
     "George_Russell": "جورج راسل",
@@ -76,6 +77,41 @@ drivers_translate = {
     "Yuki_Tsunoda": "یوکی سونودا",
     "Nico_Hülkenberg": "نیکو هالکنبرگ",
     "Kevin_Magnussen": "کوین مگنوسن"
+}
+
+country_tr = {
+    "Bahrain_Grand_Prix": "گرندپری بحرین",
+    "Saudi_Arabian_Grand_Prix": "گرندپری عربستان",
+    "Australian_Grand_Prix": "گرندپری استرالیا",
+    "Azerbaijan_Grand_Prix": "گرندپری آذربایجان",
+    "United_States_Grand_Prix": "گرندپری آمریکا",
+    "Miami_Grand_Prix": "گرندپری میامی",
+    "Monaco_Grand_Prix": "گرندپری موناکو",
+    "Spanish_Grand_Prix": "گرندپری اسپانیا",
+    "Canadian_Grand_Prix": "گرندپری کانادا",
+    "Austrian_Grand_Prix": "گرندپری اتریش",
+    "British_Grand_Prix": "گرندپری بریتانیا",
+    "Hungarian_Grand_Prix": "گرندپری مجارستان",
+    "Belgian_Grand_Prix": "گرندپری بلژیک",
+    "Dutch_Grand_Prix": "گرندپری هلند",
+    "Italian_Grand_Prix": "گرندپری ایتالیا",
+    "Singapore_Grand_Prix": "گرندپری سنگاپور",
+    "Japanese_Grand_Prix": "گرندپری ژاپن",
+    "Qatar_Grand_Prix": "گرندپری قطر",
+    "Mexico_City_Grand_Prix": "گرندپری مکزیک",
+    "São_Paulo_Grand_Prix": "گرندپری برزیل",
+    "Abu_Dhabi_Grand_Prix": "گرندپری ابوظبی",
+    "Las_Vegas_Grand_Prix": "گرندپری لاس وگاس",
+    "Emilia_Romagna_Grand_Prix": "گرندپری امیلیا رومانیا",
+    "Portuguese_Grand_Prix": "گرند پری پرتغال",
+    "French_Grand_Prix": "گرند پری فرانسه",
+    "Styrian_Grand_Prix": "گرند پری استراین",
+    "Turkish_Grand_Prix": "گرند پری ترکیه",
+    "Russian_Grand_Prix": "گرند پری روسیه",
+    "Tuscan_Grand_Prix": "گرند پری توسکان",
+    "Eifel_Grand_Prix": "گرند پری ایفل",
+    "Sakhir_Grand_Prix": "گرند پری ساخیر",
+    "Chinese_Grand_Prix": "گرند پری چین",
 }
 
 def check_and_limit(user_id):
@@ -1266,40 +1302,6 @@ async def pay(event):
                 else: 
                     year = int(year_data)
                     response = manager.get_event(year=year)["Country"]
-                    country_tr = {
-                        "Bahrain_Grand_Prix": "گرندپری بحرین",
-                        "Saudi_Arabian_Grand_Prix": "گرندپری عربستان",
-                        "Australian_Grand_Prix": "گرندپری استرالیا",
-                        "Azerbaijan_Grand_Prix": "گرندپری آذربایجان",
-                        "United_States_Grand_Prix": "گرندپری آمریکا",
-                        "Miami_Grand_Prix": "گرندپری میامی",
-                        "Monaco_Grand_Prix": "گرندپری موناکو",
-                        "Spanish_Grand_Prix": "گرندپری اسپانیا",
-                        "Canadian_Grand_Prix": "گرندپری کانادا",
-                        "Austrian_Grand_Prix": "گرندپری اتریش",
-                        "British_Grand_Prix": "گرندپری بریتانیا",
-                        "Hungarian_Grand_Prix": "گرندپری مجارستان",
-                        "Belgian_Grand_Prix": "گرندپری بلژیک",
-                        "Dutch_Grand_Prix": "گرندپری هلند",
-                        "Italian_Grand_Prix": "گرندپری ایتالیا",
-                        "Singapore_Grand_Prix": "گرندپری سنگاپور",
-                        "Japanese_Grand_Prix": "گرندپری ژاپن",
-                        "Qatar_Grand_Prix": "گرندپری قطر",
-                        "Mexico_City_Grand_Prix": "گرندپری مکزیک",
-                        "São_Paulo_Grand_Prix": "گرندپری برزیل",
-                        "Abu_Dhabi_Grand_Prix": "گرندپری ابوظبی",
-                        "Las_Vegas_Grand_Prix": "گرندپری لاس وگاس",
-                        "Emilia_Romagna_Grand_Prix": "گرندپری امیلیا رومانیا",
-                        "Portuguese_Grand_Prix": "گرند پری پرتغال",
-                        "French_Grand_Prix": "گرند پری فرانسه",
-                        "Styrian_Grand_Prix": "گرند پری استراین",
-                        "Turkish_Grand_Prix": "گرند پری ترکیه",
-                        "Russian_Grand_Prix": "گرند پری روسیه",
-                        "Tuscan_Grand_Prix": "گرند پری توسکان",
-                        "Eifel_Grand_Prix": "گرند پری ایفل",
-                        "Sakhir_Grand_Prix": "گرند پری ساخیر",
-                        "Chinese_Grand_Prix": "گرند پری چین",
-                    }
                     gp_keys = []
                     for gp in response:
                         if lang == 1:
@@ -1485,40 +1487,6 @@ async def pay(event):
                 else: 
                     year = int(year_data)
                     response = manager.get_event(year=year)["Country"]
-                    country_tr = {
-                        "Bahrain_Grand_Prix": "گرندپری بحرین",
-                        "Saudi_Arabian_Grand_Prix": "گرندپری عربستان",
-                        "Australian_Grand_Prix": "گرندپری استرالیا",
-                        "Azerbaijan_Grand_Prix": "گرندپری آذربایجان",
-                        "United_States_Grand_Prix": "گرندپری آمریکا",
-                        "Miami_Grand_Prix": "گرندپری میامی",
-                        "Monaco_Grand_Prix": "گرندپری موناکو",
-                        "Spanish_Grand_Prix": "گرندپری اسپانیا",
-                        "Canadian_Grand_Prix": "گرندپری کانادا",
-                        "Austrian_Grand_Prix": "گرندپری اتریش",
-                        "British_Grand_Prix": "گرندپری بریتانیا",
-                        "Hungarian_Grand_Prix": "گرندپری مجارستان",
-                        "Belgian_Grand_Prix": "گرندپری بلژیک",
-                        "Dutch_Grand_Prix": "گرندپری هلند",
-                        "Italian_Grand_Prix": "گرندپری ایتالیا",
-                        "Singapore_Grand_Prix": "گرندپری سنگاپور",
-                        "Japanese_Grand_Prix": "گرندپری ژاپن",
-                        "Qatar_Grand_Prix": "گرندپری قطر",
-                        "Mexico_City_Grand_Prix": "گرندپری مکزیک",
-                        "São_Paulo_Grand_Prix": "گرندپری برزیل",
-                        "Abu_Dhabi_Grand_Prix": "گرندپری ابوظبی",
-                        "Las_Vegas_Grand_Prix": "گرندپری لاس وگاس",
-                        "Emilia_Romagna_Grand_Prix": "گرندپری امیلیا رومانیا",
-                        "Portuguese_Grand_Prix": "گرند پری پرتغال",
-                        "French_Grand_Prix": "گرند پری فرانسه",
-                        "Styrian_Grand_Prix": "گرند پری استراین",
-                        "Turkish_Grand_Prix": "گرند پری ترکیه",
-                        "Russian_Grand_Prix": "گرند پری روسیه",
-                        "Tuscan_Grand_Prix": "گرند پری توسکان",
-                        "Eifel_Grand_Prix": "گرند پری ایفل",
-                        "Sakhir_Grand_Prix": "گرند پری ساخیر",
-                        "Chinese_Grand_Prix": "گرند پری چین",
-                    }
                     gp_keys = []
                     for gp in response:
                         if lang == 1:
@@ -1724,40 +1692,6 @@ async def pay(event):
                 else: 
                     year = int(year_data)
                     response = manager.get_event(year=year)["Country"]
-                    country_tr = {
-                        "Bahrain_Grand_Prix": "گرندپری بحرین",
-                        "Saudi_Arabian_Grand_Prix": "گرندپری عربستان",
-                        "Australian_Grand_Prix": "گرندپری استرالیا",
-                        "Azerbaijan_Grand_Prix": "گرندپری آذربایجان",
-                        "United_States_Grand_Prix": "گرندپری آمریکا",
-                        "Miami_Grand_Prix": "گرندپری میامی",
-                        "Monaco_Grand_Prix": "گرندپری موناکو",
-                        "Spanish_Grand_Prix": "گرندپری اسپانیا",
-                        "Canadian_Grand_Prix": "گرندپری کانادا",
-                        "Austrian_Grand_Prix": "گرندپری اتریش",
-                        "British_Grand_Prix": "گرندپری بریتانیا",
-                        "Hungarian_Grand_Prix": "گرندپری مجارستان",
-                        "Belgian_Grand_Prix": "گرندپری بلژیک",
-                        "Dutch_Grand_Prix": "گرندپری هلند",
-                        "Italian_Grand_Prix": "گرندپری ایتالیا",
-                        "Singapore_Grand_Prix": "گرندپری سنگاپور",
-                        "Japanese_Grand_Prix": "گرندپری ژاپن",
-                        "Qatar_Grand_Prix": "گرندپری قطر",
-                        "Mexico_City_Grand_Prix": "گرندپری مکزیک",
-                        "São_Paulo_Grand_Prix": "گرندپری برزیل",
-                        "Abu_Dhabi_Grand_Prix": "گرندپری ابوظبی",
-                        "Las_Vegas_Grand_Prix": "گرندپری لاس وگاس",
-                        "Emilia_Romagna_Grand_Prix": "گرندپری امیلیا رومانیا",
-                        "Portuguese_Grand_Prix": "گرند پری پرتغال",
-                        "French_Grand_Prix": "گرند پری فرانسه",
-                        "Styrian_Grand_Prix": "گرند پری استراین",
-                        "Turkish_Grand_Prix": "گرند پری ترکیه",
-                        "Russian_Grand_Prix": "گرند پری روسیه",
-                        "Tuscan_Grand_Prix": "گرند پری توسکان",
-                        "Eifel_Grand_Prix": "گرند پری ایفل",
-                        "Sakhir_Grand_Prix": "گرند پری ساخیر",
-                        "Chinese_Grand_Prix": "گرند پری چین",
-                    }
                     gp_keys = []
                     for gp in response:
                         if lang == 1:
@@ -1951,40 +1885,6 @@ async def pay(event):
                 else: 
                     year = int(year_data)
                     response = manager.get_event(year=year)["Country"]
-                    country_tr = {
-                        "Bahrain_Grand_Prix": "گرندپری بحرین",
-                        "Saudi_Arabian_Grand_Prix": "گرندپری عربستان",
-                        "Australian_Grand_Prix": "گرندپری استرالیا",
-                        "Azerbaijan_Grand_Prix": "گرندپری آذربایجان",
-                        "United_States_Grand_Prix": "گرندپری آمریکا",
-                        "Miami_Grand_Prix": "گرندپری میامی",
-                        "Monaco_Grand_Prix": "گرندپری موناکو",
-                        "Spanish_Grand_Prix": "گرندپری اسپانیا",
-                        "Canadian_Grand_Prix": "گرندپری کانادا",
-                        "Austrian_Grand_Prix": "گرندپری اتریش",
-                        "British_Grand_Prix": "گرندپری بریتانیا",
-                        "Hungarian_Grand_Prix": "گرندپری مجارستان",
-                        "Belgian_Grand_Prix": "گرندپری بلژیک",
-                        "Dutch_Grand_Prix": "گرندپری هلند",
-                        "Italian_Grand_Prix": "گرندپری ایتالیا",
-                        "Singapore_Grand_Prix": "گرندپری سنگاپور",
-                        "Japanese_Grand_Prix": "گرندپری ژاپن",
-                        "Qatar_Grand_Prix": "گرندپری قطر",
-                        "Mexico_City_Grand_Prix": "گرندپری مکزیک",
-                        "São_Paulo_Grand_Prix": "گرندپری برزیل",
-                        "Abu_Dhabi_Grand_Prix": "گرندپری ابوظبی",
-                        "Las_Vegas_Grand_Prix": "گرندپری لاس وگاس",
-                        "Emilia_Romagna_Grand_Prix": "گرندپری امیلیا رومانیا",
-                        "Portuguese_Grand_Prix": "گرند پری پرتغال",
-                        "French_Grand_Prix": "گرند پری فرانسه",
-                        "Styrian_Grand_Prix": "گرند پری استراین",
-                        "Turkish_Grand_Prix": "گرند پری ترکیه",
-                        "Russian_Grand_Prix": "گرند پری روسیه",
-                        "Tuscan_Grand_Prix": "گرند پری توسکان",
-                        "Eifel_Grand_Prix": "گرند پری ایفل",
-                        "Sakhir_Grand_Prix": "گرند پری ساخیر",
-                        "Chinese_Grand_Prix": "گرند پری چین",
-                    }
                     gp_keys = []
                     for gp in response:
                         if lang == 1:
@@ -2250,40 +2150,6 @@ async def pay(event):
                 else: 
                     year = int(year_data)
                     response = manager.get_event(year=year)["Country"]
-                    country_tr = {
-                        "Bahrain_Grand_Prix": "گرندپری بحرین",
-                        "Saudi_Arabian_Grand_Prix": "گرندپری عربستان",
-                        "Australian_Grand_Prix": "گرندپری استرالیا",
-                        "Azerbaijan_Grand_Prix": "گرندپری آذربایجان",
-                        "United_States_Grand_Prix": "گرندپری آمریکا",
-                        "Miami_Grand_Prix": "گرندپری میامی",
-                        "Monaco_Grand_Prix": "گرندپری موناکو",
-                        "Spanish_Grand_Prix": "گرندپری اسپانیا",
-                        "Canadian_Grand_Prix": "گرندپری کانادا",
-                        "Austrian_Grand_Prix": "گرندپری اتریش",
-                        "British_Grand_Prix": "گرندپری بریتانیا",
-                        "Hungarian_Grand_Prix": "گرندپری مجارستان",
-                        "Belgian_Grand_Prix": "گرندپری بلژیک",
-                        "Dutch_Grand_Prix": "گرندپری هلند",
-                        "Italian_Grand_Prix": "گرندپری ایتالیا",
-                        "Singapore_Grand_Prix": "گرندپری سنگاپور",
-                        "Japanese_Grand_Prix": "گرندپری ژاپن",
-                        "Qatar_Grand_Prix": "گرندپری قطر",
-                        "Mexico_City_Grand_Prix": "گرندپری مکزیک",
-                        "São_Paulo_Grand_Prix": "گرندپری برزیل",
-                        "Abu_Dhabi_Grand_Prix": "گرندپری ابوظبی",
-                        "Las_Vegas_Grand_Prix": "گرندپری لاس وگاس",
-                        "Emilia_Romagna_Grand_Prix": "گرندپری امیلیا رومانیا",
-                        "Portuguese_Grand_Prix": "گرند پری پرتغال",
-                        "French_Grand_Prix": "گرند پری فرانسه",
-                        "Styrian_Grand_Prix": "گرند پری استراین",
-                        "Turkish_Grand_Prix": "گرند پری ترکیه",
-                        "Russian_Grand_Prix": "گرند پری روسیه",
-                        "Tuscan_Grand_Prix": "گرند پری توسکان",
-                        "Eifel_Grand_Prix": "گرند پری ایفل",
-                        "Sakhir_Grand_Prix": "گرند پری ساخیر",
-                        "Chinese_Grand_Prix": "گرند پری چین",
-                    }
                     gp_keys = []
                     for gp in response:
                         if lang == 1:
@@ -2510,40 +2376,6 @@ async def pay(event):
                 else: 
                     year = int(year_data)
                     response = manager.get_event(year=year)["Country"]
-                    country_tr = {
-                        "Bahrain_Grand_Prix": "گرندپری بحرین",
-                        "Saudi_Arabian_Grand_Prix": "گرندپری عربستان",
-                        "Australian_Grand_Prix": "گرندپری استرالیا",
-                        "Azerbaijan_Grand_Prix": "گرندپری آذربایجان",
-                        "United_States_Grand_Prix": "گرندپری آمریکا",
-                        "Miami_Grand_Prix": "گرندپری میامی",
-                        "Monaco_Grand_Prix": "گرندپری موناکو",
-                        "Spanish_Grand_Prix": "گرندپری اسپانیا",
-                        "Canadian_Grand_Prix": "گرندپری کانادا",
-                        "Austrian_Grand_Prix": "گرندپری اتریش",
-                        "British_Grand_Prix": "گرندپری بریتانیا",
-                        "Hungarian_Grand_Prix": "گرندپری مجارستان",
-                        "Belgian_Grand_Prix": "گرندپری بلژیک",
-                        "Dutch_Grand_Prix": "گرندپری هلند",
-                        "Italian_Grand_Prix": "گرندپری ایتالیا",
-                        "Singapore_Grand_Prix": "گرندپری سنگاپور",
-                        "Japanese_Grand_Prix": "گرندپری ژاپن",
-                        "Qatar_Grand_Prix": "گرندپری قطر",
-                        "Mexico_City_Grand_Prix": "گرندپری مکزیک",
-                        "São_Paulo_Grand_Prix": "گرندپری برزیل",
-                        "Abu_Dhabi_Grand_Prix": "گرندپری ابوظبی",
-                        "Las_Vegas_Grand_Prix": "گرندپری لاس وگاس",
-                        "Emilia_Romagna_Grand_Prix": "گرندپری امیلیا رومانیا",
-                        "Portuguese_Grand_Prix": "گرند پری پرتغال",
-                        "French_Grand_Prix": "گرند پری فرانسه",
-                        "Styrian_Grand_Prix": "گرند پری استراین",
-                        "Turkish_Grand_Prix": "گرند پری ترکیه",
-                        "Russian_Grand_Prix": "گرند پری روسیه",
-                        "Tuscan_Grand_Prix": "گرند پری توسکان",
-                        "Eifel_Grand_Prix": "گرند پری ایفل",
-                        "Sakhir_Grand_Prix": "گرند پری ساخیر",
-                        "Chinese_Grand_Prix": "گرند پری چین",
-                    }
                     gp_keys = []
                     for gp in response:
                         if lang == 1:
@@ -2770,40 +2602,6 @@ async def pay(event):
                 else: 
                     year = int(year_data)
                     response = manager.get_event(year=year)["Country"]
-                    country_tr = {
-                        "Bahrain_Grand_Prix": "گرندپری بحرین",
-                        "Saudi_Arabian_Grand_Prix": "گرندپری عربستان",
-                        "Australian_Grand_Prix": "گرندپری استرالیا",
-                        "Azerbaijan_Grand_Prix": "گرندپری آذربایجان",
-                        "United_States_Grand_Prix": "گرندپری آمریکا",
-                        "Miami_Grand_Prix": "گرندپری میامی",
-                        "Monaco_Grand_Prix": "گرندپری موناکو",
-                        "Spanish_Grand_Prix": "گرندپری اسپانیا",
-                        "Canadian_Grand_Prix": "گرندپری کانادا",
-                        "Austrian_Grand_Prix": "گرندپری اتریش",
-                        "British_Grand_Prix": "گرندپری بریتانیا",
-                        "Hungarian_Grand_Prix": "گرندپری مجارستان",
-                        "Belgian_Grand_Prix": "گرندپری بلژیک",
-                        "Dutch_Grand_Prix": "گرندپری هلند",
-                        "Italian_Grand_Prix": "گرندپری ایتالیا",
-                        "Singapore_Grand_Prix": "گرندپری سنگاپور",
-                        "Japanese_Grand_Prix": "گرندپری ژاپن",
-                        "Qatar_Grand_Prix": "گرندپری قطر",
-                        "Mexico_City_Grand_Prix": "گرندپری مکزیک",
-                        "São_Paulo_Grand_Prix": "گرندپری برزیل",
-                        "Abu_Dhabi_Grand_Prix": "گرندپری ابوظبی",
-                        "Las_Vegas_Grand_Prix": "گرندپری لاس وگاس",
-                        "Emilia_Romagna_Grand_Prix": "گرندپری امیلیا رومانیا",
-                        "Portuguese_Grand_Prix": "گرند پری پرتغال",
-                        "French_Grand_Prix": "گرند پری فرانسه",
-                        "Styrian_Grand_Prix": "گرند پری استراین",
-                        "Turkish_Grand_Prix": "گرند پری ترکیه",
-                        "Russian_Grand_Prix": "گرند پری روسیه",
-                        "Tuscan_Grand_Prix": "گرند پری توسکان",
-                        "Eifel_Grand_Prix": "گرند پری ایفل",
-                        "Sakhir_Grand_Prix": "گرند پری ساخیر",
-                        "Chinese_Grand_Prix": "گرند پری چین",
-                    }
                     gp_keys = []
                     for gp in response:
                         if lang == 1:
@@ -3002,40 +2800,6 @@ async def pay(event):
                 else: 
                     year = int(year_data)
                     response = manager.get_event(year=year)["Country"]
-                    country_tr = {
-                        "Bahrain_Grand_Prix": "گرندپری بحرین",
-                        "Saudi_Arabian_Grand_Prix": "گرندپری عربستان",
-                        "Australian_Grand_Prix": "گرندپری استرالیا",
-                        "Azerbaijan_Grand_Prix": "گرندپری آذربایجان",
-                        "United_States_Grand_Prix": "گرندپری آمریکا",
-                        "Miami_Grand_Prix": "گرندپری میامی",
-                        "Monaco_Grand_Prix": "گرندپری موناکو",
-                        "Spanish_Grand_Prix": "گرندپری اسپانیا",
-                        "Canadian_Grand_Prix": "گرندپری کانادا",
-                        "Austrian_Grand_Prix": "گرندپری اتریش",
-                        "British_Grand_Prix": "گرندپری بریتانیا",
-                        "Hungarian_Grand_Prix": "گرندپری مجارستان",
-                        "Belgian_Grand_Prix": "گرندپری بلژیک",
-                        "Dutch_Grand_Prix": "گرندپری هلند",
-                        "Italian_Grand_Prix": "گرندپری ایتالیا",
-                        "Singapore_Grand_Prix": "گرندپری سنگاپور",
-                        "Japanese_Grand_Prix": "گرندپری ژاپن",
-                        "Qatar_Grand_Prix": "گرندپری قطر",
-                        "Mexico_City_Grand_Prix": "گرندپری مکزیک",
-                        "São_Paulo_Grand_Prix": "گرندپری برزیل",
-                        "Abu_Dhabi_Grand_Prix": "گرندپری ابوظبی",
-                        "Las_Vegas_Grand_Prix": "گرندپری لاس وگاس",
-                        "Emilia_Romagna_Grand_Prix": "گرندپری امیلیا رومانیا",
-                        "Portuguese_Grand_Prix": "گرند پری پرتغال",
-                        "French_Grand_Prix": "گرند پری فرانسه",
-                        "Styrian_Grand_Prix": "گرند پری استراین",
-                        "Turkish_Grand_Prix": "گرند پری ترکیه",
-                        "Russian_Grand_Prix": "گرند پری روسیه",
-                        "Tuscan_Grand_Prix": "گرند پری توسکان",
-                        "Eifel_Grand_Prix": "گرند پری ایفل",
-                        "Sakhir_Grand_Prix": "گرند پری ساخیر",
-                        "Chinese_Grand_Prix": "گرند پری چین",
-                    }
                     gp_keys = []
                     for gp in response:
                         if lang == 1:
