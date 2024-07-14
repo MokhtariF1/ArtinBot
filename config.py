@@ -307,6 +307,7 @@ TEXT = {
     "users_level": "تغییر سطح",
     "level_updated": "سطح کاربر با موفقیت تغییر کرد",
     "championship_calendar": "تقویم مسابقات",
+    "coin_not_enough": "امتیاز شما برای دریافت این دیتا کافی نمیباشد!"
 } 
 
 EN_TEXT = {
@@ -520,5 +521,5 @@ otherwise the payment will not be confirmed and the money will be returned to yo
     "users_level": "Changing Level",
     "level_updated": "The user level successfully changed",
     "championship_calendar": "Championship Calendar",
-
+    "coin_not_enough": "Your score is not enough to receive this data!"
 }
