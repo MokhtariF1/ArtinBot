@@ -47,6 +47,7 @@ manager = Manager()
 user_messages = {}
 drivers_translate = {
     "Max_Verstappen": "مکس ورستپن",
+    "Nyck_de Vries": "نیک دوریس",
     "Liam_Lawson": "لیام لاوسون",
     "Sergio_Pérez": "سرجیو پرز",
     "Lewis_Hamilton": "لوئیس همیلتون",
