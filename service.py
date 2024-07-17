@@ -19,7 +19,8 @@ class Manager:
                     "location": event.Location[i],
                 }
             )
-
+        if year == 2022 or year == 2020:
+            del gp_s["Country"][0]
         return gp_s
     @CacheMongo().cache
     def get_session(self, year: int, country: str):
