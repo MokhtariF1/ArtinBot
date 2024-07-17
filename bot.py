@@ -116,6 +116,7 @@ country_tr = {
     "German_Grand_Prix": "گرندپری آلمان",
     "Mexican_Grand_Prix": "گرندپری مکزیک",
     "Brazilian_Grand_Prix": "گرندپری برزیل",
+    "70th_Anniversary_Grand_Prix": "گرندپری بریتانیا (70 سالگی)"
 }
 
 def check_and_limit(user_id):
