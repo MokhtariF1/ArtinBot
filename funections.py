@@ -321,6 +321,7 @@ def speed_rpm_delta(year, gp, identifier, driver_one, driver_two):
         'Williams': '#005AFF',
         'Alfa Romeo': '#900000',
         'Haas': '#FFFFFF',
+        'Haas F1 Team': "#FFFFFF",
     }
 
     # Check if both drivers are from the same team

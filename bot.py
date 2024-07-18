@@ -276,7 +276,16 @@ async def pay(event):
             ]
             await event.reply(bot_text["select"], buttons=keys)
         elif text == bot_text["account_setup"]:
-            await event.reply(bot_text["soon"])
+            keys = [
+                [
+                    Button.text(bot_text["time_setup"]),
+                    Button.text(bot_text["set_notifications"])
+                ],
+                [
+                    Button.text(bot_text["back"], resize=1)
+                ]
+            ]
+            await event.reply(bot_text["select"], buttons=keys)
         elif text == bot_text["language"]:
             keys = [
                 [
