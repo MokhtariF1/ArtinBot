@@ -308,7 +308,7 @@ TEXT = {
     "level_updated": "سطح کاربر با موفقیت تغییر کرد",
     "championship_calendar": "تقویم مسابقات",
     "coin_not_enough": "امتیاز شما برای دریافت این دیتا کافی نمیباشد!",
-    "time_setup": "تنظیم اکانت",
+    "time_setup": "تنظیم زمان",
     "set_notifications": "تنظیم اعلانات"
 } 
 
