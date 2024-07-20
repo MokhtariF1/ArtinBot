@@ -149,6 +149,19 @@ def check_lang(user_id):
     print(lang)
     return lang
 
+def check_date_passed(input_date):
+    # تبدیل تاریخ ورودی به شی datetime
+    input_datetime = datetime.strptime(input_date, '%Y-%m-%d')
+    
+    # تاریخ امروز
+    today = datetime.now().date()
+    
+    # بررسی آیا تاریخ ورودی از امروز گذشته است یا خیر
+    if input_datetime.date() < today:
+        return True
+    else:
+        return False
+
 @bot.on(events.CallbackQuery())
 async def call_handler(event):
     user_id = event.sender_id
@@ -1387,11 +1400,7 @@ async def pay(event):
                             session = event_data.decode()
                             if year == 2024:
                                 # ساعت مسابقه به عنوان یک رشته
-                                race_hour = cur.execute(f"SELECT time FROM grand_time WHERE grand = '{gp}' AND session_type = '{session}';").fetchone()
-                                if race_hour is None:
-                                    await conv.send_message(bot_text["problem"])
-                                    return
-                                race_hour = race_hour[0]
+
                                 # دریافت تاریخ مسابقه از API
                                 check_date = f"https://ergast.com/api/f1/{year}.json"
                                 check_date = requests.get(check_date).json()["MRData"]["RaceTable"]["Races"]
@@ -1413,14 +1422,19 @@ async def pay(event):
                                         else:
                                             await conv.send_message(bot_text["action_not_found"])
                                             return
-                                        
-                                        # ترکیب تاریخ و ساعت مسابقه
-                                        race_datetime_str = f"{race_date} {race_hour}"
-                                        race_datetime = datetime.strptime(race_datetime_str, "%Y-%m-%d %H:%M:%S")
-                                        
-                                        if now_datetime < race_datetime:
-                                            await conv.send_message(bot_text["dont_time"])
-                                            return
+                                        if check_date_passed(race_date) is False:
+                                            race_hour = cur.execute(f"SELECT time FROM grand_time WHERE grand = '{gp}' AND session_type = '{session}';").fetchone()
+                                            if race_hour is None:
+                                                await conv.send_message(bot_text["problem"])
+                                                return
+                                            race_hour = race_hour[0]
+                                            # ترکیب تاریخ و ساعت مسابقه
+                                            race_datetime_str = f"{race_date} {race_hour}"
+                                            race_datetime = datetime.strptime(race_datetime_str, "%Y-%m-%d %H:%M:%S")
+                                            
+                                            if now_datetime < race_datetime:
+                                                await conv.send_message(bot_text["dont_time"])
+                                                return
                             if lang == 1:
                                 loading = await conv.send_message(bot_text["loading"].format(year=year, gp=gp, event=session))
                             else:
@@ -1583,11 +1597,6 @@ async def pay(event):
                         else:
                             session = event_data.decode()
                             if year == 2024:
-                                race_hour = cur.execute(f"SELECT time FROM grand_time WHERE grand = '{gp}' AND session_type = '{session}';").fetchone()
-                                if race_hour is None:
-                                    await conv.send_message(bot_text["problem"])
-                                    return
-                                race_hour = race_hour[0]
                                 # دریافت تاریخ مسابقه از API
                                 check_date = f"https://ergast.com/api/f1/{year}.json"
                                 check_date = requests.get(check_date).json()["MRData"]["RaceTable"]["Races"]
@@ -1617,14 +1626,19 @@ async def pay(event):
                                         else:
                                             await conv.send_message(bot_text["action_not_found"])
                                             return
-                                        
-                                        # ترکیب تاریخ و ساعت مسابقه
-                                        race_datetime_str = f"{race_date} {race_hour}"
-                                        race_datetime = datetime.strptime(race_datetime_str, "%Y-%m-%d %H:%M:%S")
-                                        
-                                        if now_datetime < race_datetime:
-                                            await conv.send_message(bot_text["dont_time"])
-                                            return
+                                        if check_date_passed(race_date) is False:
+                                            race_hour = cur.execute(f"SELECT time FROM grand_time WHERE grand = '{gp}' AND session_type = '{session}';").fetchone()
+                                            if race_hour is None:
+                                                await conv.send_message(bot_text["problem"])
+                                                return
+                                            race_hour = race_hour[0]
+                                            # ترکیب تاریخ و ساعت مسابقه
+                                            race_datetime_str = f"{race_date} {race_hour}"
+                                            race_datetime = datetime.strptime(race_datetime_str, "%Y-%m-%d %H:%M:%S")
+                                            
+                                            if now_datetime < race_datetime:
+                                                await conv.send_message(bot_text["dont_time"])
+                                                return
                             if lang == 1:
                                 loading = await conv.send_message(bot_text["loading"].format(year=year, gp=gp, event=session))
                             else:
@@ -1797,11 +1811,6 @@ async def pay(event):
                         else:
                             session = event_data.decode()
                             if year == 2024:
-                                race_hour = cur.execute(f"SELECT time FROM grand_time WHERE grand = '{gp}' AND session_type = '{session}';").fetchone()
-                                if race_hour is None:
-                                    await conv.send_message(bot_text["problem"])
-                                    return
-                                race_hour = race_hour[0]
                                 # دریافت تاریخ مسابقه از API
                                 check_date = f"https://ergast.com/api/f1/{year}.json"
                                 check_date = requests.get(check_date).json()["MRData"]["RaceTable"]["Races"]
@@ -1831,14 +1840,19 @@ async def pay(event):
                                         else:
                                             await conv.send_message(bot_text["action_not_found"])
                                             return
-                                        
-                                        # ترکیب تاریخ و ساعت مسابقه
-                                        race_datetime_str = f"{race_date} {race_hour}"
-                                        race_datetime = datetime.strptime(race_datetime_str, "%Y-%m-%d %H:%M:%S")
-                                        
-                                        if now_datetime < race_datetime:
-                                            await conv.send_message(bot_text["dont_time"])
-                                            return
+                                        if check_date_passed(race_date) is False:
+                                            race_hour = cur.execute(f"SELECT time FROM grand_time WHERE grand = '{gp}' AND session_type = '{session}';").fetchone()
+                                            if race_hour is None:
+                                                await conv.send_message(bot_text["problem"])
+                                                return
+                                            race_hour = race_hour[0]
+                                            # ترکیب تاریخ و ساعت مسابقه
+                                            race_datetime_str = f"{race_date} {race_hour}"
+                                            race_datetime = datetime.strptime(race_datetime_str, "%Y-%m-%d %H:%M:%S")
+                                            
+                                            if now_datetime < race_datetime:
+                                                await conv.send_message(bot_text["dont_time"])
+                                                return
                             if lang == 1:
                                 loading = await conv.send_message(bot_text["loading"].format(year=year, gp=gp, event=session))
                             else:
@@ -1998,11 +2012,6 @@ async def pay(event):
                         else:
                             session = event_data.decode()
                             if year == 2024:
-                                race_hour = cur.execute(f"SELECT time FROM grand_time WHERE grand = '{gp_country}' AND session_type = '{session}';").fetchone()
-                                if race_hour is None:
-                                    await conv.send_message(bot_text["problem"])
-                                    return
-                                race_hour = race_hour[0]
                                 # دریافت تاریخ مسابقه از API
                                 check_date = f"https://ergast.com/api/f1/{year}.json"
                                 check_date = requests.get(check_date).json()["MRData"]["RaceTable"]["Races"]
@@ -2032,14 +2041,19 @@ async def pay(event):
                                         else:
                                             await conv.send_message(bot_text["action_not_found"])
                                             return
-                                        
-                                        # ترکیب تاریخ و ساعت مسابقه
-                                        race_datetime_str = f"{race_date} {race_hour}"
-                                        race_datetime = datetime.strptime(race_datetime_str, "%Y-%m-%d %H:%M:%S")
-                                        
-                                        if now_datetime < race_datetime:
-                                            await conv.send_message(bot_text["dont_time"])
-                                            return
+                                        if check_date_passed(race_date) is False:
+                                            race_hour = cur.execute(f"SELECT time FROM grand_time WHERE grand = '{gp}' AND session_type = '{session}';").fetchone()
+                                            if race_hour is None:
+                                                await conv.send_message(bot_text["problem"])
+                                                return
+                                            race_hour = race_hour[0]
+                                            # ترکیب تاریخ و ساعت مسابقه
+                                            race_datetime_str = f"{race_date} {race_hour}"
+                                            race_datetime = datetime.strptime(race_datetime_str, "%Y-%m-%d %H:%M:%S")
+                                            
+                                            if now_datetime < race_datetime:
+                                                await conv.send_message(bot_text["dont_time"])
+                                                return
                             url = f"http://ergast.com/api/f1/{year}/{gp_round}/drivers.json"
                             drivers = requests.get(url).json()["MRData"]["DriverTable"]["Drivers"]
                             drivers_keys = []
@@ -2272,11 +2286,6 @@ async def pay(event):
                         else:
                             session = event_data.decode()
                             if year == 2024:
-                                race_hour = cur.execute(f"SELECT time FROM grand_time WHERE grand = '{gp_country}' AND session_type = '{session}';").fetchone()
-                                if race_hour is None:
-                                    await conv.send_message(bot_text["problem"])
-                                    return
-                                race_hour = race_hour[0]
                                 # دریافت تاریخ مسابقه از API
                                 check_date = f"https://ergast.com/api/f1/{year}.json"
                                 check_date = requests.get(check_date).json()["MRData"]["RaceTable"]["Races"]
@@ -2306,14 +2315,19 @@ async def pay(event):
                                         else:
                                             await conv.send_message(bot_text["action_not_found"])
                                             return
-                                        
-                                        # ترکیب تاریخ و ساعت مسابقه
-                                        race_datetime_str = f"{race_date} {race_hour}"
-                                        race_datetime = datetime.strptime(race_datetime_str, "%Y-%m-%d %H:%M:%S")
-                                        
-                                        if now_datetime < race_datetime:
-                                            await conv.send_message(bot_text["dont_time"])
-                                            return
+                                        if check_date_passed(race_date) is False:
+                                            race_hour = cur.execute(f"SELECT time FROM grand_time WHERE grand = '{gp}' AND session_type = '{session}';").fetchone()
+                                            if race_hour is None:
+                                                await conv.send_message(bot_text["problem"])
+                                                return
+                                            race_hour = race_hour[0]
+                                            # ترکیب تاریخ و ساعت مسابقه
+                                            race_datetime_str = f"{race_date} {race_hour}"
+                                            race_datetime = datetime.strptime(race_datetime_str, "%Y-%m-%d %H:%M:%S")
+                                            
+                                            if now_datetime < race_datetime:
+                                                await conv.send_message(bot_text["dont_time"])
+                                                return
                             url = f"http://ergast.com/api/f1/{year}/{gp_round}/drivers.json"
                             drivers = requests.get(url).json()["MRData"]["DriverTable"]["Drivers"]
                             drivers_keys = []
@@ -2507,11 +2521,6 @@ async def pay(event):
                         else:
                             session = event_data.decode()
                             if year == 2024:
-                                race_hour = cur.execute(f"SELECT time FROM grand_time WHERE grand = '{gp_country}' AND session_type = '{session}';").fetchone()
-                                if race_hour is None:
-                                    await conv.send_message(bot_text["problem"])
-                                    return
-                                race_hour = race_hour[0]
                                 # دریافت تاریخ مسابقه از API
                                 check_date = f"https://ergast.com/api/f1/{year}.json"
                                 check_date = requests.get(check_date).json()["MRData"]["RaceTable"]["Races"]
@@ -2541,14 +2550,19 @@ async def pay(event):
                                         else:
                                             await conv.send_message(bot_text["action_not_found"])
                                             return
-                                        
-                                        # ترکیب تاریخ و ساعت مسابقه
-                                        race_datetime_str = f"{race_date} {race_hour}"
-                                        race_datetime = datetime.strptime(race_datetime_str, "%Y-%m-%d %H:%M:%S")
-                                        
-                                        if now_datetime < race_datetime:
-                                            await conv.send_message(bot_text["dont_time"])
-                                            return
+                                        if check_date_passed(race_date) is False:
+                                            race_hour = cur.execute(f"SELECT time FROM grand_time WHERE grand = '{gp}' AND session_type = '{session}';").fetchone()
+                                            if race_hour is None:
+                                                await conv.send_message(bot_text["problem"])
+                                                return
+                                            race_hour = race_hour[0]
+                                            # ترکیب تاریخ و ساعت مسابقه
+                                            race_datetime_str = f"{race_date} {race_hour}"
+                                            race_datetime = datetime.strptime(race_datetime_str, "%Y-%m-%d %H:%M:%S")
+                                            
+                                            if now_datetime < race_datetime:
+                                                await conv.send_message(bot_text["dont_time"])
+                                                return
                             url = f"http://ergast.com/api/f1/{year}/{gp_round}/drivers.json"
                             drivers = requests.get(url).json()["MRData"]["DriverTable"]["Drivers"]
                             drivers_keys = []
@@ -2743,11 +2757,6 @@ async def pay(event):
                         else:
                             session = event_data.decode()
                             if year == 2024:
-                                race_hour = cur.execute(f"SELECT time FROM grand_time WHERE grand = '{gp}' AND session_type = '{session}';").fetchone()
-                                if race_hour is None:
-                                    await conv.send_message(bot_text["problem"])
-                                    return
-                                race_hour = race_hour[0]
                                 # دریافت تاریخ مسابقه از API
                                 check_date = f"https://ergast.com/api/f1/{year}.json"
                                 check_date = requests.get(check_date).json()["MRData"]["RaceTable"]["Races"]
@@ -2777,14 +2786,19 @@ async def pay(event):
                                         else:
                                             await conv.send_message(bot_text["action_not_found"])
                                             return
-                                        
-                                        # ترکیب تاریخ و ساعت مسابقه
-                                        race_datetime_str = f"{race_date} {race_hour}"
-                                        race_datetime = datetime.strptime(race_datetime_str, "%Y-%m-%d %H:%M:%S")
-                                        
-                                        if now_datetime < race_datetime:
-                                            await conv.send_message(bot_text["dont_time"])
-                                            return
+                                        if check_date_passed(race_date) is False:
+                                            race_hour = cur.execute(f"SELECT time FROM grand_time WHERE grand = '{gp}' AND session_type = '{session}';").fetchone()
+                                            if race_hour is None:
+                                                await conv.send_message(bot_text["problem"])
+                                                return
+                                            race_hour = race_hour[0]
+                                            # ترکیب تاریخ و ساعت مسابقه
+                                            race_datetime_str = f"{race_date} {race_hour}"
+                                            race_datetime = datetime.strptime(race_datetime_str, "%Y-%m-%d %H:%M:%S")
+                                            
+                                            if now_datetime < race_datetime:
+                                                await conv.send_message(bot_text["dont_time"])
+                                                return
                             if lang == 1:
                                 loading = await conv.send_message(bot_text["loading"].format(year=year, gp=gp, event=session))
                             else:
@@ -2924,12 +2938,6 @@ async def pay(event):
                             "Race": "مسابقه"
                         }
                         if year == 2024:
-
-                            race_hour = cur.execute(f"SELECT time FROM grand_time WHERE grand = '{gp}' AND session_type = '{session}';").fetchone()
-                            if race_hour is None:
-                                await conv.send_message(bot_text["problem"])
-                                return
-                            race_hour = race_hour[0]
                             # دریافت تاریخ مسابقه از API
                             check_date = f"https://ergast.com/api/f1/{year}.json"
                             check_date = requests.get(check_date).json()["MRData"]["RaceTable"]["Races"]
@@ -2959,14 +2967,19 @@ async def pay(event):
                                     else:
                                         await conv.send_message(bot_text["action_not_found"])
                                         return
-                                    
-                                    # ترکیب تاریخ و ساعت مسابقه
-                                    race_datetime_str = f"{race_date} {race_hour}"
-                                    race_datetime = datetime.strptime(race_datetime_str, "%Y-%m-%d %H:%M:%S")
-                                    
-                                    if now_datetime < race_datetime:
-                                        await conv.send_message(bot_text["dont_time"])
-                                        return
+                                    if check_date_passed(race_date) is False:
+                                        race_hour = cur.execute(f"SELECT time FROM grand_time WHERE grand = '{gp}' AND session_type = '{session}';").fetchone()
+                                        if race_hour is None:
+                                            await conv.send_message(bot_text["problem"])
+                                            return
+                                        race_hour = race_hour[0]
+                                        # ترکیب تاریخ و ساعت مسابقه
+                                        race_datetime_str = f"{race_date} {race_hour}"
+                                        race_datetime = datetime.strptime(race_datetime_str, "%Y-%m-%d %H:%M:%S")
+                                        
+                                        if now_datetime < race_datetime:
+                                            await conv.send_message(bot_text["dont_time"])
+                                            return
                         if lang == 1:
                             loading = await conv.send_message(bot_text["loading"].format(year=year, gp=gp, event=session))
                         else:
@@ -3551,7 +3564,55 @@ async def show_grand_handler(event):
     except:
         pass
 
-
+@bot.on(events.CallbackQuery(pattern='show_time:*'))
+async def show_time_handler(event):
+    user_id = event.sender_id
+    lang = check_lang(user_id)
+    if lang == 1:
+        bot_text = config.EN_TEXT
+    else:
+        bot_text = config.TEXT
+    back = Button.text(bot_text["back"], resize=True)
+    start_text = bot_text['select']
+    ch_admin = check_admin(user_id)
+    if ch_admin is False:
+        keys = [
+            [Button.text(bot_text["archive"], resize=True)],
+            [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
+            [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
+             Button.text(bot_text["rules"])],
+        ]
+        await event.reply(bot_text["select"], buttons=keys)
+        return
+    find_count = len(cur.execute("SELECT * FROM grand_time ORDER BY time_num").fetchall())
+    if find_count == 0:
+        await bot.send_message(user_id, bot_text['not_found'])
+        return
+    page_number = int(event.data.decode().split(':')[1])
+    skip_number = (page_number * 5) - 5
+    # find_connections = db.connections.find().skip(skip_number).limit(5)
+    find_grands = cur.execute("SELECT * FROM grand_time LIMIT 5 OFFSET ?;", (skip_number,)).fetchall()
+    items_per_page = 5
+    pages = find_count // items_per_page
+    if find_count % items_per_page != 0:
+        pages += 1
+    paginate_keys = paginate('show_time', page_number, pages, ':')
+    for grand in find_grands:
+        grand_time = grand[2]
+        grand_event = grand[1]
+        grand_name = grand[0]
+        grand_num = grand[3]
+        key = [
+            [
+                Button.inline(bot_text['delete_grand'], 'delete_time:' + str(grand_num)),
+            ]
+        ]
+        full_channel = f'{bot_text["grand_name"]}:{grand_name}\n{bot_text["time_event"]}:{grand_event}\n{bot_text["time"]}:`{grand_time}`'
+        await bot.send_message(user_id, full_channel, buttons=key)
+    try:
+        await bot.send_message(user_id, bot_text['come_next'], buttons=paginate_keys)
+    except:
+        pass
 @bot.on(events.CallbackQuery(pattern="delete_grand:*"))
 async def del_grand(event):
     user_id = event.sender_id
