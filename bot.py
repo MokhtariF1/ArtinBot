@@ -119,6 +119,12 @@ country_tr = {
     "70th_Anniversary_Grand_Prix": "گرندپری بریتانیا (70 سالگی)"
 }
 
+sessions_convert = {
+    "Practice_1": "FP1",
+    "Practice_2": "FP2",
+    "Practice_3": "FP3"
+}
+
 def check_and_limit(user_id):
     current_time = time.time()
     if user_id not in user_messages:
@@ -1514,6 +1520,7 @@ async def pay(event):
                             gp_text = gp["t"]
                         else:
                             gp_text = country_tr[gp["tr"]]
+
                         gp_data = gp["t"].encode()
                         key = Button.inline(gp_text, data=gp_data)
                         gp_keys.append(key)
@@ -1623,6 +1630,8 @@ async def pay(event):
                             else:
                                 loading = await conv.send_message(bot_text["loading"].format(year=year, gp=country_tr[gp.replace(" ", "_")], event=type_tr[session.replace(" ", "_")]))
                             BASE_DIR = Path(__file__).resolve().parent
+                            if session == "Practice_1" or session == "Practice_2" or session == "Practice_3":
+                                session = sessions_convert[session]
                             image_top = f"{year}-{gp}-{session}-top_speed.png"
                             image_base_top = fr"{BASE_DIR}/{image_top}"
                             image_trap = f"{year}-{gp}-{session}-speed_trap.png"
@@ -1835,6 +1844,8 @@ async def pay(event):
                             else:
                                 loading = await conv.send_message(bot_text["loading"].format(year=year, gp=country_tr[gp.replace(" ", "_")], event=type_tr[session.replace(" ", "_")]))
                             BASE_DIR = Path(__file__).resolve().parent
+                            if session == "Practice_1" or session == "Practice_2" or session == "Practice_3":
+                                session = sessions_convert[session]
                             image_lap = f"{year}-{gp}-{session}-lap_times.png"
                             image_base_lap = fr"{BASE_DIR}/{image_lap}"
                             if os.path.exists(image_base_lap) is False:
@@ -2102,6 +2113,8 @@ async def pay(event):
                                     else:
                                         loading = await conv.send_message(bot_text["loading"].format(year=year, gp=country_tr[gp_country.replace(" ", "_")], event=type_tr[session.replace(" ", "_")]))
                                     BASE_DIR = Path(__file__).resolve().parent
+                                    if session == "Practice_1" or session == "Practice_2" or session == "Practice_3":
+                                        session = sessions_convert[session]
                                     image_rpm = f"{year}-{gp_round}-{session}-{driver_one_code}-{driver_two_code}-rpm.png"
                                     image_base_rpm = fr"{BASE_DIR}/{image_rpm}"
                                     if os.path.exists(image_base_rpm) is False:
@@ -2340,6 +2353,8 @@ async def pay(event):
                                 else:
                                     loading = await conv.send_message(bot_text["loading"].format(year=year, gp=country_tr[gp_country.replace(" ", "_")], event=type_tr[session.replace(" ", "_")]))
                                 BASE_DIR = Path(__file__).resolve().parent
+                                if session == "Practice_1" or session == "Practice_2" or session == "Practice_3":
+                                    session = sessions_convert[session]
                                 image_viz = f"{year}-{gp_round}-{session}-{driver_code}-map_viz.png"
                                 image_base_viz = fr"{BASE_DIR}/{image_viz}"
                                 if os.path.exists(image_base_viz) is False:
@@ -2573,6 +2588,8 @@ async def pay(event):
                                 else:
                                     loading = await conv.send_message(bot_text["loading"].format(year=year, gp=country_tr[gp_country.replace(" ", "_")], event=type_tr[session.replace(" ", "_")]))
                                 BASE_DIR = Path(__file__).resolve().parent
+                                if session == "Practice_1" or session == "Practice_2" or session == "Practice_3":
+                                    session = sessions_convert[session]
                                 image_map = f"{year}-{gp_round}-{session}-{driver_code}-map_brake.png"
                                 image_base_map = fr"{BASE_DIR}/{image_map}"
                                 if os.path.exists(image_base_map) is False:
@@ -2773,6 +2790,8 @@ async def pay(event):
                             else:
                                 loading = await conv.send_message(bot_text["loading"].format(year=year, gp=country_tr[gp.replace(" ", "_")], event=type_tr[session.replace(" ", "_")]))
                             BASE_DIR = Path(__file__).resolve().parent
+                            if session == "Practice_1" or session == "Practice_2" or session == "Practice_3":
+                                session = sessions_convert[session]
                             image_force = f"{year}-{gp}-{session}-down_force.png"
                             image_base_force = fr"{BASE_DIR}/{image_force}"
                             if os.path.exists(image_base_force) is False:
@@ -2953,6 +2972,8 @@ async def pay(event):
                         else:
                             loading = await conv.send_message(bot_text["loading"].format(year=year, gp=country_tr[gp.replace(" ", "_")], event=type_tr[session.replace(" ", "_")]))
                         BASE_DIR = Path(__file__).resolve().parent
+                        if session == "Practice_1" or session == "Practice_2" or session == "Practice_3":
+                            session = sessions_convert[session]
                         image_reaction = f"{year}-{gp}-{session}-reaction.png"
                         image_base_reaction = fr"{BASE_DIR}/{image_reaction}"
                         if os.path.exists(image_base_reaction) is False:
