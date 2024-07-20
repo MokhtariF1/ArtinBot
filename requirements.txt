@@ -5,3 +5,5 @@ fastf1
 seaborn
 numpy
 pandas
+pymongo
+openpyxl
