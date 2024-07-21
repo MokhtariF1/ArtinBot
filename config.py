@@ -1,7 +1,10 @@
 from telethon.tl.functions.channels import GetParticipantsRequest
 from telethon.tl.types import ChannelParticipantsSearch, InputChannel
 import re
+import sqlite3
 
+con = sqlite3.connect("bot.db")
+cur = con.cursor()
 
 API_ID = 86576
 API_HASH = "385886b58b21b7f3762e1cde2d651925"
@@ -21,7 +24,7 @@ PROXY_ADDRESS = "127.0.0.1"
 PROXY_PORT = 10808
 DB_NAME = "bot.db"
 CHANNEL_ID = "https://t.me/F1DataOfficial"
-CHANNEL_ID_PLUS = "https://t.me/RacePlusIran"
+CHANNEL_ID_PLUS = cur.execute("SELECT channel_id FROM join_channel").fetchone()[0]
 CALLBACK_URL = "https://f1datas.com/payment"
 IDEALIZATION_CHANNEL = "https://t.me/+0OOAnBCTM-sxOTlk"
 START_SCORE = 10

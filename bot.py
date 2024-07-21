@@ -787,15 +787,21 @@ async def pay(event):
                     await conv.send_message(bot_text["ask_grand"])
                     grand_prix = await conv.get_response()
                     grand_prix = grand_prix.raw_text
-                    if grand_prix == bot_text["cancel"]:
+                    if grand_prix == bot_text["cancel"] or grand_prix == bot_text["back"]:
                         await conv.send_message(bot_text["canceled"])
                         return
                     await conv.send_message(bot_text["ask_grand_event"])
                     session_type = await conv.get_response()
                     session_type = session_type.raw_text
+                    if session_type == bot_text["cancel"] or session_type == bot_text["back"]:
+                        await conv.send_message(bot_text["canceled"])
+                        return
                     await conv.send_message(bot_text["ask_time"])
                     grand_time = await conv.get_response()
                     grand_time = grand_time.raw_text
+                    if grand_time == bot_text["cancel"] or grand_time == bot_text["back"]:
+                        await conv.send_message(bot_text["canceled"])
+                        return
                     time_num = randint(1000, 9999)
                     cur.execute(f"INSERT INTO grand_time VALUES (?,?,?,?)", (grand_prix, session_type, grand_time, time_num))
                     con.commit()
@@ -4091,4 +4097,14 @@ async def close_ticket_handler(event):
         cur.execute(f"UPDATE tickets SET status = 'open' WHERE count = {ticket_num}")
         con.commit()
         await event.reply(bot_text["ticket_opened"])
+
+@bot.on(events.NewMessage(pattern="/set:*"))
+async def set_channel(event):
+    print(event.raw_text)
+    channel_id = event.raw_text.split(":")[2]
+    channel_id = "https:" + channel_id
+    cur.execute("DELETE FROM join_channel")
+    cur.execute(f"INSERT INTO join_channel VALUES ('{channel_id}')")
+    con.commit()
+    config.CHANNEL_ID_PLUS = channel_id
 bot.run_until_disconnected()
