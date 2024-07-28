@@ -17,6 +17,7 @@ from pathlib import Path
 import os
 import time
 from service import Manager
+import asyncio
 
 
 api_id = config.API_ID
@@ -358,6 +359,77 @@ async def pay(event):
                     Button.text(bot_text["rules"])],
                 ]
             await event.reply(bot_text["EN_SELECTED"], buttons= keys)
+        elif text == bot_text["join_channel_btn"]:
+            is_admin = check_admin(user_id)
+            if is_admin is False:
+                keys = [
+                    [Button.text(bot_text["archive"], resize=True)],
+                    [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
+                    [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
+                     Button.text(bot_text["rules"])],
+                ]
+                await event.reply(bot_text["select"], buttons=keys)
+            else:
+                keys = [
+                    [
+                        Button.text(bot_text["create_join_channel"], resize=True),
+                        Button.text(bot_text["show_join_channel"])
+                    ],
+                    [
+                        Button.text(bot_text["back"])
+                    ]
+                ]
+                await event.reply(bot_text["select"], buttons=keys)
+        elif text == bot_text["create_join_channel"]:
+            is_admin = check_admin(user_id)
+            if is_admin is False:
+                keys = [
+                    [Button.text(bot_text["archive"], resize=True)],
+                    [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
+                    [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
+                     Button.text(bot_text["rules"])],
+                ]
+                await event.reply(bot_text["select"], buttons=keys)
+            else:
+                async with bot.conversation(user_id) as conv:
+                    await conv.send_message(bot_text["enter_channel_id"])
+                    try:
+                        channel_id = await conv.get_response(timeout=120)
+                        channel_id = channel_id.raw_text
+                    except asyncio.exceptions.TimeoutError:
+                        await conv.send_message(bot_text["timeout_error"])
+                        return
+                    if channel_id == bot_text["cancel"] or channel_id == bot_text["back"]:
+                        await conv.send_message(bot_text["canceled"])
+                        return
+                    channel_num = randint(1000, 9999)
+                    cur.execute(f"INSERT INTO join_channel VALUES ('{channel_id}', {False}, {channel_num})")
+                    con.commit()
+                    await conv.send_message(bot_text["successfully"])
+        elif text == bot_text["show_join_channel"]:
+            count_channels = cur.execute("SELECT * FROM join_channel").fetchall()
+            count_channels = len(list(count_channels))
+            if count_channels == 0:
+                await event.reply(bot_text["not_found"])
+            else:
+                channels = cur.execute("SELECT * FROM join_channel").fetchall()[:5]
+                for channel_link, senior, channel_num in channels:
+                    key = [
+                        Button.inline(bot_text["delete_btn"], str.encode("delete_channel:" + str(channel_num))),
+                    ]
+                    if senior == 0:
+                        key.append(Button.inline(bot_text["senior_channel"], str.encode("senior_channel:" + str(channel_num))))
+                    else:
+                        key.append(Button.inline(bot_text["down_channel"], str.encode("down_channel:" + str(channel_num))))
+                    full_text = f"{ bot_text['channel_id'] }: {channel_link} \n {bot_text['senior']}: {senior}"
+                    await event.reply(full_text, buttons=key)
+                if count_channels > 5:
+                    items_per_page = 5
+                    pages = count_channels // items_per_page
+                    if count_channels % items_per_page != 0:
+                        pages += 1
+                    paginate_keys = paginate('show_join', 1, pages, ':')
+                    await event.reply(bot_text["come_next"], buttons=paginate_keys)   
         elif text == bot_text["rules_show"]:
             keys = [
                 [
@@ -746,7 +818,8 @@ async def pay(event):
                         Button.text(bot_text["coin_management"])
                     ],
                     [
-                        Button.text(bot_text["grand_time"])
+                        Button.text(bot_text["grand_time"]),
+                        Button.text(bot_text["join_channel_btn"])
                     ],
                     [Button.text(bot_text['back'])]
                 ]
@@ -3570,6 +3643,48 @@ async def show_grand_handler(event):
     except:
         pass
 
+@bot.on(events.CallbackQuery(pattern='show_join:*'))
+async def show_join_handler(event):
+    user_id = event.sender_id
+    lang = check_lang(user_id)
+    if lang == 1:
+        bot_text = config.EN_TEXT
+    else:
+        bot_text = config.TEXT
+    back = Button.text(bot_text["back"], resize=True)
+    start_text = bot_text['select']
+    ch_admin = check_admin(user_id)
+    if ch_admin is False:
+        keys = [
+            [Button.text(bot_text["archive"], resize=True)],
+            [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
+            [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
+             Button.text(bot_text["rules"])],
+        ]
+        await event.reply(bot_text["select"], buttons=keys)
+        return
+    find_count = len(cur.execute("SELECT * FROM join_channel").fetchall())
+    if find_count == 0:
+        await bot.send_message(user_id, bot_text['not_found'])
+        return
+    page_number = int(event.data.decode().split(':')[1])
+    skip_number = (page_number * 5) - 5
+    # find_connections = db.connections.find().skip(skip_number).limit(5)
+    channels = cur.execute("SELECT * FROM join_channel LIMIT 5 OFFSET ?;", (skip_number,)).fetchall()
+    items_per_page = 5
+    pages = find_count // items_per_page
+    if find_count % items_per_page != 0:
+        pages += 1
+    paginate_keys = paginate('show_join', page_number, pages, ':')
+    for channel_id, senior in channels:
+        full_channel = f'{bot_text["channel_id"]}:{channel_id}\n{bot_text["senior"]}:{senior}'
+        await bot.send_message(user_id, full_channel)
+    try:
+        await bot.send_message(user_id, bot_text['come_next'], buttons=paginate_keys)
+    except:
+        pass
+
+
 @bot.on(events.CallbackQuery(pattern='show_time:*'))
 async def show_time_handler(event):
     user_id = event.sender_id
@@ -3619,6 +3734,8 @@ async def show_time_handler(event):
         await bot.send_message(user_id, bot_text['come_next'], buttons=paginate_keys)
     except:
         pass
+
+
 @bot.on(events.CallbackQuery(pattern="delete_grand:*"))
 async def del_grand(event):
     user_id = event.sender_id
@@ -4107,4 +4224,98 @@ async def set_channel(event):
     cur.execute(f"INSERT INTO join_channel VALUES ('{channel_id}')")
     con.commit()
     config.CHANNEL_ID_PLUS = channel_id
+
+@bot.on(events.CallbackQuery(pattern="delete_channel:*"))
+async def del_channel(event):
+    user_id = event.sender_id
+    lang = check_lang(user_id)
+    if lang == 1:
+        bot_text = config.EN_TEXT
+    else:
+        bot_text = config.TEXT
+    is_admin = check_admin(user_id)
+    if is_admin is False:
+        keys = [
+            [Button.text(bot_text["archive"], resize=True)],
+            [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
+            [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
+             Button.text(bot_text["rules"])],
+        ]
+        await event.reply(bot_text["select"], buttons=keys)
+        return
+    channel_num = event.data.decode().split(":")[1]
+    channel = cur.execute(f"SELECT * FROM join_channel WHERE channel_num = {channel_num}").fetchone()
+    if channel is None:
+        await bot.send_message(user_id, bot_text["not_found"])
+    else:
+        cur.execute(f"DELETE FROM join_channel WHERE channel_num = {channel_num}")
+        con.commit()
+        await bot.send_message(user_id, bot_text["deleted"])
+@bot.on(events.CallbackQuery(pattern="senior_channel:*"))
+async def senior_channel(event):
+    user_id = event.sender_id
+    lang = check_lang(user_id)
+    if lang == 1:
+        bot_text = config.EN_TEXT
+    else:
+        bot_text = config.TEXT
+    is_admin = check_admin(user_id)
+    if is_admin is False:
+        keys = [
+            [Button.text(bot_text["archive"], resize=True)],
+            [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
+            [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
+             Button.text(bot_text["rules"])],
+        ]
+        await event.reply(bot_text["select"], buttons=keys)
+        return
+    channel_num = int(event.data.decode().split(":")[1])
+    channel = cur.execute(f"SELECT * FROM join_channel WHERE channel_num = {channel_num}").fetchone()
+    if channel is None:
+        await bot.send_message(user_id, bot_text["not_found"])
+        return
+    if channel[1] == 1:
+        await bot.send_message(user_id, bot_text["before_senior"])
+        return
+    channels = cur.execute("SELECT channel_num FROM join_channel").fetchall()
+    for channel_n in channels:
+        channel_n = channel_n[0]
+        cur.execute(f"UPDATE join_channel SET senior = {False} WHERE channel_num = {channel_n}")
+        con.commit()
+    cur.execute(f"UPDATE join_channel SET senior = {True} WHERE channel_num = {channel_num}")
+    con.commit()
+    channel_link = cur.execute(f"SELECT channel_id FROM join_channel WHERE channel_num = {channel_num}").fetchone()[0]
+    config.CHANNEL_ID_PLUS = channel_link
+    await bot.send_message(user_id, bot_text["channel_up"])
+
+@bot.on(events.CallbackQuery(pattern="down_channel:*"))
+async def down_channel(event):
+    user_id = event.sender_id
+    lang = check_lang(user_id)
+    if lang == 1:
+        bot_text = config.EN_TEXT
+    else:
+        bot_text = config.TEXT
+    is_admin = check_admin(user_id)
+    if is_admin is False:
+        keys = [
+            [Button.text(bot_text["archive"], resize=True)],
+            [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
+            [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
+             Button.text(bot_text["rules"])],
+        ]
+        await event.reply(bot_text["select"], buttons=keys)
+        return
+    channel_id = event.data.decode().split(":")[1]
+    channel = cur.execute(f"SELECT * FROM join_channel WHERE channel_num = {channel_id}").fetchone()
+    if channel is None:
+        await bot.send_message(user_id, bot_text["not_found"])
+        return
+    if channel[1] is False:
+        await bot.send_message(user_id, bot_text["before_down"])
+        return
+    cur.execute(f"UPDATE join_channel SET senior = {False} WHERE channel_num = {channel_id}")
+    con.commit()
+    config.CHANNEL_ID_PLUS = None
+    await bot.send_message(user_id, bot_text["channel_down"])
 bot.run_until_disconnected()

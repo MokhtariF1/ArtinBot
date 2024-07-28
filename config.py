@@ -8,7 +8,7 @@ cur = con.cursor()
 
 API_ID = 86576
 API_HASH = "385886b58b21b7f3762e1cde2d651925"
-ENV = 1
+ENV = 0
 if ENV:
     BOT_TOKEN = "7185706687:AAEkVBiMGDh0IigJs0iJBSSL1i7U7mN1e2k"
     PROXY = False
@@ -24,7 +24,10 @@ PROXY_ADDRESS = "127.0.0.1"
 PROXY_PORT = 10808
 DB_NAME = "bot.db"
 CHANNEL_ID = "https://t.me/F1DataOfficial"
-CHANNEL_ID_PLUS = cur.execute("SELECT channel_id FROM join_channel").fetchone()[0]
+try:
+    CHANNEL_ID_PLUS = cur.execute(f"SELECT channel_id FROM join_channel WHERE senior = {True}").fetchone()[0]
+except TypeError:
+    CHANNEL_ID_PLUS = None
 CALLBACK_URL = "https://f1datas.com/payment"
 IDEALIZATION_CHANNEL = "https://t.me/+0OOAnBCTM-sxOTlk"
 START_SCORE = 10
@@ -50,6 +53,8 @@ async def join_check(user_id, cli):
     return result, entity
 
 async def join_check_plus(user_id, cli):
+    if CHANNEL_ID_PLUS is None:
+        return True, None
     entity = await cli.get_entity(CHANNEL_ID_PLUS)
     access_hash = entity.access_hash
     channel_id = entity.id
@@ -161,6 +166,7 @@ TEXT = {
     "welcome_show_words": "کلمات ثبت شده:",
     "delete_btn": "🗑",
     "edit_btn": "✏️ ",
+    "senior_channel": "⬆️",
     "word_text": "متن دکمه",
     "word_tag": "تگ دکمه",
     "come_next": "دکمه صفحه بندی",
@@ -312,7 +318,18 @@ TEXT = {
     "championship_calendar": "تقویم مسابقات",
     "coin_not_enough": "امتیاز شما برای دریافت این دیتا کافی نمیباشد!",
     "time_setup": "تنظیم زمان",
-    "set_notifications": "تنظیم اعلانات"
+    "set_notifications": "تنظیم اعلانات",
+    "join_channel_btn": "تنظیمات جوین اجباری",
+    "create_join_channel": "ایجاد جوین اجباری",
+    "show_join_channel": "مشاهده چنل ها",
+    "enter_channel_id": "آیدی یا لینک چنل را وارد کنید:",
+    "channel_id": "آیدی چنل",
+    "senior": "ارشد",
+    "down_channel": "⬇️",
+    "before_senior": "چنل از قبل ارشد میباشد!",
+    "channel_up": "چنل با موفقیت به درجه ارشد ارتقا پیدا کرد!",
+    "before_down": "چنل از قبل در حالت معمولی است!",
+    "channel_down": "چنل با موفقیت به حالت عادی تغییر کرد!",
 } 
 
 EN_TEXT = {
@@ -528,5 +545,17 @@ otherwise the payment will not be confirmed and the money will be returned to yo
     "championship_calendar": "Championship Calendar",
     "coin_not_enough": "Your score is not enough to receive this data!",
     "time_setup": "Time setup",
-    "set_notifications": "Set notifications"
+    "set_notifications": "Set notifications",
+    "join_channel_btn": "Join Channel Settings",
+    "create_join_channel": "create join channel",
+    "show_join_channel": "show join channels",
+    "enter_channel_id": "Enter channel id or link:",
+    "channel_id": "Channel id",
+    "senior": "Senior",
+    "senior_channel": "⬆️",
+    "down_channel": "⬇️",
+    "before_senior": "Channel has already been a senior!",
+    "channel_up": "Channel has successfully been promoted to Senior!",
+    "before_down": "The channel is already in normal mode!",
+    "channel_down": "The channel has successfully changed to normal!",
 }
