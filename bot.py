@@ -521,7 +521,7 @@ async def pay(event):
                     text = await conv.get_response()
                     q_text = text.message
                 else:
-                    if image_msg.message == bot_text["cancel"]:
+                    if image_msg.message == bot_text["cancel"] or image_msg.message == bot_text["back"]:
                         key = [
                             Button.text(bot_text["back"])
                         ]
@@ -605,7 +605,7 @@ async def pay(event):
                     text = await conv.get_response()
                     q_text = text.message
                 else:
-                    if image_msg.message == bot_text["cancel"]:
+                    if image_msg.message == bot_text["cancel"] or image_msg.message == bot_text["back"]:
                         key = [
                             Button.text(bot_text["back"])
                         ]
@@ -648,13 +648,16 @@ async def pay(event):
             async with bot.conversation(user_id, timeout=1000) as conv:
                 await conv.send_message(bot_text["enter_hashtag"])
                 hashtag = await conv.get_response()
+                if hashtag.raw_text == bot_text["cancel"] or hashtag.raw_text == bot_text["back"]:
+                    key = Button.text(bot_text["back"], resize=True)
+                    await conv.send_message(bot_text["canceled"], buttons=key)
+                    await conv.cancel_all()
                 query = f"SELECT * FROM hashtag WHERE text LIKE '%{hashtag.raw_text}%'"
                 search = cur.execute(query).fetchall()
                 if len(search) == 0:
                     key = Button.text(bot_text["back"], resize=True)
                     await conv.send_message(bot_text["not_found"], buttons=key)
                     await conv.cancel_all()
-                print(search)
                 result = "\nنتایج پیدا شده👇\n"
                 for tag in search:
                     result += config.CHANNEL_ID + "/" + str(tag[0]) + "\n"
@@ -663,6 +666,10 @@ async def pay(event):
             async with bot.conversation(user_id, timeout=1000) as conv:
                 msg = await conv.send_message(bot_text["enter_button"])
                 btn = await conv.get_response()
+                if btn.raw_text == bot_text["cancel"] or btn.raw_text == bot_text["back"]:
+                    key = Button.text(bot_text["back"], resize=True)
+                    await conv.send_message(bot_text["canceled"], buttons=key)
+                    await conv.cancel_all()
                 if btn.raw_text.startswith("_") is False:
                     await event.reply(bot_text["underline"])
                     return
@@ -960,6 +967,10 @@ async def pay(event):
                     while True:
                         try:
                             amount = await conv.get_response(timeout=120)
+                            if amount.raw_text == bot_text["cancel"] or amount.raw_text == bot_text["back"]:
+                                await conv.send_message(bot_text["canceled"])
+                                await bot.delete_messages(user_id, ask_coin.id)
+                                return
                             amount = int(amount.raw_text)
                             break
                         except ValueError:
@@ -1013,6 +1024,10 @@ async def pay(event):
                     while True:
                         try:
                             user_id_get = await conv.get_response(timeout=120)
+                            if user_id_get.raw_text == bot_text["cancel"] or user_id_get.raw_text == bot_text["back"]:
+                                await conv.send_message(bot_text["canceled"])
+                                await bot.delete_messages(user_id, ask_user_id.id)
+                                return
                             user_id_get = int(user_id_get.raw_text)
                             break
                         except ValueError:
@@ -1030,6 +1045,10 @@ async def pay(event):
                         while True:
                             try:
                                 amount = await conv.get_response(timeout=120)
+                                if amount.raw_text == bot_text["cancel"] or amount.raw_text == bot_text["back"]:
+                                    await conv.send_message(bot_text["canceled"])
+                                    await bot.delete_messages(user_id, ask_amount.id)
+                                    return
                                 amount = int(amount.raw_text)
                                 break
                             except ValueError:
@@ -1103,6 +1122,10 @@ async def pay(event):
                     while True:
                         try:
                             user_id_get = await conv.get_response(timeout=120)
+                            if user_id_get.raw_text == bot_text["cancel"] or user_id_get.raw_text == bot_text["back"]:
+                                await conv.send_message(bot_text["canceled"])
+                                await bot.delete_messages(user_id, ask_user_id.id)
+                                return
                             user_id_get = int(user_id_get.raw_text)
                             break
                         except ValueError:
@@ -1155,10 +1178,15 @@ async def pay(event):
             else:
                 text = "برترین کاربران بر اساس امتیاز:\n"
             for user in users:
+                get_user = await bot.get_entity(user[0])
+                user_id_ = get_user.id
+                last_name = get_user.last_name
+                full_name = get_user.first_name + last_name if last_name is not None else get_user.first_name 
+                username = get_user.username if get_user.username is not None else "❌"
                 if lang == 1:
-                    text += f"User id: `{user[0]}`\nUserScore: **{user[5]}**" + "\n➖➖➖➖➖➖➖➖\n"
+                    text += f"User id: `{user[0]}`\nUserScore: **{user[5]}**\nUsername: {username}\nFullName: {full_name}" + "\n➖➖➖➖➖➖➖➖\n"
                 else:
-                    text += f"آیدی عددی: `{user[0]}`\nامتیاز: **{user[5]}**" + "\n➖➖➖➖➖➖➖➖\n"
+                    text += f"آیدی عددی: `{user[0]}`\nامتیاز: **{user[5]}**\nنام کاربری: {username}\nنام کامل: {full_name}" + "\n➖➖➖➖➖➖➖➖\n"
             await event.reply(text)
         elif text == bot_text["users_sub_count"]:
             users = cur.execute(f"SELECT * FROM users ORDER BY sub_count DESC LIMIT 10").fetchall()
@@ -1325,7 +1353,7 @@ async def pay(event):
                 async with bot.conversation(user_id, timeout=1000) as conv:
                     await conv.send_message(bot_text["enter_word"])
                     word = await conv.get_response()
-                    if word.raw_text == bot_text["cancel"]:
+                    if word.raw_text == bot_text["cancel"] or word.raw_text == bot_text["back"]:
                         await conv.send_message(bot_text["canceled"])
                         await conv.cancel_all()
                     else:
@@ -3153,7 +3181,7 @@ async def pay(event):
                 async with bot.conversation(user_id, timeout=1000) as conv:
                     await conv.send_message(bot_text["enter_grand"])
                     grand_name = await conv.get_response()
-                    if grand_name.raw_text == bot_text["cancel"]:
+                    if grand_name.raw_text == bot_text["cancel"] or grand_name.raw_text == bot_text["back"]:
                         await conv.send_message(bot_text["canceled"])
                         return
                     find_grand_name = cur.execute(f"SELECT * FROM grand WHERE name = '{grand_name.raw_text}'").fetchone()
@@ -3162,7 +3190,7 @@ async def pay(event):
                         return
                     await conv.send_message(bot_text["enter_grand_num"])
                     grand_num = await conv.get_response()
-                    if grand_num.raw_text == bot_text["cancel"]:
+                    if grand_num.raw_text == bot_text["cancel"] or grand_num.raw_text == bot_text["back"]:
                         await conv.send_message(bot_text["canceled"])
                         return
                     find_grand_round = cur.execute(f"SELECT * FROM grand WHERE num = '{grand_num.raw_text}'").fetchone()
@@ -3198,7 +3226,6 @@ async def pay(event):
                         ]
                         cur.executemany("INSERT INTO drivers VALUES (?,?,?,?,?,?)", data)
                         con.commit()
-                    print(ergast_requesting)
                     await bot.delete_messages(user_id, ergast_requesting.id)
                     await event.reply(bot_text["successfully"])
         elif text == bot_text["show_grand"]:
@@ -3379,6 +3406,9 @@ async def pay(event):
                         try:
                             amount = await conv.get_response()
                             amount = amount.raw_text
+                            if amount == bot_text["cancel"] or amount == bot_text["back"]:
+                                await conv.send_message(bot_text["canceled"])
+                                return
                             if int(amount) < 1000:
                                 await conv.send_message(bot_text["small_amount"])
                             elif int(amount) > 500000000:
@@ -3541,7 +3571,7 @@ async def eb(event):
         async with bot.conversation(user_id, timeout=1000) as conv:
             await conv.send_message(bot_text["enter_new_text"])
             new_text = await conv.get_response()
-            if new_text.raw_text == bot_text["cancel"]:
+            if new_text.raw_text == bot_text["cancel"] or new_text.raw_text == bot_text["back"]:
                 await conv.send_message(bot_text["canceled"])
                 await conv.cancel_all()
             else:
@@ -3928,6 +3958,9 @@ async def driver_score_handler(event):
                 while True:
                     qscore = await conv.get_response()
                     qscore = qscore.raw_text
+                    if qscore == bot_text["back"] or qscore == bot_text["cancel"]:
+                        await event.reply(bot_text["canceled"])
+                        return
                     check = config.check_number(qscore)
                     if check:
                         break
@@ -3937,6 +3970,9 @@ async def driver_score_handler(event):
                 while True:
                     rscore = await conv.get_response()
                     rscore = rscore.raw_text
+                    if rscore == bot_text["back"] or rscore == bot_text["cancel"]:
+                        await event.reply(bot_text["canceled"])
+                        return
                     check = config.check_number(rscore)
                     if check:
                         break
@@ -3946,6 +3982,9 @@ async def driver_score_handler(event):
                 while True:
                     cscore = await conv.get_response()
                     cscore = cscore.raw_text
+                    if cscore == bot_text["back"] or cscore == bot_text["cancel"]:
+                        await event.reply(bot_text["canceled"])
+                        return
                     check = config.check_number(cscore)
                     if check:
                         break
@@ -3975,6 +4014,9 @@ async def driver_score_handler(event):
                 while True:
                     pscore = await conv.get_response()
                     pscore = pscore.raw_text
+                    if pscore == bot_text["back"] or pscore == bot_text["cancel"]:
+                        await event.reply(bot_text["canceled"])
+                        return
                     check = config.check_number(pscore)
                     if check:
                         break
@@ -4054,12 +4096,18 @@ async def ticket_answer_handler(event):
             msg1 = await conv.send_message(bot_text['question_text'])
             text = await conv.get_response()
             q_text = text.message
-        else:
-            if image_msg.message == bot_text['cancel']:
+            if q_text == bot_text['cancel'] or q_text == bot_text['back']:
                 key = [
                     Button.text(bot_text['back'])
                 ]
-                await bot.send_message(user_id, bot_text['successfully_cancelled'], buttons=key)
+                await bot.send_message(user_id, bot_text['canceled'], buttons=key)
+                return
+        else:
+            if image_msg.message == bot_text['cancel'] or image_msg.message == bot_text['back']:
+                key = [
+                    Button.text(bot_text['back'])
+                ]
+                await bot.send_message(user_id, bot_text['canceled'], buttons=key)
                 return
             else:
                 q_text = image_msg.message
@@ -4121,12 +4169,18 @@ async def user_ad_handler(event):
             msg1 = await conv.send_message(bot_text['question_text'])
             text = await conv.get_response()
             q_text = text.message
-        else:
-            if image_msg.message == bot_text['cancel']:
+            if q_text == bot_text['cancel'] or q_text == bot_text['back']:
                 key = [
                     Button.text(bot_text['back'])
                 ]
-                await bot.send_message(user_id, bot_text['successfully_cancelled'], buttons=key)
+                await bot.send_message(user_id, bot_text['canceled'], buttons=key)
+                return
+        else:
+            if image_msg.message == bot_text['cancel'] or image_msg.message == bot_text['back']:
+                key = [
+                    Button.text(bot_text['back'])
+                ]
+                await bot.send_message(user_id, bot_text['canceled'], buttons=key)
                 return
             else:
                 q_text = image_msg.message
