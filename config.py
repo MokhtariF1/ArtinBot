@@ -355,6 +355,10 @@ TEXT = {
     "yes": "بله",
     "no": "خیر",
     "ask_date": "تاریخ را وارد کنید:",
+    "london_time": "زمان لندن",
+    "iran_time": "زمان ایران",
+    "select_time": "زمان را از دکمه های زیر انتخاب کنید:",
+    "iran_time_set": "زمان ایران تنظیم شد!",
 } 
 
 EN_TEXT = {
@@ -608,4 +612,8 @@ Your points balance is {score}, to get more points, you can subcategory or buy c
     "yes": "Yes",
     "no": "No",
     "ask_date": "Enter the date in the format: YYYY-MM-DD:",
+    "london_time": "London Time",
+    "iran_time": "Iran Time",
+    "select_time": "Select a time from the buttons below",
+    "iran_time_set": "Iran time is set!",
 }

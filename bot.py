@@ -1395,6 +1395,22 @@ async def pay(event):
                             con.commit()
                             await conv.send_message(bot_text["saved"])
                             await conv.cancel_all()
+        elif text == bot_text["time_setup"]:
+            keys = [
+                [
+                    Button.text(bot_text["london_time"]),
+                    Button.text(bot_text["iran_time"]),
+                ],
+                [
+                    Button.text(bot_text["back"], resize=1)
+                ]
+            ]
+            await event.reply(bot_text["select_time"], buttons=keys)
+        elif text == bot_text["iran_time"]:
+            user_id = event.sender_id
+            update_user_time = cur.execute(f"UPDATE users SET time_zone = 'iran' WHERE id = {user_id}")
+            con.commit()
+            await event.reply(bot_text["iran_time_set"])
         elif text == bot_text["data_archive"]:
             keys = [
                 [
