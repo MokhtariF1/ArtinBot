@@ -359,6 +359,7 @@ TEXT = {
     "iran_time": "زمان ایران",
     "select_time": "زمان را از دکمه های زیر انتخاب کنید:",
     "iran_time_set": "زمان ایران تنظیم شد!",
+    "london_time_set": "زمان لندن تنظیم شد!",
 } 
 
 EN_TEXT = {
@@ -616,4 +617,5 @@ Your points balance is {score}, to get more points, you can subcategory or buy c
     "iran_time": "Iran Time",
     "select_time": "Select a time from the buttons below",
     "iran_time_set": "Iran time is set!",
+    "london_time_set": "London time is set!"
 }

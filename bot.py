@@ -1411,6 +1411,11 @@ async def pay(event):
             update_user_time = cur.execute(f"UPDATE users SET time_zone = 'iran' WHERE id = {user_id}")
             con.commit()
             await event.reply(bot_text["iran_time_set"])
+        elif text == bot_text["london_time"]:
+            user_id = event.sender_id
+            update_user_time = cur.execute(f"UPDATE users SET time_zone = 'london' WHERE id = {user_id}")
+            con.commit()
+            await event.reply(bot_text["london_time_set"])
         elif text == bot_text["data_archive"]:
             keys = [
                 [
