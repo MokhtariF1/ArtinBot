@@ -8,7 +8,7 @@ cur = con.cursor()
 
 API_ID = 86576
 API_HASH = "385886b58b21b7f3762e1cde2d651925"
-ENV = 0
+ENV = 1
 if ENV:
     BOT_TOKEN = "7185706687:AAEkVBiMGDh0IigJs0iJBSSL1i7U7mN1e2k"
     PROXY = False
