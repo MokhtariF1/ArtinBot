@@ -44,10 +44,28 @@ def main():
                 print(f"Waiting until {ten_minutes_before} (Iran time)...")
                 time.sleep(wait_time)  # Wait until ten minutes before the target time
                 users = cursor.execute('SELECT * FROM users').fetchall()
-                telegram_send_message_url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage?chat_id"
+                type_tr = {
+                    "Practice_1": "تمرین اول",
+                    "Practice_2": "تمرین دوم",
+                    "Practice_3": "تمرین سوم",
+                    "Sprint": "اسپرینت",
+                    "Sprint_Shootout": "اسپرینت شوت آوت",
+                    "Sprint_Qualifying": "تعیین خط اسپرینت",
+                    "Qualifying": "تعیین خط",
+                    "Race": "مسابقه"
+                }
                 for user in users:
                     user_id = user[0]
-
+                    user_lang = user[1]
+                    if user_lang == 1:
+                        session = session_type
+                        full_text = "The {event} event will start in ten minutes!".format(event=session)
+                    else:
+                        session = type_tr[session_type]
+                        full_text = f"ده دقیقه دیگر رویداد {event} شروع خواهد شد".format(event=session)
+                    telegram_send_message_url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage?chat_id={user_id}&text={full_text}"
+                    response = requests.get(telegram_send_message_url)
+                    print(response.json())
             else:
                 print("The specified time is already less than ten minutes away or has passed.")
                 continue
