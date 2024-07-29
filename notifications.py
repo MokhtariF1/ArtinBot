@@ -62,10 +62,9 @@ def main():
                         full_text = "The {event} event will start in ten minutes!".format(event=session)
                     else:
                         session = type_tr[session_type]
-                        full_text = f"ده دقیقه دیگر رویداد {event} شروع خواهد شد".format(event=session)
+                        full_text = "ده دقیقه دیگر رویداد {event} شروع خواهد شد".format(event=session)
                     telegram_send_message_url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage?chat_id={user_id}&text={full_text}"
                     response = requests.get(telegram_send_message_url)
-                    print(response.json())
             else:
                 print("The specified time is already less than ten minutes away or has passed.")
                 continue
