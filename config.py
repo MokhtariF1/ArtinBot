@@ -116,7 +116,25 @@ TEXT = {
     "technical_rules": "قوانین فنی",
     "protection": "حمایت",
     "language": "زبان ربات",
-    "rules_text": "متن قوانین",
+    "rules_text": """💫 - کاربر گرامی به بخش قوانین ربات خوش آمدید.
+
+❗️ قوانین فنی:
+
+- خواهشمندیم به منظور جلوگیری از مشکلات فنی، قبلی اسپم و عدم سرعت مناسب پاسخگویی از ارسال تعداد زیادی درخواست به صورت خودکار خودداری می کنید.
+
+- اطلاعات و دیتا ها به صورت خودکار از طریق، دیتا سنتر ها و API به ربات متصل می شود، پس درستی آن توسط خود کاربران می بایست تایید شود. ربات مسئولیتی در خصوص این موارد نخواهد داشت.
+
+- از ارسال غیرقانونی، ناپسند یا نامناسب خودداری، در صورتی که فعالیت های مشکوک توسط ربات مسدود شد.
+
+- از انتشار اطلاعات شخصی خود و دیگران در فضای ارتباطی، خودداری، این اطلاعات در ربات محفوظ می ماند. در صورت دیده شدن انتشار اطلاعات شخصی در مکانی به جزء ربات، باعث مسدود شدن شما می شود.
+
+- از انتشار بدون ذکر منبع، خودداری می کنید. در صورت دیده شدن این موارد، توسط ربات مسدود شد.
+
+- در صورت بروز مشکل یا نیاز به راهنمایی، با پشتیبانی ربات تماس بگیرید.
+
+- در صورت دیدن هر گونه تخلف از قوانین، به مدیران گزارش می دهند تا انجام شود.
+
+🆔 @F1DATAIQBOT""",
     "coffee": "مهمان قهوه ات",
     "dinner": "شام آخر",
     "small_party": "جشن کوچک",
@@ -316,7 +334,9 @@ TEXT = {
     "users_level": "تغییر سطح",
     "level_updated": "سطح کاربر با موفقیت تغییر کرد",
     "championship_calendar": "تقویم مسابقات",
-    "coin_not_enough": "امتیاز شما برای دریافت این دیتا کافی نمیباشد!",
+    "coin_not_enough": """💫 - کاربر گرامی، امتیاز شما برای دریافت این دیتا کافی نمی باشد.
+
+موجودی امتیاز شما {score} می باشد، برای دریافت امتیاز بیشتر می توانید با زیرمجموعه گیری و یا خرید سکه اقدام نمایید.""",
     "time_setup": "تنظیم زمان",
     "set_notifications": "تنظیم اعلانات",
     "join_channel_btn": "تنظیمات جوین اجباری",
@@ -330,6 +350,8 @@ TEXT = {
     "channel_up": "چنل با موفقیت به درجه ارشد ارتقا پیدا کرد!",
     "before_down": "چنل از قبل در حالت معمولی است!",
     "channel_down": "چنل با موفقیت به حالت عادی تغییر کرد!",
+    "idealization_full": "کاربر عزیز، شما 2 فرصت ایده دادن خود را استفاده کرده اید و تا وقتی که ادمین این تعداد را ریست نکند شما نمیتوانید ایده ای بدهید!",
+    "reset_success": "فرصت های ایده آل سازی با موفقیت بازنشانی شدند!"
 } 
 
 EN_TEXT = {
@@ -344,7 +366,25 @@ EN_TEXT = {
     "copy_right": "Copy right",
     "protection": "Protection",
     "language": "Bot language",
-    "rules_text": "Rules text",
+    "rules_text": """💫 - Dear user, welcome to the robot rules section.
+
+❗️ Technical rules:
+
+- Please refrain from sending a large number of requests automatically in order to avoid technical problems, previous spam and lack of adequate response speed.
+
+- Information and data are automatically connected to the robot through data centers and API, so its correctness must be confirmed by the users themselves. The robot will not be responsible for these cases.
+
+- Do not post illegal, offensive or inappropriate content, in case of suspicious activities you will be blocked by the bot.
+
+- Avoid publishing your personal information and that of others in communication spaces, this information will be kept in the robot. If you are seen publishing personal information in a place other than the robot, you will be blocked.
+
+- Do not publish content without mentioning the source. If these things are seen, you will be blocked by the bot.
+
+- If you have any problems or need help, contact the robot support.
+
+- If you see any violation of the rules, report to the managers so that the necessary action can be taken.
+
+🆔 @F1DATAIQBOT""",
     "coffee": "Your coffee guest",
     "dinner": "The last supper",
     "small_party": "Small party",
@@ -543,7 +583,9 @@ otherwise the payment will not be confirmed and the money will be returned to yo
     "users_level": "Changing Level",
     "level_updated": "The user level successfully changed",
     "championship_calendar": "Championship Calendar",
-    "coin_not_enough": "Your score is not enough to receive this data!",
+    "coin_not_enough": """💫 - Dear user, your score is not enough to receive this data.
+
+Your points balance is {score}, to get more points, you can subcategory or buy coins.""",
     "time_setup": "Time setup",
     "set_notifications": "Set notifications",
     "join_channel_btn": "Join Channel Settings",
@@ -558,4 +600,6 @@ otherwise the payment will not be confirmed and the money will be returned to yo
     "channel_up": "Channel has successfully been promoted to Senior!",
     "before_down": "The channel is already in normal mode!",
     "channel_down": "The channel has successfully changed to normal!",
+    "idealization_full": "Dear user, you have used 2 opportunities to give your idea and you cannot give an idea until the admin resets this number!",
+    "reset_success": "The idealization opportunities have been reset successfully!",
 }

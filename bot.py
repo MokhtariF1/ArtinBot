@@ -507,6 +507,10 @@ async def pay(event):
             ]
             await event.reply(bot_text["select"], buttons=keys)
         elif text == bot_text["idealization"]:
+            idealization_count = len(list(cur.execute(f"SELECT * FROM idealization WHERE user_id = {user_id}").fetchall()))
+            if idealization_count + 1 > 2:
+                await event.reply(bot_text["idealization_full"])
+                return
             async with bot.conversation(user_id, timeout=1000) as conv:
                 await conv.send_message(bot_text["question_image_idea"])
                 image_msg = await conv.get_response()
@@ -528,14 +532,25 @@ async def pay(event):
             if q_text == bot_text["cancel"] or q_text == bot_text["back"]:
                 await conv.send_message(bot_text["canceled"])
                 await conv.cancel_all()
+            find_user = cur.execute(f"SELECT * FROM users WHERE id = {user_id}").fetchone()
+            join_time = find_user[3]
+            user_level = find_user[10]
+            tel_user = await bot.get_entity(user_id)
+            first_name = tel_user.first_name
+            last_name = tel_user.last_name
+            username = tel_user.username if tel_user.username is not None else '❌'
+            full_name = first_name + last_name if last_name is not None else first_name
             if lang == 1:
-                full_text = f"idea text: **{q_text}**\nuser id: `{user_id}`"
+                full_text = f"idea text: **{q_text}**\nuser id: `{user_id}`\nusername: {username}\nfull name: {full_name}\nJoin Date: {join_time}"
             else:
-                full_text = f"متن ایده: **{q_text}**\nآیدی کاربر: `{user_id}`"
+                full_text = f"متن ایده: **{q_text}**\nآیدی کاربر: `{user_id}`\nنام کاربری: {username}\nنام کامل: {full_name}\nزمان عضویت: {join_time}"
             admins = cur.execute("SELECT * FROM admins").fetchall()
             for admin in admins:
                 await bot.send_message(int(admin[0]), full_text, file=image_path)
+            cur.execute(f"INSERT INTO idealization VALUES ({user_id})")
+            con.commit()
             await event.reply(bot_text["successfully"])
+
         elif text == bot_text["tickets"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
@@ -1370,7 +1385,10 @@ async def pay(event):
             }
             score_get = score_dict[f"{user_level}"]
             if user_scores - score_get < 0:
-                await event.reply(bot_text["coin_not_enough"])
+                key = [
+                    Button.inline(bot_text["account"], data=b'user_account')
+                ]
+                await event.reply(bot_text["coin_not_enough"].format(score=user_scores), buttons=key)
                 return
             async with bot.conversation(user_id) as conv:
                 year_keys = [
@@ -1562,7 +1580,10 @@ async def pay(event):
             }
             score_get = score_dict[f"{user_level}"]
             if user_scores - score_get < 0:
-                await event.reply(bot_text["coin_not_enough"])
+                key = [
+                    Button.inline(bot_text["account"], data=b'user_account')
+                ]
+                await event.reply(bot_text["coin_not_enough"].format(score=user_scores), buttons=key)
                 return
             async with bot.conversation(user_id) as conv:
                 year_keys = [
@@ -1777,7 +1798,10 @@ async def pay(event):
             }
             score_get = score_dict[f"{user_level}"]
             if user_scores - score_get < 0:
-                await event.reply(bot_text["coin_not_enough"])
+                key = [
+                    Button.inline(bot_text["account"], data=b'user_account')
+                ]
+                await event.reply(bot_text["coin_not_enough"].format(score=user_scores), buttons=key)
                 return
             async with bot.conversation(user_id) as conv:
                 year_keys = [
@@ -1979,7 +2003,10 @@ async def pay(event):
             }
             score_get = score_dict[f"{user_level}"]
             if user_scores - score_get < 0:
-                await event.reply(bot_text["coin_not_enough"])
+                key = [
+                    Button.inline(bot_text["account"], data=b'user_account')
+                ]
+                await event.reply(bot_text["coin_not_enough"].format(score=user_scores), buttons=key)
                 return
             async with bot.conversation(user_id) as conv:
                 year_keys = [
@@ -2253,7 +2280,10 @@ async def pay(event):
             }
             score_get = score_dict[f"{user_level}"]
             if user_scores - score_get < 0:
-                await event.reply(bot_text["coin_not_enough"])
+                key = [
+                    Button.inline(bot_text["account"], data=b'user_account')
+                ]
+                await event.reply(bot_text["coin_not_enough"].format(score=user_scores), buttons=key)
                 return
             async with bot.conversation(user_id) as conv:
                 year_keys = [
@@ -2488,7 +2518,10 @@ async def pay(event):
             }
             score_get = score_dict[f"{user_level}"]
             if user_scores - score_get < 0:
-                await event.reply(bot_text["coin_not_enough"])
+                key = [
+                    Button.inline(bot_text["account"], data=b'user_account')
+                ]
+                await event.reply(bot_text["coin_not_enough"].format(score=user_scores), buttons=key)
                 return
             async with bot.conversation(user_id) as conv:
                 year_keys = [
@@ -2723,7 +2756,10 @@ async def pay(event):
             }
             score_get = score_dict[f"{user_level}"]
             if user_scores - score_get < 0:
-                await event.reply(bot_text["coin_not_enough"])
+                key = [
+                    Button.inline(bot_text["account"], data=b'user_account')
+                ]
+                await event.reply(bot_text["coin_not_enough"].format(score=user_scores), buttons=key)
                 return
             async with bot.conversation(user_id) as conv:
                 year_keys = [
@@ -2930,7 +2966,10 @@ async def pay(event):
             }
             score_get = score_dict[f"{user_level}"]
             if user_scores - score_get < 0:
-                await event.reply(bot_text["coin_not_enough"])
+                key = [
+                    Button.inline(bot_text["account"], data=b'user_account')
+                ]
+                await event.reply(bot_text["coin_not_enough"].format(score=user_scores), buttons=key)
                 return
             async with bot.conversation(user_id) as conv:
                 year_keys = [
@@ -4318,4 +4357,51 @@ async def down_channel(event):
     con.commit()
     config.CHANNEL_ID_PLUS = None
     await bot.send_message(user_id, bot_text["channel_down"])
+
+
+@bot.on(events.CallbackQuery(data=b'user_account'))
+async def user_account(event):
+    user_id = event.sender_id
+    lang = check_lang(user_id)
+    if lang == 1:
+        bot_text = config.EN_TEXT
+    else:
+        bot_text = config.TEXT
+    keys = [
+        [
+            Button.text(bot_text["user_information"]),
+            Button.text(bot_text["personal_account"]),
+        ],
+        [
+            Button.text(bot_text["sub_collection"], resize=1)
+        ],
+        [
+            Button.text(bot_text["back"])
+        ]
+    ]
+    await bot.send_message(user_id, bot_text["select"], buttons=keys)
+
+
+@bot.on(events.NewMessage(pattern="/reset_idea"))
+async def reset_idea(event):
+    user_id = event.sender_id
+    lang = check_lang(user_id)
+    if lang == 1:
+        bot_text = config.EN_TEXT
+    else:
+        bot_text = config.TEXT
+    is_admin = check_admin(user_id)
+    if is_admin is False:
+        keys = [
+            [Button.text(bot_text["archive"], resize=True)],
+            [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
+            [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
+             Button.text(bot_text["rules"])],
+        ]
+        await event.reply(bot_text["select"], buttons=keys)
+        return
+    cur.execute("DELETE FROM idealization")
+    con.commit()
+    await event.reply(bot_text["reset_success"])
+    
 bot.run_until_disconnected()
