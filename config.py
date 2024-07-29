@@ -8,7 +8,7 @@ cur = con.cursor()
 
 API_ID = 86576
 API_HASH = "385886b58b21b7f3762e1cde2d651925"
-ENV = 1
+ENV = 0
 if ENV:
     BOT_TOKEN = "7185706687:AAEkVBiMGDh0IigJs0iJBSSL1i7U7mN1e2k"
     PROXY = False
@@ -351,7 +351,10 @@ TEXT = {
     "before_down": "چنل از قبل در حالت معمولی است!",
     "channel_down": "چنل با موفقیت به حالت عادی تغییر کرد!",
     "idealization_full": "کاربر عزیز، شما 2 فرصت ایده دادن خود را استفاده کرده اید و تا وقتی که ادمین این تعداد را ریست نکند شما نمیتوانید ایده ای بدهید!",
-    "reset_success": "فرصت های ایده آل سازی با موفقیت بازنشانی شدند!"
+    "reset_success": "فرصت های ایده آل سازی با موفقیت بازنشانی شدند!",
+    "yes": "بله",
+    "no": "خیر",
+    "ask_date": "تاریخ را وارد کنید:",
 } 
 
 EN_TEXT = {
@@ -602,4 +605,7 @@ Your points balance is {score}, to get more points, you can subcategory or buy c
     "channel_down": "The channel has successfully changed to normal!",
     "idealization_full": "Dear user, you have used 2 opportunities to give your idea and you cannot give an idea until the admin resets this number!",
     "reset_success": "The idealization opportunities have been reset successfully!",
+    "yes": "Yes",
+    "no": "No",
+    "ask_date": "Enter the date in the format: YYYY-MM-DD:",
 }

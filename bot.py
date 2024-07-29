@@ -897,8 +897,26 @@ async def pay(event):
                     if grand_time == bot_text["cancel"] or grand_time == bot_text["back"]:
                         await conv.send_message(bot_text["canceled"])
                         return
+                    await conv.send_message(bot_text["ask_date"])
+                    grand_date = await conv.get_response()
+                    grand_date = grand_date.raw_text
+                    if grand_date == bot_text["cancel"] or grand_date == bot_text["back"]:
+                        await conv.send_message(bot_text["canceled"])
+                        return
+                    notification_keys = [
+                        [Button.inline(bot_text["yes"], b'yes_notification'), Button.inline(bot_text["no"], b'no_notification')]
+                    ]
+                    await conv.send_message(bot_text["select"], buttons=notification_keys)
+                    check_notification = await conv.wait_event(events.CallbackQuery())
+                    if check_notification.data == b'no_notification':
+                        check_notification = "no"
+                    elif check_notification.data == b'yes_notification':
+                        check_notification = "yes"
+                    else:
+                        await event.reply(bot_text["action_not_found"])
+                        return
                     time_num = randint(1000, 9999)
-                    cur.execute(f"INSERT INTO grand_time VALUES (?,?,?,?)", (grand_prix, session_type, grand_time, time_num))
+                    cur.execute(f"INSERT INTO grand_time VALUES (?,?,?,?,?,?)", (grand_prix, session_type, grand_time, time_num, check_notification, grand_date))
                     con.commit()
                     await conv.send_message(bot_text["successfully"])
                     await conv.cancel_all()
