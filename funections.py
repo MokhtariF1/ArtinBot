@@ -939,7 +939,7 @@ def strategy(year, gp, identifire):
         previous_stint_end = 0
         for idx, row in driver_stints.iterrows():
             # Get the color of the tire compound
-            compound_color = fastf1.plotting.get_compound_color(row["Compound"], session=session)
+            compound_color = ff1.plotting.get_compound_color(row["Compound"], session=session)
             plt.barh(
                 y=driver,
                 width=row["StintLength"],
