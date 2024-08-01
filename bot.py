@@ -3657,7 +3657,7 @@ async def pay(event):
                             else:
                                 loading = await conv.send_message(bot_text["loading"].format(year=year, gp=country_tr[gp.replace(" ", "_")], event=type_tr[session]))
                             BASE_DIR = Path(__file__).resolve().parent
-                            image_strategy = f"{year}-{gp}-{session}-strategy.png"
+                            image_strategy = f"{year}-{gp}-{session}_strategy.png"
                             image_base_strategy = fr"{BASE_DIR}/{image_strategy}"
                             if os.path.exists(image_base_strategy) is False:
                                 try:
