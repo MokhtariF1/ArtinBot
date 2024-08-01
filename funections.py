@@ -903,11 +903,10 @@ def all_data(year, gp, identifire, driver_one, driver_two):
     
     return path_list
 def strategy(year, gp, identifire):
-    year = 2024
-    grand_prix = "Hungary"
+    grand_prix = gp
 
     # Load the race session
-    session = ff1.get_session(year, grand_prix, 'R')
+    session = ff1.get_session(year, grand_prix, identifire)
     session.load()
     laps = session.laps
 
