@@ -360,6 +360,10 @@ TEXT = {
     "select_time": "زمان را از دکمه های زیر انتخاب کنید:",
     "iran_time_set": "زمان ایران تنظیم شد!",
     "london_time_set": "زمان لندن تنظیم شد!",
+    "select_notification": "آیا این زمان برای اعلانات تنظیم شود؟",
+    "all": "All",
+    "g_force": "G Force",
+    "strategy": "Strategy",
 } 
 
 EN_TEXT = {
@@ -617,5 +621,9 @@ Your points balance is {score}, to get more points, you can subcategory or buy c
     "iran_time": "Iran Time",
     "select_time": "Select a time from the buttons below",
     "iran_time_set": "Iran time is set!",
-    "london_time_set": "London time is set!"
+    "london_time_set": "London time is set!",
+    "select_notification": "Set this time for notifications?",
+    "all": "All",
+    "g_force": "G Force",
+    "strategy": "Strategy",
 }

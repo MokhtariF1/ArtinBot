@@ -4,6 +4,7 @@ import pytz
 import sqlite3
 from config import *
 import requests
+from bot import country_tr
 # Connect to the SQLite database
 conn = sqlite3.connect('bot.db')
 cursor = conn.cursor()
@@ -11,6 +12,7 @@ def main():
     get_notifications_time = cursor.execute('SELECT * FROM grand_time ORDER BY time ASC').fetchall()
     for notification in get_notifications_time:
         session_type = notification[1]
+        grand_notification = notification[0]
         notification_status = notification[4]
         if session_type == "FP1" or session_type == "FP2" or session_type == "FP3" or notification_status == "no":
             continue
@@ -59,10 +61,12 @@ def main():
                     user_lang = user[1]
                     if user_lang == 1:
                         session = session_type
-                        full_text = "The {event} event will start in ten minutes!".format(event=session)
+                        gp = grand_notification
+                        full_text = "The {event} event in {gp} will start in ten minutes!".format(event=session, gp=gp)
                     else:
                         session = type_tr[session_type]
-                        full_text = "ده دقیقه دیگر رویداد {event} شروع خواهد شد".format(event=session)
+                        gp = country_tr[grand_notification]
+                        full_text = "رویداد {event} ده دقیقه دیگر در {gp} شروع خواهد شد".format(event=session)
                     telegram_send_message_url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage?chat_id={user_id}&text={full_text}"
                     response = requests.get(telegram_send_message_url)
             else:

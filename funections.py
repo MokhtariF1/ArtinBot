@@ -817,7 +817,159 @@ def start_reaction(year, gp, identifire):
     # Plot metrics
     fig, ax, reaction_path = plot_metrics(zero_to_hundred_times, tire_compounds, team_colors, max_speeds, max_accelerations, year, gp, identifire)
     return reaction_path
+def all_data(year, gp, identifire, driver_one, driver_two):
+    session = ff1.get_session(year, gp, identifire)
+    session.load()
+    path_list = []
+    # Select the laps
+    lap_leclerc = session.laps.pick_driver(driver_one).pick_fastest()
+    lap_sainz = session.laps.pick_driver(driver_two).pick_fastest()
+
+    # Get the telemetry data
+    telemetry_leclerc = lap_leclerc.get_telemetry().add_distance()
+    telemetry_sainz = lap_sainz.get_telemetry().add_distance()
+
+    # Resample telemetry data to common distance points
+    common_distance = np.linspace(0, min(telemetry_leclerc['Distance'].max(), telemetry_sainz['Distance'].max()), num=500)
+    telemetry_leclerc_resampled = telemetry_leclerc.set_index('Distance').reindex(common_distance, method='nearest').reset_index()
+    telemetry_sainz_resampled = telemetry_sainz.set_index('Distance').reindex(common_distance, method='nearest').reset_index()
+
+    # Plot Speed comparison
+    plotting.setup_mpl()
+    fig, ax_speed = plt.subplots(figsize=(18, 12))
+    fig.patch.set_facecolor('#000000')
+    ax_speed.set_facecolor('#111111')
+
+    ax_speed.plot(telemetry_leclerc_resampled['Distance'], telemetry_leclerc_resampled['Speed'], label='LEC Speed', color='cyan', lw=2)
+    ax_speed.plot(telemetry_sainz_resampled['Distance'], telemetry_sainz_resampled['Speed'], label='SAI Speed', color='orange', lw=2)
+
+    ax_speed.set_xlabel('Distance (m)', fontsize=14, fontweight='bold', color='white')
+    ax_speed.set_ylabel('Speed (km/h)', fontsize=14, fontweight='bold', color='white')
+    ax_speed.set_title('Speed Comparison - 2024 Bahrain GP Qualifying', fontsize=24, fontweight='bold', color='white')
+    ax_speed.grid(True, which='both', linestyle='--', linewidth=0.7, color='gray')
+    ax_speed.legend(loc='upper right', fontsize=14, facecolor='black', edgecolor='white', framealpha=1)
+    speed_comparison_path = f"{year}-{gp}-{identifire}-{driver_one}-{driver_two}_speed_comparison.png"
+    plt.savefig(speed_comparison_path)
+    path_list.append(speed_comparison_path)
+
+    # Plot Gear comparison
+    fig, ax_gear = plt.subplots(figsize=(18, 12))
+    fig.patch.set_facecolor('#000000')
+    ax_gear.set_facecolor('#111111')
+
+    ax_gear.plot(telemetry_leclerc_resampled['Distance'], telemetry_leclerc_resampled['nGear'], label='LEC Gear', color='cyan', lw=2)
+    ax_gear.plot(telemetry_sainz_resampled['Distance'], telemetry_sainz_resampled['nGear'], label='SAI Gear', color='orange', lw=2)
+
+    ax_gear.set_xlabel('Distance (m)', fontsize=14, fontweight='bold', color='white')
+    ax_gear.set_ylabel('Gear', fontsize=14, fontweight='bold', color='white')
+    ax_gear.set_title('Gear Comparison - 2024 Bahrain GP Qualifying', fontsize=24, fontweight='bold', color='white')
+    ax_gear.grid(True, which='both', linestyle='--', linewidth=0.7, color='gray')
+    ax_gear.legend(loc='upper right', fontsize=14, facecolor='black', edgecolor='white', framealpha=1)
+    gear_comparison_path = f"{year}-{gp}-{identifire}-{driver_one}-{driver_two}_gear_comparison.png"
+    plt.savefig(gear_comparison_path)
+    path_list.append(gear_comparison_path)
+    # Plot Brake comparison
+    fig, ax_brake = plt.subplots(figsize=(18, 12))
+    fig.patch.set_facecolor('#000000')
+    ax_brake.set_facecolor('#111111')
+
+    ax_brake.plot(telemetry_leclerc_resampled['Distance'], telemetry_leclerc_resampled['Brake'], label='LEC Brake', color='cyan', lw=2)
+    ax_brake.plot(telemetry_sainz_resampled['Distance'], telemetry_sainz_resampled['Brake'], label='SAI Brake', color='orange', lw=2)
+
+    ax_brake.set_xlabel('Distance (m)', fontsize=14, fontweight='bold', color='white')
+    ax_brake.set_ylabel('Brake', fontsize=14, fontweight='bold', color='white')
+    ax_brake.set_title('Brake Comparison - 2024 Bahrain GP Qualifying', fontsize=24, fontweight='bold', color='white')
+    ax_brake.grid(True, which='both', linestyle='--', linewidth=0.7, color='gray')
+    ax_brake.legend(loc='upper right', fontsize=14, facecolor='black', edgecolor='white', framealpha=1)
+    brake_comparison_path = f"{year}-{gp}-{identifire}-{driver_one}-{driver_two}_brake_comparison.png"
+    plt.savefig(brake_comparison_path)
+    path_list.append(brake_comparison_path)
+    # Plot Throttle comparison
+    fig, ax_throttle = plt.subplots(figsize=(18, 12))
+    fig.patch.set_facecolor('#000000')
+    ax_throttle.set_facecolor('#111111')
+
+    ax_throttle.plot(telemetry_leclerc_resampled['Distance'], telemetry_leclerc_resampled['Throttle'], label='LEC Throttle', color='cyan', lw=2)
+    ax_throttle.plot(telemetry_sainz_resampled['Distance'], telemetry_sainz_resampled['Throttle'], label='SAI Throttle', color='orange', lw=2)
+
+    ax_throttle.set_xlabel('Distance (m)', fontsize=14, fontweight='bold', color='white')
+    ax_throttle.set_ylabel('Throttle (%)', fontsize=14, fontweight='bold', color='white')
+    ax_throttle.set_title('Throttle Comparison - 2024 Bahrain GP Qualifying', fontsize=24, fontweight='bold', color='white')
+    ax_throttle.grid(True, which='both', linestyle='--', linewidth=0.7, color='gray')
+    ax_throttle.legend(loc='upper right', fontsize=14, facecolor='black', edgecolor='white', framealpha=1)
+    throttle_comparison_path = f"{year}-{gp}-{identifire}-{driver_one}-{driver_two}_throttle_comparison.png"
+    plt.savefig(throttle_comparison_path)
+    path_list.append(throttle_comparison_path)
     
+    return path_list
+def strategy(year, gp, identifire):
+    year = 2024
+    grand_prix = "Hungary"
+
+    # Load the race session
+    session = ff1.get_session(year, grand_prix, 'R')
+    session.load()
+    laps = session.laps
+
+    # Get the list of driver numbers
+    drivers = session.drivers
+
+    # Convert driver numbers to three-letter abbreviations
+    driver_abbreviations = []
+    for driver in drivers:
+        try:
+            abbreviation = session.get_driver(driver)["Abbreviation"]
+            driver_abbreviations.append(abbreviation)
+        except KeyError:
+            # Skip the driver if no abbreviation is found
+            continue
+
+    # Group laps by driver, stint number, and compound
+    stints = laps[["Driver", "Stint", "Compound", "LapNumber"]]
+    stints = stints.groupby(["Driver", "Stint", "Compound"]).count().reset_index()
+
+    # Rename the LapNumber column to StintLength
+    stints = stints.rename(columns={"LapNumber": "StintLength"})
+
+    # Create a figure and axes for the plot
+    fig, ax = plt.subplots(figsize=(10, 12))
+
+    # Plot the tire strategies for each driver
+    for driver in driver_abbreviations:
+        driver_stints = stints.loc[stints["Driver"] == driver]
+        previous_stint_end = 0
+        for idx, row in driver_stints.iterrows():
+            # Get the color of the tire compound
+            compound_color = fastf1.plotting.get_compound_color(row["Compound"], session=session)
+            plt.barh(
+                y=driver,
+                width=row["StintLength"],
+                left=previous_stint_end,
+                color=compound_color,
+                edgecolor="black"
+            )
+            previous_stint_end += row["StintLength"]
+
+    # Additional plot settings for better readability
+    plt.title(f"{year} {grand_prix} Grand Prix Strategies")
+    plt.xlabel("Lap Number")
+    plt.grid(False)
+    ax.invert_yaxis()  # Invert the y-axis to show higher finishing drivers at the top
+
+    # Remove unnecessary plot borders
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.spines['left'].set_visible(False)
+
+    # Add a watermark
+    fig.text(0.5, 0.5, 'F1 DATA IQ', fontsize=50, color='gray', ha='center', va='center', alpha=0.3)
+
+    plt.tight_layout()  # Improve layout
+    plot_strategy_path = f"{year}-{gp}-{identifire}_strategy.png"
+    plt.savefig(plot_strategy_path)  # Display the plot
+
+    return plot_strategy_path
+
 # start = time.time()
 # try:
 #     test = speed_rpm_delta(2024, 'Bahrain Grand Prix', "R", "VER", "HAM")
