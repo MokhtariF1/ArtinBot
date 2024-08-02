@@ -969,6 +969,107 @@ def strategy(year, gp, identifire):
 
     return plot_strategy_path
 
+def all_info(year, grand_prix, identifire):
+    # Load the race session
+    session = ff1.get_session(year, grand_prix, identifire)
+    session.load()
+
+    # Get the list of driver numbers
+    drivers = session.drivers
+
+    # Convert driver numbers to three-letter abbreviations
+    driver_abbreviations = []
+    for driver in drivers:
+        try:
+            abbreviation = session.get_driver(driver)["Abbreviation"]
+            driver_abbreviations.append(abbreviation)
+        except KeyError:
+            # Skip the driver if no abbreviation is found
+            continue
+
+    # Get the race results and print the columns to inspect
+    results = session.results
+
+    # Sort drivers based on their finishing positions
+    sorted_results = results.sort_values(by='Position')
+    # Verify the correct column name for driver identifiers
+
+    # Assuming 'DriverNumber' is the correct column name
+    top_10_drivers = sorted_results.head(10)['DriverNumber'].tolist()
+    top_10_abbreviations = [session.get_driver(driver)["Abbreviation"] for driver in top_10_drivers]
+
+    # Create a figure and axes for the plot
+    fig, ax = plt.subplots(figsize=(10, 12))
+
+    # Plot the G-Force for each of the top 10 drivers using telemetry data
+    for driver in top_10_abbreviations:
+        laps_driver = session.laps.pick_driver(driver)
+        telemetry = laps_driver.get_car_data().add_distance()
+        
+        # Calculate the magnitude of G-Force
+        telemetry['GForce'] = (telemetry['Throttle'] * telemetry['Brake']).abs()  # Simplified G-Force calculation
+        
+        ax.plot(telemetry['Distance'], telemetry['GForce'], label=driver)
+
+    # Additional plot settings for better readability
+    plt.title(f"{year} {grand_prix} Grand Prix Top 10 Drivers G-Force")
+    plt.xlabel("Distance (m)")
+    plt.ylabel("G-Force")
+    plt.legend(title="Driver")
+    plt.grid(True)
+
+    # Add a watermark
+    fig.text(0.5, 0.5, 'F1 DATA IQ', fontsize=50, color='gray', ha='center', va='center', alpha=0.3)
+
+    plt.tight_layout()  # Improve layout
+    all_info_path = f"{year}-{grand_prix}-{identifire}_all_info.png"
+    plt.savefig(all_info_path)  # Display the plot
+    
+    return all_info_path
+
+def driver_func_data(year, grand_prix, identifire, driver_one, driver_two):
+    # Load the race session
+    session = ff1.get_session(year, grand_prix, identifire)
+    session.load()
+
+    # Define the drivers to compare
+    driver1_name = driver_one  # Hamilton
+    driver2_name = driver_two  # Leclerc
+
+    # Create a figure and axes for the plot
+    fig, ax = plt.subplots(figsize=(10, 12))
+
+    # Define a function to plot G-Force for a selected driver
+    def plot_driver_g_force(driver_abbreviation, color):
+        # Get laps and telemetry data for the driver
+        laps_driver = session.laps.pick_driver(driver_abbreviation)
+        telemetry = laps_driver.get_car_data().add_distance()
+        
+        # Calculate the magnitude of G-Force
+        telemetry['GForce'] = (telemetry['Throttle'] * telemetry['Brake']).abs()  # Simplified G-Force calculation
+        
+        # Plot G-Force data
+        ax.plot(telemetry['Distance'], telemetry['GForce'], label=driver_abbreviation, color=color)
+
+    # Plot the G-Force for Hamilton and Leclerc
+    plot_driver_g_force(driver1_name, 'blue')
+    plot_driver_g_force(driver2_name, 'red')
+
+    # Additional plot settings for better readability
+    plt.title(f"{year} {grand_prix} Grand Prix G-Force Comparison: {driver_one} vs {driver_two}")
+    plt.xlabel("Distance (m)")
+    plt.ylabel("G-Force")
+    plt.legend(title="Driver")
+    plt.grid(True)
+
+    # Add a watermark
+    fig.text(0.5, 0.5, 'F1 DATA IQ', fontsize=50, color='gray', ha='center', va='center', alpha=0.3)
+
+    plt.tight_layout()  # Improve layout
+    driver_path = f"{year}-{grand_prix}-{identifire}-{driver_one}-{driver_two}_driver.png"
+    plt.savefig(driver_path)  # Display the plot
+
+    return driver_path
 # start = time.time()
 # try:
 #     test = speed_rpm_delta(2024, 'Bahrain Grand Prix', "R", "VER", "HAM")

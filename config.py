@@ -364,6 +364,8 @@ TEXT = {
     "all": "All",
     "g_force": "G Force",
     "strategy": "Strategy",
+    "driver": "Driver",
+    "all_info": "All Info"
 } 
 
 EN_TEXT = {
@@ -626,4 +628,6 @@ Your points balance is {score}, to get more points, you can subcategory or buy c
     "all": "All",
     "g_force": "G Force",
     "strategy": "Strategy",
+    "driver": "Driver",
+    "all_info": "All Info"
 }
