@@ -3796,17 +3796,14 @@ async def pay(event):
                         }
                         sessions_keys = []
                         for session in sessions:
-                            if session != "Race" and session != "Sprint":
-                                continue
+                            if lang == 1:
+                                session_text = session
                             else:
-                                if lang == 1:
-                                    session_text = session
-                                else:
-                                    session_text = type_tr[session]
-                                session_key = [
-                                    Button.inline(session_text, session.encode()),
-                                ]
-                                sessions_keys.append(session_key)
+                                session_text = type_tr[session]
+                            session_key = [
+                                Button.inline(session_text, session.encode()),
+                            ]
+                            sessions_keys.append(session_key)
                         ask_event = await event.reply(bot_text["select_session"], buttons=sessions_keys)
                         try:
                             session_res = await conv.wait_event(events.CallbackQuery(), timeout=60)
