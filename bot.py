@@ -4128,7 +4128,7 @@ async def pay(event):
                                     BASE_DIR = Path(__file__).resolve().parent
                                     if session == "Practice_1" or session == "Practice_2" or session == "Practice_3":
                                         session = sessions_convert[session]
-                                    image_driver = f"{year}-{gp_round}-{session}-{driver_one_code}-{driver_two_code}-driver.png"
+                                    image_driver = f"{year}-{gp_round}-{session}-{driver_one_code}-{driver_two_code}_driver.png"
                                     image_base_driver = fr"{BASE_DIR}/{image_driver}"
                                     if os.path.exists(image_base_driver) is False:
                                         image_driver_path = driver_func_data(year, gp_round, session, driver_one_code, driver_two_code)
