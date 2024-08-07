@@ -812,6 +812,7 @@ async def pay(event):
                 pn_keys = [
                     [
                         Button.text(bot_text["management"]),
+                        Button.text(bot_text["data_management"]),
                         Button.text(bot_text["users"], resize=1)
                     ],
                     [
@@ -832,18 +833,38 @@ async def pay(event):
             else:
                 keys = [
                     [
-                        Button.text(bot_text["words"], resize=True),
-                        Button.text(bot_text["grand"]), 
+                        Button.text(bot_text["join_channel_btn"])
                     ],
                     [
+                        Button.text(bot_text["words"], resize=True),
                         Button.text(bot_text["tickets"]),
+                    ],
+                    [Button.text(bot_text['back'])]
+                ]
+                await event.reply(bot_text["select"], buttons=keys)
+        elif text == bot_text["data_management"]:
+            is_admin = check_admin(user_id)
+            if is_admin is False:
+                keys = [
+                    [Button.text(bot_text["archive"], resize=True)],
+                    [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
+                    [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
+                     Button.text(bot_text["rules"])],
+                ]
+                await event.reply(bot_text["select"], buttons=keys)
+            else:
+                keys = [
+                    [
+                        Button.text(bot_text["users_level"], resize=1),
                         Button.text(bot_text["coin_management"])
                     ],
                     [
+                        Button.text(bot_text["grand"]),
                         Button.text(bot_text["grand_time"]),
-                        Button.text(bot_text["join_channel_btn"])
                     ],
-                    [Button.text(bot_text['back'])]
+                    [
+                        Button.text(bot_text["back"])
+                    ]
                 ]
                 await event.reply(bot_text["select"], buttons=keys)
         elif text == bot_text["grand_time"]:
@@ -1108,16 +1129,15 @@ async def pay(event):
             else:
                 us_keys = [
                     [
-                        Button.text(bot_text["new_users"]),
+                        Button.text(bot_text["robot_statistics"]),
+                    ],
+                    [
                         Button.text(bot_text["users_excel"]),
-                        Button.text(bot_text["robot_statistics"])
+                        Button.text(bot_text["new_users"])
                     ],
                     [
                         Button.text(bot_text["users_coin_gt"]),
                         Button.text(bot_text["users_sub_count"]),
-                    ],
-                    [
-                        Button.text(bot_text["users_level"])
                     ],
                     [
                         Button.text(bot_text['back'], resize=True)
@@ -2167,7 +2187,10 @@ async def pay(event):
                         sessions_keys = []
                         for session in sessions:
                             if lang == 1:
-                                session_text = session
+                                try:
+                                    session_text = sessions_convert[session]
+                                except KeyError:
+                                    session_text = session
                             else:
                                 session_text = type_tr[session]
                             session_key = [
@@ -2253,6 +2276,7 @@ async def pay(event):
                             ask_driver = await conv.send_message(bot_text["ask_driver_one"], buttons=result)
                             try:
                                 dr_event = await conv.wait_event(events.CallbackQuery(), timeout=60)
+                                print(dr_event)
                                 await bot.delete_messages(user_id, ask_driver.id)
                             except TimeoutError:
                                 await conv.send_message(bot_text["timeout_error"])
@@ -2296,6 +2320,7 @@ async def pay(event):
                                     await conv.send_message(bot_text["canceled"])
                                     await conv.cancel_all()
                                 else:
+                                    print(driver_data)
                                     driver_one_code = driver_data.decode()
                                     driver_two_code = driver_data_two.decode()
                                     session = event_data.decode()
