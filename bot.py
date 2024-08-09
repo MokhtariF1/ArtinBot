@@ -986,6 +986,9 @@ async def pay(event):
                         Button.text(bot_text["one_coin"])
                     ],
                     [
+                        Button.text(bot_text["down_all_coin"])
+                    ],
+                    [
                         Button.text(bot_text["back"])
                     ]
                 ]
@@ -1344,6 +1347,30 @@ async def pay(event):
                     ],
                 ]
                 await event.reply(bot_text["select"], buttons=keys)
+        elif text == bot_text["down_all_coin"]:
+            async with bot.conversation(user_id, timeout=1000) as conv:
+                await conv.send_message(bot_text["enter_down_all_coin"])
+                while True:
+                    try:
+                        amount = await conv.get_response()
+                        amount = amount.raw_text
+                        if amount == bot_text["cancel"] or amount == bot_text["back"]:
+                            await conv.send_message(bot_text["canceled"])
+                            return
+                        amount = int(amount)
+                        break
+                    except ValueError:
+                        await conv.send_message(bot_text["just_num"])
+            users = cur.execute("SELECT * FROM users").fetchall()
+            for user in users:
+                user_coin = int(user[5])
+                if user_coin - amount < 0:
+                    user_coin = 0
+                else:
+                    user_coin = user_coin - amount
+                cur.execute(f"UPDATE users SET score = {user_coin} WHERE id = {user[0]}")
+                con.commit()
+            await event.reply(bot_text["all_down_su"])
         elif text == bot_text["add_score"]:
             find_grands = cur.execute("SELECT * FROM grand ORDER BY num").fetchall()
             if len(find_grands) == 0:

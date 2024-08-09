@@ -15,7 +15,7 @@ if ENV:
     BOT_ID = "https://t.me/F1DataIQBot"
 else:
     BOT_TOKEN = "6300653200:AAFK0BuvMPJ4kZV3gj_sbvXezciah_ga1B4"
-    PROXY = True
+    PROXY = False
     BOT_ID = "https://t.me/F1data_Test_bot"
 PAY_TOKEN = "fced3227-3cf2-486f-95e7-52ee9e8fd77d"
 SESSION_NAME = "bot"
@@ -368,7 +368,10 @@ TEXT = {
     "driver": "Driver",
     "all_info": "All Info",
     "loading_one": "در حال دریافت اطلاعات ...\nسال: {year}\nگرندپری: {grand}\nرویداد: {event}\nراننده اول: {driver_one}",
-    "loadin_two": "در حال دریافت اطلاعات ...\nسال: {year}\nگرندپری: {grand}\nرویداد: {event}\nراننده اول: {driver_one}\nراننده دوم: {driver_two}"
+    "loading_two": "در حال دریافت اطلاعات ...\nسال: {year}\nگرندپری: {grand}\nرویداد: {event}\nراننده اول: {driver_one}\nراننده دوم: {driver_two}",
+    "down_all_coin": "کم کردن سکه(همه)",
+    "enter_down_all_coin": "مقدار سکه ای که میخواهید از حساب کاربران کم شود را وارد کنید:",
+    "all_down_su": "از تمام کاربران سکه کم شد✅"
 } 
 
 EN_TEXT = {
@@ -634,5 +637,9 @@ Your points balance is {score}, to get more points, you can subcategory or buy c
     "g_force": "G Force",
     "strategy": "Strategy",
     "driver": "Driver",
-    "all_info": "All Info"
+    "all_info": "All Info",
+    "down_all_coin": "Subtract coins (all)",
+    "enter_down_all_coin": "Enter the amount of coins you want to deduct from the user's account:",
+    "all_down_su": "Coins were deducted from all users✅"
+
 }
