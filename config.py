@@ -15,7 +15,7 @@ if ENV:
     BOT_ID = "https://t.me/F1DataIQBot"
 else:
     BOT_TOKEN = "6300653200:AAFK0BuvMPJ4kZV3gj_sbvXezciah_ga1B4"
-    PROXY = False
+    PROXY = True
     BOT_ID = "https://t.me/F1data_Test_bot"
 PAY_TOKEN = "fced3227-3cf2-486f-95e7-52ee9e8fd77d"
 SESSION_NAME = "bot"
@@ -103,6 +103,17 @@ def check_number(num):
         return False
 
 
+def all_statistics(where):
+    cur.execute(f"INSERT INTO statistics_all VALUES ('{where}')")
+    con.commit()
+def small_statistics(where, user_id):
+    find_user = cur.execute(f"SELECT * FROM statistics_small WHERE user_id = '{user_id}'").fetchone()
+    print(find_user)
+    if find_user is None:
+        cur.execute(f"INSERT INTO statistics_small VALUES ('{where}', '{user_id}')")
+        con.commit()
+    else:
+        return
 # bot texts
 TEXT = {
     "EN_SELECTED": "زبان 🏴انگلیسی انتخاب شد",
@@ -371,8 +382,28 @@ TEXT = {
     "loading_two": "در حال دریافت اطلاعات ...\nسال: {year}\nگرندپری: {grand}\nرویداد: {event}\nراننده اول: {driver_one}\nراننده دوم: {driver_two}",
     "down_all_coin": "کم کردن سکه(همه)",
     "enter_down_all_coin": "مقدار سکه ای که میخواهید از حساب کاربران کم شود را وارد کنید:",
-    "all_down_su": "از تمام کاربران سکه کم شد✅"
-} 
+    "all_down_su": "از تمام کاربران سکه کم شد✅",
+    "statistics_data": "تعداد درخواست دیتا",
+    "statistics_small": "تعداد درخواست کاربران",
+    "statistics_all": "تعداد درخواست کل",
+    "statistics": "آمار",
+    "overtake_statistics": "Overtake Statistics",
+    "map_viz_statistics": "Map Viz Statistics",
+    "rpm_statistics": "Rpm Statistics",
+    "downforce_statistics": "Down Force Statistics",
+    "top_trap_statistics": "Top Speed Statistics",
+    "start_reaction_statistics": "Start Reaction Statistics",
+    "g_force_all_info": "All Info Statistics",
+    "g_force_driver": "G force driver Statistics",
+    "plot_lap_times": "Plot Lap Times Statistics",
+    "map_break_statistics": "Map Break Statistics",
+    "all_statistics": "All Statistics",
+    "strategy_statistics": "Strategy Statistics",
+    "enter_statistics": "دیتای مورد نظر خود را جهت مشاهده آمار انتخاب کنید:",
+    "statistics_all_text": "تعداد کل درخواست ها در بخش {data} برابر است با {count} درخواست",
+    "statistics_small_text": "تعداد کاربرانی که در بخش {data} درخواست زده اند مساوی با {count} است",
+    "statistics_data_text": "تعداد کل درخواست دیتا ها مساوی با {count} است"
+}
 
 EN_TEXT = {
     "EN_SELECTED": "English 🏴󠁧󠁢󠁥󠁮󠁧󠁿 󠁧󠁢󠁥󠁮language was selected",
@@ -640,6 +671,25 @@ Your points balance is {score}, to get more points, you can subcategory or buy c
     "all_info": "All Info",
     "down_all_coin": "Subtract coins (all)",
     "enter_down_all_coin": "Enter the amount of coins you want to deduct from the user's account:",
-    "all_down_su": "Coins were deducted from all users✅"
-
+    "all_down_su": "Coins were deducted from all users✅",
+    "statistics_data": "Number of data requests",
+    "statistics_small": "Number of user requests",
+    "statistics_all": "Total number of requests",
+    "statistics": "Statistics",
+    "overtake_statistics": "Overtake Statistics",
+    "map_viz_statistics": "Map Viz Statistics",
+    "rpm_statistics": "Rpm Statistics",
+    "downforce_statistics": "Down Force Statistics",
+    "top_trap_statistics": "Top Speed Statistics",
+    "start_reaction_statistics": "Start Reaction Statistics",
+    "g_force_all_info": "All Info Statistics",
+    "g_force_driver": "G force driver Statistics",
+    "plot_lap_times": "Plot Lap Times Statistics",
+    "map_break_statistics": "Map Break Statistics",
+    "all_statistics": "All Statistics",
+    "strategy_statistics": "Strategy Statistics",
+    "enter_statistics": "Select the desired data to view statistics",
+    "statistics_all_text": "The total number of requests in the {data} section is equal to {count} requests",
+    "statistics_small_text": "The number of users who have applied in {data} is {count}",
+    "statistics_data_text": "The total number of data requests is equal to {count}"
 }

@@ -839,9 +839,163 @@ async def pay(event):
                         Button.text(bot_text["words"], resize=True),
                         Button.text(bot_text["tickets"]),
                     ],
-                    [Button.text(bot_text['back'])]
+                    [
+                        Button.text(bot_text["statistics_data"]),
+                        Button.text(bot_text["statistics_small"]),
+                        Button.text(bot_text["statistics_all"]),
+                    ],
+                    [Button.text(bot_text['back'])],
                 ]
                 await event.reply(bot_text["select"], buttons=keys)
+        elif text == bot_text["statistics_data"]:
+            count = len(cur.execute(f"SELECT * FROM statistics_all").fetchall())
+            await event.reply(bot_text["statistics_data_text"].format(count=count))
+        elif text == bot_text["statistics"]:
+            keys = [
+                [
+                    Button.text(bot_text["statistics_all"]),
+                    Button.text(bot_text["statistics_small"], resize=1),
+                    Button.text(bot_text["statistics_data"], resize=1)
+                ],
+                [
+                    Button
+                ]
+            ]
+            await event.reply(bot_text["select"], buttons=keys)
+        elif text == bot_text["statistics_small"]:
+            async with bot.conversation(user_id, timeout=1000) as conv_all:
+                keys_all = [
+                    [
+                        Button.inline(bot_text["rpm_statistics"], b'rs'),
+                        Button.inline(bot_text["overtake_statistics"], b'os'),
+                    ],
+                    [
+                        Button.inline(bot_text["map_viz_statistics"], b'ms'),
+                        Button.inline(bot_text["downforce_statistics"], b'ds'),
+                    ],
+                    [
+                        Button.inline(bot_text["top_trap_statistics"], b'ts'),
+                        Button.inline(bot_text["start_reaction_statistics"], b'sr'),
+                    ],
+                    [
+                        Button.inline(bot_text["g_force_all_info"], b'gr'),
+                        Button.inline(bot_text["g_force_driver"], b'gd'),
+                    ],
+                    [
+                        Button.inline(bot_text["plot_lap_times"], b'pd'),
+                        Button.inline(bot_text["map_break_statistics"], b'mbs'),
+                    ],
+                    [
+                        Button.inline(bot_text["all_statistics"], b'as'),
+                        Button.inline(bot_text["strategy_statistics"], b'ss'),
+                    ],
+                    [
+                        Button.inline(bot_text["cancel"], b'cancel')
+                    ]
+                ]
+                await conv_all.send_message(bot_text["enter_statistics"], buttons=keys_all)
+                response = await conv_all.wait_event(events.CallbackQuery())
+                statistics_value = None
+                if response.data == b'rs':
+                    statistics_value = bot_text["rpm"]
+                elif response.data == b'os':
+                    statistics_value = bot_text["overtake"]
+                elif response.data == b'ms':
+                    statistics_value = bot_text["map_viz"]
+                elif response.data == b'ds':
+                    statistics_value = bot_text["down_force"]
+                elif response.data == b'ts':
+                    statistics_value = bot_text["top_speed"]
+                elif response.data == b'sr':
+                    statistics_value = bot_text["start_reaction"]
+                elif response.data == b'gr':
+                    statistics_value = bot_text["all_info"]
+                elif response.data == b'gd':
+                    statistics_value = bot_text["driver"]
+                elif response.data == b'pd':
+                    statistics_value = bot_text["lap_times"]
+                elif response.data == b'mbs':
+                    statistics_value = bot_text["map_break"]
+                elif response.data == b'as':
+                    statistics_value = bot_text["all"]
+                elif response.data == b'ss':
+                    statistics_value = bot_text["strategy"]
+                elif response.data == b'cancel':
+                    return
+                else:
+                    await conv_all.send_message(bot_text["action_not_found"])
+                    return
+                count_all = cur.execute(f"SELECT * FROM statistics_small WHERE data = '{statistics_value}'").fetchall()
+                count_all = len(count_all)
+                await conv_all.send_message(bot_text["statistics_small_text"].format(data=statistics_value, count=count_all))
+                return
+        elif text == bot_text["statistics_all"]:
+            async with bot.conversation(user_id, timeout=1000) as conv_all:
+                keys_all = [
+                    [
+                        Button.inline(bot_text["rpm_statistics"], b'rs'),
+                        Button.inline(bot_text["overtake_statistics"], b'os'),
+                    ],
+                    [
+                        Button.inline(bot_text["map_viz_statistics"], b'ms'),
+                        Button.inline(bot_text["downforce_statistics"], b'ds'),
+                    ],
+                    [
+                        Button.inline(bot_text["top_trap_statistics"], b'ts'),
+                        Button.inline(bot_text["start_reaction_statistics"], b'sr'),
+                    ],
+                    [
+                        Button.inline(bot_text["g_force_all_info"], b'gr'),
+                        Button.inline(bot_text["g_force_driver"], b'gd'),
+                    ],
+                    [
+                        Button.inline(bot_text["plot_lap_times"], b'pd'),
+                        Button.inline(bot_text["map_break_statistics"], b'mbs'),
+                    ],
+                    [
+                        Button.inline(bot_text["all_statistics"], b'as'),
+                        Button.inline(bot_text["strategy_statistics"], b'ss'),
+                    ],
+                    [
+                        Button.inline(bot_text["cancel"], b'cancel')
+                    ]
+                ]
+                await conv_all.send_message(bot_text["enter_statistics"], buttons=keys_all)
+                response = await conv_all.wait_event(events.CallbackQuery())
+                statistics_value = None
+                if response.data == b'rs':
+                    statistics_value = bot_text["rpm"]
+                elif response.data == b'os':
+                    statistics_value = bot_text["overtake"]
+                elif response.data == b'ms':
+                    statistics_value = bot_text["map_viz"]
+                elif response.data == b'ds':
+                    statistics_value = bot_text["down_force"]
+                elif response.data == b'ts':
+                    statistics_value = bot_text["top_speed"]
+                elif response.data == b'sr':
+                    statistics_value = bot_text["start_reaction"]
+                elif response.data == b'gr':
+                    statistics_value = bot_text["all_info"]
+                elif response.data == b'gd':
+                    statistics_value = bot_text["driver"]
+                elif response.data == b'pd':
+                    statistics_value = bot_text["lap_times"]
+                elif response.data == b'mbs':
+                    statistics_value = bot_text["map_break"]
+                elif response.data == b'as':
+                    statistics_value = bot_text["all"]
+                elif response.data == b'ss':
+                    statistics_value = bot_text["strategy"]
+                elif response.data == b'cancel':
+                    return
+                else:
+                    await conv_all.send_message(bot_text["action_not_found"])
+                    return
+                count_all = cur.execute(f"SELECT * FROM statistics_all WHERE data = '{statistics_value}'").fetchall()
+                count_all = len(count_all)
+                await conv_all.send_message(bot_text["statistics_all_text"].format(data=statistics_value, count=count_all))
+                return
         elif text == bot_text["data_management"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
@@ -1663,8 +1817,11 @@ async def pay(event):
                                 except:
                                     pass
                             await bot.delete_messages(user_id, loading.id)
+
                             await bot.send_file(user_id, caption="overtake", file=image_base_over)
                             await bot.send_file(user_id, caption="overtake", file=image_base_over, force_document=True)
+                            config.all_statistics(event.message.message)
+                            config.small_statistics(event.message.message, user_id)
                             user_find = cur.execute(f"SELECT * FROM users WHERE id = {user_id}").fetchone()
                             user_level = user_find[10]
                             level_dict = {
@@ -1878,6 +2035,8 @@ async def pay(event):
                             await bot.send_file(user_id, caption="speed trap", file=image_base_trap)
                             await bot.send_file(user_id, caption="top speed", file=image_base_top, force_document=True)
                             await bot.send_file(user_id, caption="speed trap", file=image_base_trap, force_document=True)
+                            config.all_statistics(event.message.message)
+                            config.small_statistics(event.message.message, user_id)
                             user_find = cur.execute(f"SELECT * FROM users WHERE id = {user_id}").fetchone()
                             user_level = user_find[10]
                             level_dict = {
@@ -2088,6 +2247,8 @@ async def pay(event):
                             await bot.delete_messages(user_id, loading.id)
                             await bot.send_file(user_id, caption="Lap Times", file=image_base_lap)
                             await bot.send_file(user_id, caption="Lap Times", file=image_base_lap, force_document=True)
+                            config.all_statistics(event.message.message)
+                            config.small_statistics(event.message.message, user_id)
                             user_find = cur.execute(f"SELECT * FROM users WHERE id = {user_id}").fetchone()
                             user_level = user_find[10]
                             level_dict = {
@@ -2365,6 +2526,8 @@ async def pay(event):
                                     await bot.delete_messages(user_id, loading.id)
                                     await bot.send_file(user_id, caption="rpm", file=image_base_rpm)
                                     await bot.send_file(user_id, caption="rpm", file=image_base_rpm, force_document=True)
+                                    config.all_statistics(event.message.message)
+                                    config.small_statistics(event.message.message, user_id)
                                     user_find = cur.execute(f"SELECT * FROM users WHERE id = {user_id}").fetchone()
                                     user_level = user_find[10]
                                     level_dict = {
@@ -2609,6 +2772,8 @@ async def pay(event):
                                 await bot.delete_messages(user_id, loading.id)
                                 await bot.send_file(user_id, caption="map viz", file=image_base_viz)
                                 await bot.send_file(user_id, caption="map viz", file=image_base_viz, force_document=True)
+                                config.all_statistics(event.message.message)
+                                config.small_statistics(event.message.message, user_id)
                                 user_find = cur.execute(f"SELECT * FROM users WHERE id = {user_id}").fetchone()
                                 user_level = user_find[10]
                                 level_dict = {
@@ -2847,6 +3012,8 @@ async def pay(event):
                                 await bot.delete_messages(user_id, loading.id)
                                 await bot.send_file(user_id, caption="map brake", file=image_base_map)
                                 await bot.send_file(user_id, caption="map brake", file=image_base_map, force_document=True)
+                                config.all_statistics(event.message.message)
+                                config.small_statistics(event.message.message, user_id)
                                 user_find = cur.execute(f"SELECT * FROM users WHERE id = {user_id}").fetchone()
                                 user_level = user_find[10]
                                 level_dict = {
@@ -3051,6 +3218,8 @@ async def pay(event):
                             await bot.delete_messages(user_id, loading.id)
                             await bot.send_file(user_id, caption="Down Force", file=image_base_force)
                             await bot.send_file(user_id, caption="Down Force", file=image_base_force, force_document=True)
+                            config.all_statistics(event.message.message)
+                            config.small_statistics(event.message.message, user_id)
                             user_find = cur.execute(f"SELECT * FROM users WHERE id = {user_id}").fetchone()
                             user_level = user_find[10]
                             level_dict = {
@@ -3235,6 +3404,8 @@ async def pay(event):
                         await bot.delete_messages(user_id, loading.id)
                         await bot.send_file(user_id, caption="Reaction", file=image_base_reaction)
                         await bot.send_file(user_id, caption="Reaction", file=image_base_reaction, force_document=True)
+                        config.all_statistics(event.message.message)
+                        config.small_statistics(event.message.message, user_id)
                         user_find = cur.execute(f"SELECT * FROM users WHERE id = {user_id}").fetchone()
                         user_level = user_find[10]
                         level_dict = {
@@ -3520,6 +3691,8 @@ async def pay(event):
                                     await bot.delete_messages(user_id, loading.id)
                                     await bot.send_file(user_id, caption="All", file=[image_base_throttle, image_base_gear, image_base_brake, image_base_speed])
                                     await bot.send_file(user_id, caption="All", file=[image_base_throttle, image_base_gear, image_base_brake, image_base_speed], force_document=True)
+                                    config.all_statistics(event.message.message)
+                                    config.small_statistics(event.message.message, user_id)
                                     user_find = cur.execute(f"SELECT * FROM users WHERE id = {user_id}").fetchone()
                                     user_level = user_find[10]
                                     level_dict = {
@@ -3719,6 +3892,8 @@ async def pay(event):
                             await bot.delete_messages(user_id, loading.id)
                             await bot.send_file(user_id, caption="Strategy", file=image_base_strategy)
                             await bot.send_file(user_id, caption="Strategy", file=image_base_strategy, force_document=True)
+                            config.all_statistics(event.message.message)
+                            config.small_statistics(event.message.message, user_id)
                             user_find = cur.execute(f"SELECT * FROM users WHERE id = {user_id}").fetchone()
                             user_level = user_find[10]
                             level_dict = {
@@ -3930,6 +4105,8 @@ async def pay(event):
                             await bot.delete_messages(user_id, loading.id)
                             await bot.send_file(user_id, caption="All Info", file=image_base_info)
                             await bot.send_file(user_id, caption="All Info", file=image_base_info, force_document=True)
+                            config.all_statistics(event.message.message)
+                            config.small_statistics(event.message.message, user_id)
                             user_find = cur.execute(f"SELECT * FROM users WHERE id = {user_id}").fetchone()
                             user_level = user_find[10]
                             level_dict = {
@@ -4184,6 +4361,8 @@ async def pay(event):
                                     await bot.delete_messages(user_id, loading.id)
                                     await bot.send_file(user_id, caption="Driver", file=image_base_driver)
                                     await bot.send_file(user_id, caption="Driver", file=image_base_driver, force_document=True)
+                                    config.all_statistics(event.message.message)
+                                    config.small_statistics(event.message.message, user_id)
                                     await conv.cancel_all()
         elif text == bot_text["add_grand"]:
             is_admin = check_admin(user_id)
