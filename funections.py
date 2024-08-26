@@ -566,7 +566,7 @@ def lap_times(year, gp, identifire):
                 order=finishing_order,
                 hue="Compound",
                 palette=ff1.plotting.COMPOUND_COLORS,
-                hue_order=["SOFT", "MEDIUM", "HARD"],
+                hue_order=["SOFT", "MEDIUM", "HARD", "WET"],
                 linewidth=0,
                 size=4,
                 )
