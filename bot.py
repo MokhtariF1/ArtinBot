@@ -506,6 +506,126 @@ async def pay(event):
                 ]
             ]
             await event.reply(bot_text["select"], buttons=keys)
+        elif text == bot_text["all_send"]:
+            is_admin = check_admin(user_id)
+            if is_admin:
+                async with bot.conversation(user_id, timeout=1000) as conv:
+
+                    await conv.send_message(bot_text["all_send_text"])
+
+                    image_msg = await conv.get_response()
+
+                    image_path = None
+
+                    if image_msg.media is not None:
+
+                        image_path = await image_msg.download_media()
+
+                        await conv.send_message(bot_text["all_send_tx"])
+
+                        text = await conv.get_response()
+
+                        q_text = text.message
+
+                    else:
+
+                        if image_msg.message == bot_text["back"]:
+
+                            key = [
+
+                                Button.text(bot_text["back"], resize=1)
+
+                            ]
+
+                            await bot.send_message(user_id, bot_text['canceled'], buttons=key)
+
+                            return
+
+                        else:
+
+                            q_text = image_msg.message
+
+                    users = cur.execute(f"SELECT id FROM users").fetchall()
+                    for user in users:
+
+                        user_id_ = user[0]
+
+                        try:
+
+                            await bot.send_message(user_id_, q_text, file=image_path)
+
+                        except:
+
+                            continue
+        elif text == bot_text["one_send"]:
+            is_admin = check_admin(user_id)
+            if is_admin:
+                async with bot.conversation(user_id, timeout=1000) as conv:
+                    ask_user_id = await conv.send_message(bot_text["enter_user_id"])
+                    while True:
+                        try:
+                            user_id_get = await conv.get_response(timeout=120)
+                            if user_id_get.raw_text == bot_text["cancel"] or user_id_get.raw_text == bot_text["back"]:
+                                await conv.send_message(bot_text["canceled"])
+                                await bot.delete_messages(user_id, ask_user_id.id)
+                                return
+                            user_id_get = int(user_id_get.raw_text)
+                            break
+                        except ValueError:
+                            await conv.send_message(bot_text["just_num"])
+                        except TimeoutError:
+                            await conv.send_message(bot_text["timeout_error"])
+                            await bot.delete_messages(user_id, ask_user_id.id)
+                            return
+                    find_user = cur.execute(f"SELECT score FROM users WHERE id = {user_id_get}").fetchone()
+                    if find_user is None:
+                        await event.reply(bot_text["not_found"])
+                        return
+                    else:
+                        await conv.send_message(bot_text["all_send_text"])
+
+                        image_msg = await conv.get_response()
+
+                        image_path = None
+
+                        if image_msg.media is not None:
+
+                            image_path = await image_msg.download_media()
+
+                            await conv.send_message(bot_text["all_send_tx"])
+
+                            text = await conv.get_response()
+
+                            q_text = text.message
+
+                        else:
+
+                            if image_msg.message == bot_text["back"]:
+
+                                key = [
+
+                                    Button.text(bot_text["back"], resize=1)
+
+                                ]
+
+                                await bot.send_message(user_id, bot_text['canceled'], buttons=key)
+
+                                return
+
+                            else:
+
+                                q_text = image_msg.message
+
+                        user = cur.execute(f"SELECT id FROM users WHERE id = {user_id_get}").fetchone()
+                        user_id_ = user[0]
+                        print(user_id_)
+                        try:
+
+                            await bot.send_message(user_id_, q_text, file=image_path)
+
+                        except Exception as e:
+                            print(e)
+                            pass
         elif text == bot_text["idealization"]:
             idealization_count = len(list(cur.execute(f"SELECT * FROM idealization WHERE user_id = {user_id}").fetchall()))
             if idealization_count + 1 > 2:
@@ -843,6 +963,10 @@ async def pay(event):
                         Button.text(bot_text["statistics_data"]),
                         Button.text(bot_text["statistics_small"]),
                         Button.text(bot_text["statistics_all"]),
+                    ],
+                    [
+                        Button.text(bot_text["all_send"]),
+                        Button.text(bot_text["one_send"])
                     ],
                     [Button.text(bot_text['back'])],
                 ]
