@@ -1658,6 +1658,7 @@ async def pay(event):
             for grand in find_grands:
                 grand_name = grand[1]
                 grand_num = grand[0]
+                print(grand_num)
                 key = [Button.inline(grand_name, str.encode("get_drivers" + ":" + str(grand_num)))]
                 inline_keys.append(key)
             await event.reply(bot_text["select_grand"], buttons=inline_keys)
