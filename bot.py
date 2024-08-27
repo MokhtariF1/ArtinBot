@@ -1650,7 +1650,7 @@ async def pay(event):
                 con.commit()
             await event.reply(bot_text["all_down_su"])
         elif text == bot_text["add_score"]:
-            find_grands = cur.execute("SELECT * FROM grand ORDER BY num DESC").fetchall()
+            find_grands = cur.execute("SELECT * FROM grand ORDER BY num ASC").fetchall()
             if len(find_grands) == 0:
                 await event.reply(bot_text["grands_not_found"], buttons=back)
                 return
