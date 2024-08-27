@@ -15,7 +15,7 @@ if ENV:
     BOT_ID = "https://t.me/F1DataIQBot"
 else:
     BOT_TOKEN = "6300653200:AAFK0BuvMPJ4kZV3gj_sbvXezciah_ga1B4"
-    PROXY = False
+    PROXY = True
     BOT_ID = "https://t.me/F1data_Test_bot"
 PAY_TOKEN = "fced3227-3cf2-486f-95e7-52ee9e8fd77d"
 SESSION_NAME = "bot"
@@ -699,5 +699,6 @@ Your points balance is {score}, to get more points, you can subcategory or buy c
     "all_send": "Public Posting",
     "all_send_text": "If you need an image, send your image and otherwise send your desired text:",
     "all_send_tx": "Enter the text:",
-    "one_send": "Single Shipment"
+    "one_send": "Single Shipment",
+    "data_management": "Data Management"
 }
