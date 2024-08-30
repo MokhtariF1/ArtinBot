@@ -407,6 +407,7 @@ TEXT = {
     "all_send_text": "درصورت نیاز به تصویر، تصویر خود را ارسال کنید و در غیر این صورت متن مورد نظر خود را ارسال کنید:",
     "all_send_tx": ":متن را وارد کنید",
     "one_send": "ارسال پیام تکی",
+    "data_to_pole": "Delta to Pole",
 }
 
 EN_TEXT = {
@@ -700,5 +701,6 @@ Your points balance is {score}, to get more points, you can subcategory or buy c
     "all_send_text": "If you need an image, send your image and otherwise send your desired text:",
     "all_send_tx": "Enter the text:",
     "one_send": "Single Shipment",
-    "data_management": "Data Management"
+    "data_management": "Data Management",
+    "data_to_pole": "Delta to Pole"
 }
