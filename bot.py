@@ -4503,7 +4503,7 @@ async def pay(event):
                 async with bot.conversation(user_id, timeout=1000) as conv:
                     await conv.send_message(bot_text["enter_grand"])
                     grand_name = await conv.get_response()
-                    if grand_name.raw_text == bot_text["cancel"] or grand_name.raw_text == bot_text["back"]:
+                    if grand_name.raw_text == bot_text["cancel"]:
                         await conv.send_message(bot_text["canceled"])
                         return
                     find_grand_name = cur.execute(f"SELECT * FROM grand WHERE name = '{grand_name.raw_text}'").fetchone()
@@ -4512,7 +4512,7 @@ async def pay(event):
                         return
                     await conv.send_message(bot_text["enter_grand_num"])
                     grand_num = await conv.get_response()
-                    if grand_num.raw_text == bot_text["cancel"] or grand_num.raw_text == bot_text["back"]:
+                    if grand_num.raw_text == bot_text["cancel"]:
                         await conv.send_message(bot_text["canceled"])
                         return
                     find_grand_round = cur.execute(f"SELECT * FROM grand WHERE num = '{grand_num.raw_text}'").fetchone()
@@ -4540,16 +4540,82 @@ async def pay(event):
                     url = f"http://ergast.com/api/f1/2024/{grand_num.raw_text}/drivers.json"
                     result = requests.get(url).json()
                     drivers = result["MRData"]["DriverTable"]["Drivers"]
-                    for driver in drivers:
-                        driver_name = driver["givenName"] + "_" + driver["familyName"]
-                        driver_id = driver["driverId"]
+                    num = 0
+                    while num < len(drivers):
+                        driver_name = drivers[num]["givenName"] + "_" + drivers[num]["familyName"]
+                        driver_id = drivers[num]["driverId"]
                         data = [
                             (int(grand_num.raw_text), driver_name, driver_id, 0, 0, 0),
                         ]
                         cur.executemany("INSERT INTO drivers VALUES (?,?,?,?,?,?)", data)
                         con.commit()
+                        num += 1
+                    print(ergast_requesting)
                     await bot.delete_messages(user_id, ergast_requesting.id)
                     await event.reply(bot_text["successfully"])
+        # elif text == bot_text["add_grand"]:
+        #     is_admin = check_admin(user_id)
+        #     if is_admin is False:
+        #         keys = [
+        #             [Button.text(bot_text["archive"], resize=True)],
+        #             [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
+        #             [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
+        #              Button.text(bot_text["rules"])],
+        #         ]
+        #         await event.reply(bot_text["select"], buttons=keys)
+        #     else:
+        #         async with bot.conversation(user_id, timeout=1000) as conv:
+        #             await conv.send_message(bot_text["enter_grand"])
+        #             grand_name = await conv.get_response()
+        #             if grand_name.raw_text == bot_text["cancel"] or grand_name.raw_text == bot_text["back"]:
+        #                 await conv.send_message(bot_text["canceled"])
+        #                 return
+        #             find_grand_name = cur.execute(f"SELECT * FROM grand WHERE name = '{grand_name.raw_text}'").fetchone()
+        #             if find_grand_name is not None:
+        #                 await event.reply(bot_text["name_already_exists"])
+        #                 return
+        #             await conv.send_message(bot_text["enter_grand_num"])
+        #             grand_num = await conv.get_response()
+        #             if grand_num.raw_text == bot_text["cancel"] or grand_num.raw_text == bot_text["back"]:
+        #                 await conv.send_message(bot_text["canceled"])
+        #                 return
+        #             find_grand_round = cur.execute(f"SELECT * FROM grand WHERE num = '{grand_num.raw_text}'").fetchone()
+        #             if find_grand_round is not None:
+        #                 await event.reply(bot_text["round_already_exists"])
+        #                 return
+        #             keys = [
+        #                 Button.inline("1", b'1'),
+        #                 Button.inline("2", b'2')
+        #             ]
+        #             await conv.send_message(bot_text["ask_state"], buttons=keys)
+        #             try:
+        #                 state = await conv.wait_event(events.CallbackQuery())
+        #             except TimeoutError:
+        #                 await conv.send_message(bot_text["timeout_error"])
+        #                 await conv.cancel_all()
+        #             state_data = int(state.data.decode())
+        #             data = [
+        #                 (grand_num.raw_text, grand_name.raw_text, False, state_data)
+        #             ]
+        #             cur.executemany(f"INSERT INTO grand VALUES (?,?,?,?)", data)
+        #             con.commit()
+        #             # request to ergast
+        #             ergast_requesting = await event.reply(bot_text["requesting_ergast"])
+        #             url = f"http://ergast.com/api/f1/2024/{grand_num.raw_text}/drivers.json"
+        #             result = requests.get(url).json()
+        #             drivers = result["MRData"]["DriverTable"]["Drivers"]
+        #             for driver in drivers:
+        #                 # print(driver)
+        #                 driver_name = driver["givenName"] + "_" + driver["familyName"]
+        #                 driver_id = driver["driverId"]
+        #                 print(driver_id)
+        #                 # data = [
+        #                     # (int(grand_num.raw_text), driver_name, driver_id, 0, 0, 0),
+        #                 # ]
+        #                 cur.execute(f"INSERT INTO drivers VALUES ({int(grand_num.raw_text)},'{driver_name}','{driver_id}',{0},{0},{0})")
+        #                 con.commit()
+        #             await bot.delete_messages(user_id, ergast_requesting.id)
+        #             await event.reply(bot_text["successfully"])
         elif text == bot_text["show_grand"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
