@@ -24,6 +24,7 @@ PROXY_ADDRESS = "127.0.0.1"
 PROXY_PORT = 10808
 DB_NAME = "bot.db"
 CHANNEL_ID = "https://t.me/F1DataOfficial"
+ergast = True
 try:
     CHANNEL_ID_PLUS = cur.execute(f"SELECT channel_id FROM join_channel WHERE senior = {True}").fetchone()[0]
 except TypeError:

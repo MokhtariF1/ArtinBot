@@ -47,6 +47,28 @@ con = sqlite3.connect(config.DB_NAME)
 cur = con.cursor()
 manager = Manager()
 user_messages = {}
+driver_short_codes = {
+    "Max_Verstappen": "VER",
+    "Lewis_Hamilton": "HAM",
+    "Charles_Leclerc": "LEC",
+    "Sergio_Pérez": "PER",
+    "Carlos_Sainz": "SAI",
+    "Lando_Norris": "NOR",
+    "Daniel_Ricciardo": "RIC",
+    "Fernando_Alonso": "ALO",
+    "George_Russell": "RUS",
+    "Pierre_Gasly": "GAS",
+    "Esteban_Ocon": "OCO",
+    "Valtteri_Bottas": "BOT",
+    "Yuki_Tsunoda": "TSU",
+    "Kevin_Magnussen": "MAG",
+    "Nico_Hülkenberg": "HUL",
+    "Alexander_Albon": "ALB",
+    "Lance_Stroll": "STR",
+    "Oscar_Piastri": "PIA",
+    "Guanyu_Zhou": "ZHO"
+}
+
 drivers_translate = {
     "Max_Verstappen": "مکس ورستپن",
     "Nyck_de Vries": "نیک دوریس",
@@ -79,7 +101,8 @@ drivers_translate = {
     "Esteban_Ocon": "استبان اوکون",
     "Yuki_Tsunoda": "یوکی سونودا",
     "Nico_Hülkenberg": "نیکو هالکنبرگ",
-    "Kevin_Magnussen": "کوین مگنوسن"
+    "Kevin_Magnussen": "کوین مگنوسن",
+    "Franco_Colapinto ": "فرانکو کولاپینتو"
 }
 
 country_tr = {
@@ -1786,7 +1809,6 @@ async def pay(event):
             await event.reply(bot_text["select"], buttons=keys)
         elif text == bot_text["overtake"]:
             user_find = cur.execute(f"SELECT * FROM users WHERE id = {user_id}").fetchone()
-            print(user_find)
             user_scores = user_find[5]
             user_level = user_find[10]
             score_dict = {
@@ -2582,16 +2604,29 @@ async def pay(event):
                                                 await conv.send_message(bot_text["dont_time"])
                                                 return
                             url = f"http://ergast.com/api/f1/{year}/{gp_round}/drivers.json"
-                            drivers = requests.get(url).json()["MRData"]["DriverTable"]["Drivers"]
+                            if config.ergast:
+                                drivers = requests.get(url).json()["MRData"]["DriverTable"]["Drivers"]
+                            else:
+                                drivers = drivers_translate
                             drivers_keys = []
-                            for driver in drivers:
-                                if lang == 1:
-                                    driver_name = driver["givenName"] + driver["familyName"]
-                                else:
-                                    driver_name = drivers_translate[driver["givenName"] + "_" + driver["familyName"]]
-                                driver_code = driver["code"]
-                                key = Button.inline(driver_name, data=driver_code.encode())
-                                drivers_keys.append(key)
+                            if config.ergast:
+                                for driver in drivers:
+                                    if lang == 1:
+                                        driver_name = driver["givenName"] + driver["familyName"]
+                                    else:
+                                        driver_name = drivers_translate[driver["givenName"] + "_" + driver["familyName"]]
+                                    driver_code = driver["code"]
+                                    key = Button.inline(driver_name, data=driver_code.encode())
+                                    drivers_keys.append(key)
+                            else:
+                                for driver in drivers.keys():
+                                    if lang == 1:
+                                        driver_name = driver
+                                    else:
+                                        driver_name = drivers_translate[driver]
+                                    driver_code = driver_short_codes[driver]
+                                    key = Button.inline(driver_name, data=driver_code.encode())
+                                    drivers_keys.append(key)
                             result = []
                             for dv in range(0, len(drivers_keys), 2):
                                 if dv + 1 < len(drivers_keys):
