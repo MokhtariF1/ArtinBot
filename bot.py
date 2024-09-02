@@ -149,7 +149,16 @@ sessions_convert = {
     "Practice_2": "FP2",
     "Practice_3": "FP3"
 }
-
+type_tr = {
+    "Practice_1": "تمرین اول",
+    "Practice_2": "تمرین دوم",
+    "Practice_3": "تمرین سوم",
+    "FP1": "تمرین اول",
+    "FP2": "تمرین دوم",
+    "FP3": "تمرین سوم",
+    "Qualifying": "تعیین خط",
+    "Race": "مسابقه"
+}
 def check_and_limit(user_id):
     current_time = time.time()
     if user_id not in user_messages:
