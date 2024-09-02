@@ -4683,7 +4683,7 @@ async def pay(event):
                         if lang == 1:
                             loading = await conv.send_message(bot_text["loading"].format(year=year, gp=gp, event=session))
                         else:
-                            loading = await conv.send_message(bot_text["loading"].format(year=year, gp=country_tr[gp.replace(" ", "_")], event=type_tr[session.replace(" ", "_")]))
+                            loading = await conv.send_message(bot_text["loading"].format(year=year, gp=country_tr[gp.replace(" ", "_")], event="تعیین خط"))
                         BASE_DIR = Path(__file__).resolve().parent
                         if session == "Practice_1" or session == "Practice_2" or session == "Practice_3":
                             session = sessions_convert[session]
