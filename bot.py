@@ -1818,7 +1818,7 @@ async def pay(event):
                     else:
                         response = rjson["pdfs_path"]
                         new_pdfs = []
-                        for r in respones:
+                        for r in response:
                             new_pdfs.append("/root/pdf_test/" + r)
                         await bot.send_file(user_id, file=new_pdfs)
         elif text == bot_text["time_setup"]:
