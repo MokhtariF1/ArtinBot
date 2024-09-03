@@ -1817,7 +1817,10 @@ async def pay(event):
                         await event.reply(bot_text["cant_get_fia"])
                     else:
                         response = rjson["pdfs_path"]
-                        await bot.send_file(user_id, file=response)
+                        new_pdfs = []
+                        for r in respones:
+                            new_pdfs.append("/root/pdf_test/" + r)
+                        await bot.send_file(user_id, file=new_pdfs)
         elif text == bot_text["time_setup"]:
             keys = [
                 [
