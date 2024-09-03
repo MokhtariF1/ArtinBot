@@ -490,7 +490,7 @@ async def pay(event):
                 [
                     Button.text(bot_text["championship_calendar"]),
                     Button.text(bot_text["scores"]),
-                    Button.text(bot_text["soon"]),
+                    Button.text(bot_text["fia"]),
                 ],
                 [
                     Button.text(bot_text["back"])
@@ -1764,6 +1764,60 @@ async def pay(event):
                             con.commit()
                             await conv.send_message(bot_text["saved"])
                             await conv.cancel_all()
+        elif text == bot_text["fia"]:
+            keys = [
+                Button.text(bot_text["fia_tec"]),
+                Button.text(bot_text["fia_race_data"])
+            ]
+            await event.reply(bot_text["select"], buttons=keys)
+        elif text == bot_text["fia_tec"]:
+            await event.reply(bot_text["soon"])
+        elif text == bot_text["fia_race_data"]:
+            year = 2024
+            async with bot.conversation(user_id, timeout=1000) as conv:
+                response = manager.get_event(year=year)["Country"]
+                gp_keys = []
+                for gp in response:
+                    if lang == 1:
+                        gp_text = gp["t"]
+                    else:
+                        gp_text = country_tr[gp["tr"]]
+                    gp_data = gp["t"].encode()
+                    key = Button.inline(gp_text, data=gp_data)
+                    gp_keys.append(key)
+                result = []
+                for i in range(0, len(gp_keys), 2):
+                    if i + 1 < len(gp_keys):
+                        result.append([gp_keys[i], gp_keys[i + 1]])
+                    else:
+                        result.append([gp_keys[i]])
+                result.append([Button.inline(bot_text["cancel"], b'cancel')])
+                ask_gp = await conv.send_message(bot_text["select_gp"], buttons=result)
+                try:
+                    gp_res = await conv.wait_event(events.CallbackQuery(), timeout=60)
+                    await bot.delete_messages(user_id, ask_gp.id)
+                except TimeoutError:
+                    await conv.send_message(bot_text["timeout_error"])
+                    await bot.delete_messages(user_id, ask_gp.id)
+                    return
+                gp_data = gp_res.data
+                if gp_data == b'cancel':
+                    await conv.send_message(bot_text["canceled"])
+                    await conv.cancel_all()
+                else:
+                    gp = gp_data.decode()
+                    gp = gp.replace(" ", "_")
+                    print(gp)
+                    await event.reply(bot_text["loading_fia"])
+                    url = f"http://127.0.0.1:8000/get-pdf/?grand_name={gp}"
+                    response = requests.get(url)
+                    rjson = response.json()
+                    status = rjson["status"]
+                    if status == 500:
+                        await event.reply(bot_text["cant_get_fia"])
+                    else:
+                        response = rjson["pdfs_path"]
+                        await bot.send_file(user_id, file=response)
         elif text == bot_text["time_setup"]:
             keys = [
                 [

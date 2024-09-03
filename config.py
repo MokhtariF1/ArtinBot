@@ -15,7 +15,7 @@ if ENV:
     BOT_ID = "https://t.me/F1DataIQBot"
 else:
     BOT_TOKEN = "6300653200:AAFK0BuvMPJ4kZV3gj_sbvXezciah_ga1B4"
-    PROXY = True
+    PROXY = False
     BOT_ID = "https://t.me/F1data_Test_bot"
 PAY_TOKEN = "fced3227-3cf2-486f-95e7-52ee9e8fd77d"
 SESSION_NAME = "bot"
@@ -409,6 +409,12 @@ TEXT = {
     "all_send_tx": ":متن را وارد کنید",
     "one_send": "ارسال پیام تکی",
     "data_to_pole": "Delta to Pole",
+    "fia": "اطلاعات فیا",
+    "fia_tec": "قوانین فنی",
+    "fia_race_data": "دیتا مسابقه",
+    "fia_info_management": "مدیریت اطلاعات فیا",
+    "loading_fia": "در حال دریافت اطلاعات از فیا...",
+    "cant_get_fia": "خطا در دریافت اطلاعات از فیا!\nلطفا به پشتیبانی ربات اطلاع دهید"
 }
 
 EN_TEXT = {
@@ -703,5 +709,11 @@ Your points balance is {score}, to get more points, you can subcategory or buy c
     "all_send_tx": "Enter the text:",
     "one_send": "Single Shipment",
     "data_management": "Data Management",
-    "data_to_pole": "Delta to Pole"
+    "data_to_pole": "Delta to Pole",
+    "fia": "Fia Information",
+    "fia_tec": "Technical rules",
+    "fia_race_data": "Race Data",
+    "fia_info_management": "Fia Info Management",
+    "loading_fia": "Getting data from fia ...",
+    "cant_get_fia": "Error in get data from fia, please connect to bot support!"
 }
