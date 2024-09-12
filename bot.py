@@ -19,6 +19,8 @@ import os
 import time
 from service import Manager
 import asyncio
+from pathlib import Path
+
 
 
 api_id = config.API_ID
@@ -1828,7 +1830,9 @@ async def pay(event):
             ]
             await event.reply(bot_text["select"], buttons=keys)
         elif text == bot_text["fia_tec"]:
-            await event.reply(bot_text["soon"])
+            folder_path = Path('مسیر/به/فولدر')
+            files = [f.name for f in folder_path.iterdir() if f.is_file()]
+            await event.reply(bot_text["fia_tec"], files)
         elif text == bot_text["fia_race_data"]:
             year = 2024
             async with bot.conversation(user_id, timeout=1000) as conv:
