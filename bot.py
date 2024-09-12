@@ -68,6 +68,49 @@ driver_short_codes = {
     "Oscar_Piastri": "PIA",
     "Guanyu_Zhou": "ZHO"
 }
+driver_buy_code_en = {
+    "VER": "Max_Verstappen",
+    "HAM": "Lewis_Hamilton",
+    "LEC": "Charles_Leclerc",
+    "PER": "Sergio_Pérez",
+    "SAI": "Carlos_Sainz",
+    "NOR": "Lando_Norris",
+    "RIC": "Daniel_Ricciardo",
+    "ALO": "Fernando_Alonso",
+    "RUS": "George_Russell",
+    "GAS": "Pierre_Gasly",
+    "OCO": "Esteban_Ocon",
+    "BOT": "Valtteri_Bottas",
+    "TSU": "Yuki_Tsunoda",
+    "MAG": "Kevin_Magnussen",
+    "HUL": "Nico_Hülkenberg",
+    "ALB": "Alexander_Albon",
+    "STR": "Lance_Stroll",
+    "PIA": "Oscar_Piastri",
+    "ZHO": "Guanyu_Zhou"
+}
+driver_buy_code_fa = {
+    "VER": "مکس ورستپن",
+    "HAM": "لوئیس همیلتون",
+    "LEC": "شارل لکلرک",
+    "PER": "سرجیو پرز",
+    "SAI": "کارلوس ساینز",
+    "NOR": "لندو نوریس",
+    "RIC": "دنیل ریکاردو",
+    "ALO": "فرناندو آلونسو",
+    "RUS": "جورج راسل",
+    "GAS": "پیر گسلی",
+    "OCO": "استبان اوکون",
+    "BOT": "والتری بوتاس",
+    "TSU": "یوکی سونودا",
+    "MAG": "کوین مگنوسن",
+    "HUL": "نیکو هالکنبرگ",
+    "ALB": "الکس آلبون",
+    "STR": "لنس استرول",
+    "PIA": "اسکار پیاستری",
+    "ZHO": "گوانیو ژو"
+}
+
 
 drivers_translate = {
     "Max_Verstappen": "مکس ورستپن",
@@ -1001,6 +1044,9 @@ async def pay(event):
                         Button.text(bot_text["all_send"]),
                         Button.text(bot_text["one_send"])
                     ],
+                    [
+                        Button.text(bot_text["fia_info_management"])
+                    ],
                     [Button.text(bot_text['back'])],
                 ]
                 await event.reply(bot_text["select"], buttons=keys)
@@ -1624,6 +1670,12 @@ async def pay(event):
             else:
                 users = cur.execute("SELECT * FROM users").fetchall()
                 await event.reply(bot_text["statistics_text"].format(users=len(users)))
+        elif text == bot_text["fia_info_management"]:
+            ch_admin = check_admin(user_id=user_id)
+            if ch_admin:
+                from telethon.utils import pack_bot_file_id
+                doc = InputMediaPhoto(5967749589576569761, -3710000705773719688, b'\x01\x00\x00\x1f<f\xe1UD0\xeaK\xf86\xd6\xedE\xf7\xf07ZKCh\x8f')
+                await bot.send_file(user_id, )
         elif text == bot_text["words"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
@@ -2715,6 +2767,7 @@ async def pay(event):
                                 await conv.send_message(bot_text["canceled"])
                                 await conv.cancel_all()
                             else:
+                                driver_one_name = driver_data.decode()
                                 gp_round = int(gp_data.decode().split(":")[1])
                                 url = f"http://ergast.com/api/f1/{year}/{gp_round}/drivers.json"
                                 drivers = requests.get(url).json()["MRData"]["DriverTable"]["Drivers"]
@@ -2748,14 +2801,13 @@ async def pay(event):
                                     await conv.send_message(bot_text["canceled"])
                                     await conv.cancel_all()
                                 else:
-                                    print(driver_data)
                                     driver_one_code = driver_data.decode()
                                     driver_two_code = driver_data_two.decode()
                                     session = event_data.decode()
                                     if lang == 1:
-                                        loading = await conv.send_message(bot_text["loading"].format(year=year, gp=gp_country, event=session))
+                                        loading = await conv.send_message(bot_text["loading_two"].format(year=year, gp=gp_country, event=session, driver_one=driver_buy_code_en[driver_one_code], driver_two=driver_buy_code_en[driver_two_code]))
                                     else:
-                                        loading = await conv.send_message(bot_text["loading"].format(year=year, gp=country_tr[gp_country.replace(" ", "_")], event=type_tr[session.replace(" ", "_")]))
+                                        loading = await conv.send_message(bot_text["loading_two"].format(year=year, gp=country_tr[gp_country.replace(" ", "_")], event=type_tr[session.replace(" ", "_")], driver_one=driver_buy_code_fa[driver_one_code], driver_two=driver_buy_code_fa[driver_two_code]))
                                     BASE_DIR = Path(__file__).resolve().parent
                                     if session == "Practice_1" or session == "Practice_2" or session == "Practice_3":
                                         session = sessions_convert[session]
@@ -2998,9 +3050,9 @@ async def pay(event):
                                 driver_code = driver_data.decode()
                                 session = event_data.decode()
                                 if lang == 1:
-                                    loading = await conv.send_message(bot_text["loading"].format(year=year, gp=gp_country, event=session))
+                                    loading = await conv.send_message(bot_text["loading_one"].format(year=year, gp=gp_country, event=session, driver_one=driver_buy_code_en[driver_code]))
                                 else:
-                                    loading = await conv.send_message(bot_text["loading"].format(year=year, gp=country_tr[gp_country.replace(" ", "_")], event=type_tr[session.replace(" ", "_")]))
+                                    loading = await conv.send_message(bot_text["loading_one"].format(year=year, gp=country_tr[gp_country.replace(" ", "_")], event=type_tr[session.replace(" ", "_")], driver_one=driver_buy_code_fa[driver_code]))
                                 BASE_DIR = Path(__file__).resolve().parent
                                 if session == "Practice_1" or session == "Practice_2" or session == "Practice_3":
                                     session = sessions_convert[session]
@@ -3238,9 +3290,9 @@ async def pay(event):
                                 driver_code = driver_data.decode()
                                 session = event_data.decode()
                                 if lang == 1:
-                                    loading = await conv.send_message(bot_text["loading"].format(year=year, gp=gp_country, event=session))
+                                    loading = await conv.send_message(bot_text["loading_one"].format(year=year, gp=gp_country, event=session, driver_one=driver_buy_code_en[driver_code]))
                                 else:
-                                    loading = await conv.send_message(bot_text["loading"].format(year=year, gp=country_tr[gp_country.replace(" ", "_")], event=type_tr[session.replace(" ", "_")]))
+                                    loading = await conv.send_message(bot_text["loading_one"].format(year=year, gp=country_tr[gp_country.replace(" ", "_")], event=type_tr[session.replace(" ", "_")], driver_one=driver_buy_code_fa[driver_code]))
                                 BASE_DIR = Path(__file__).resolve().parent
                                 if session == "Practice_1" or session == "Practice_2" or session == "Practice_3":
                                     session = sessions_convert[session]
@@ -3910,9 +3962,9 @@ async def pay(event):
                                     driver_two_code = driver_data_two.decode()
                                     session = event_data.decode()
                                     if lang == 1:
-                                        loading = await conv.send_message(bot_text["loading"].format(year=year, gp=gp_country, event=session))
+                                        loading = await conv.send_message(bot_text["loading_two"].format(year=year, gp=gp_country, event=session, driver_one=driver_buy_code_en[driver_one_code], driver_two=driver_buy_code_en[driver_two_code]))
                                     else:
-                                        loading = await conv.send_message(bot_text["loading"].format(year=year, gp=country_tr[gp_country.replace(" ", "_")], event=type_tr[session.replace(" ", "_")]))
+                                        loading = await conv.send_message(bot_text["loading_two"].format(year=year, gp=country_tr[gp_country.replace(" ", "_")], event=type_tr[session.replace(" ", "_")], driver_one=driver_buy_code_fa[driver_one_code], driver_two=driver_buy_code_fa[driver_two_code]))
                                     BASE_DIR = Path(__file__).resolve().parent
                                     if session == "Practice_1" or session == "Practice_2" or session == "Practice_3":
                                         session = sessions_convert[session]
@@ -4588,9 +4640,9 @@ async def pay(event):
                                     driver_two_code = driver_data_two.decode()
                                     session = event_data.decode()
                                     if lang == 1:
-                                        loading = await conv.send_message(bot_text["loading"].format(year=year, gp=gp_country, event=session))
+                                        loading = await conv.send_message(bot_text["loading_two"].format(year=year, gp=gp_country, event=session, driver_one=driver_buy_code_en[driver_one_code], driver_two=driver_buy_code_en[driver_two_code]))
                                     else:
-                                        loading = await conv.send_message(bot_text["loading"].format(year=year, gp=country_tr[gp_country.replace(" ", "_")], event=type_tr[session.replace(" ", "_")]))
+                                        loading = await conv.send_message(bot_text["loading_two"].format(year=year, gp=country_tr[gp_country.replace(" ", "_")], event=type_tr[session.replace(" ", "_")], driver_one=driver_buy_code_fa[driver_one_code], driver_two=driver_buy_code_fa[driver_two_code]))
                                     BASE_DIR = Path(__file__).resolve().parent
                                     if session == "Practice_1" or session == "Practice_2" or session == "Practice_3":
                                         session = sessions_convert[session]

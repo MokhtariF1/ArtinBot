@@ -21,7 +21,7 @@ PAY_TOKEN = "fced3227-3cf2-486f-95e7-52ee9e8fd77d"
 SESSION_NAME = "bot"
 PROXY_TYPE = "socks5"
 PROXY_ADDRESS = "127.0.0.1"
-PROXY_PORT = 10808
+PROXY_PORT = 2080
 DB_NAME = "bot.db"
 CHANNEL_ID = "https://t.me/F1DataOfficial"
 ergast = True
@@ -379,8 +379,8 @@ TEXT = {
     "strategy": "Strategy",
     "driver": "Driver",
     "all_info": "All Info",
-    "loading_one": "در حال دریافت اطلاعات ...\nسال: {year}\nگرندپری: {grand}\nرویداد: {event}\nراننده اول: {driver_one}",
-    "loading_two": "در حال دریافت اطلاعات ...\nسال: {year}\nگرندپری: {grand}\nرویداد: {event}\nراننده اول: {driver_one}\nراننده دوم: {driver_two}",
+    "loading_one": "در حال دریافت اطلاعات ...\nسال: {year}\nگرندپری: {gp}\nرویداد: {event}\nراننده: {driver_one}",
+    "loading_two": "در حال دریافت اطلاعات ...\nسال: {year}\nگرندپری: {gp}\nرویداد: {event}\nراننده اول: {driver_one}\nراننده دوم: {driver_two}",
     "down_all_coin": "کم کردن سکه(همه)",
     "enter_down_all_coin": "مقدار سکه ای که میخواهید از حساب کاربران کم شود را وارد کنید:",
     "all_down_su": "از تمام کاربران سکه کم شد✅",
@@ -410,11 +410,13 @@ TEXT = {
     "one_send": "ارسال پیام تکی",
     "data_to_pole": "Delta to Pole",
     "fia": "اطلاعات فیا",
-    "fia_tec": "قوانین فنی",
+    "fia_tec": "قوانین فنی فیا",
     "fia_race_data": "دیتا مسابقه",
     "fia_info_management": "مدیریت اطلاعات فیا",
     "loading_fia": "در حال دریافت اطلاعات از فیا...",
-    "cant_get_fia": "خطا در دریافت اطلاعات از فیا!\nلطفا به پشتیبانی ربات اطلاع دهید"
+    "cant_get_fia": "خطا در دریافت اطلاعات از فیا!\nلطفا به پشتیبانی ربات اطلاع دهید",
+    "enter_pdf_files": "تمام فایل های مورد نظر برای نمایش در قوانین فنی فیا ارسال کنید:",
+    "send_media": "لطفا رسانه ارسال کنید!"
 }
 
 EN_TEXT = {
@@ -556,8 +558,8 @@ otherwise the payment will not be confirmed and the money will be returned to yo
     "select_gp": "Please select grand prix:",
     "select_session": "Please select event:",
     "loading": "Loading data...\nyear:{year}\ngp:{gp}\nevent:{event}",
-    "loading_one": "Receiving information...\nYear: {year}\nGrand Prix: {grand}\nevent: {event}\nDriver One: {driver_one}",
-    "loading_two": "Receiving information...\nYear: {year}\nGrand Prix: {grand}\nevent: {event}\nDriver One: {driver_one}\nDriver two: {driver_two}",
+    "loading_one": "Receiving information...\nYear: {year}\nGrand Prix: {gp}\nevent: {event}\nDriver: {driver_one}",
+    "loading_two": "Receiving information...\nYear: {year}\nGrand Prix: {gp}\nevent: {event}\nDriver One: {driver_one}\nDriver two: {driver_two}",
     "pls_join_plus": "Please subscribe to the channel below to use the power ranking button and then click power ranking again.",
     "account_setup": "Account setup",
     "bot_ping": "Bot ping",
@@ -715,5 +717,7 @@ Your points balance is {score}, to get more points, you can subcategory or buy c
     "fia_race_data": "Race Data",
     "fia_info_management": "Fia Info Management",
     "loading_fia": "Getting data from fia ...",
-    "cant_get_fia": "Error in get data from fia, please connect to bot support!"
+    "cant_get_fia": "Error in get data from fia, please connect to bot support!",
+    "enter_pdf_files": "Send all the desired files to be displayed in the FIA ​​technical rules:",
+    "send_media": "please send media!"
 }
