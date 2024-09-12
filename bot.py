@@ -1832,7 +1832,7 @@ async def pay(event):
         elif text == bot_text["fia_tec"]:
             folder_path = Path("fia_tech")
             files = [f.name for f in folder_path.iterdir() if f.is_file()]
-            await event.reply(bot_text["fia_tec"], files)
+            await event.reply(bot_text["fia_tec"], file=files)
         elif text == bot_text["fia_race_data"]:
             year = 2024
             async with bot.conversation(user_id, timeout=1000) as conv:
