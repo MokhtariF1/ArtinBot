@@ -1818,7 +1818,7 @@ async def pay(event):
                             await conv.cancel_all()
         elif text == bot_text["fia"]:
             keys = [
-                Button.text(bot_text["fia_tec"]),
+                Button.text(bot_text["fia_tec"], resize=True),
                 Button.text(bot_text["fia_race_data"])
             ]
             await event.reply(bot_text["select"], buttons=keys)
