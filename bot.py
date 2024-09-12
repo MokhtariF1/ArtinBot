@@ -1830,7 +1830,7 @@ async def pay(event):
             ]
             await event.reply(bot_text["select"], buttons=keys)
         elif text == bot_text["fia_tec"]:
-            folder_path = Path('مسیر/به/فولدر')
+            folder_path = Path("fia_tech")
             files = [f.name for f in folder_path.iterdir() if f.is_file()]
             await event.reply(bot_text["fia_tec"], files)
         elif text == bot_text["fia_race_data"]:
