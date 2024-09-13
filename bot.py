@@ -2514,6 +2514,9 @@ async def pay(event):
                                         if check_date_passed(race_date) is False:
                                             race_hour = cur.execute(f"SELECT time FROM grand_time WHERE grand = '{gp}' AND session_type = '{session}';").fetchone()
                                             if race_hour is None:
+                                                print("race hour", race_hour)
+                                                print("session and grand", gp, session)
+                                                print("check date", check_date_passed(race_date))
                                                 await conv.send_message(bot_text["problem"])
                                                 return
                                             race_hour = race_hour[0]
@@ -2723,6 +2726,9 @@ async def pay(event):
                                         if check_date_passed(race_date) is False:
                                             race_hour = cur.execute(f"SELECT time FROM grand_time WHERE grand = '{gp}' AND session_type = '{session}';").fetchone()
                                             if race_hour is None:
+                                                print("race hour", race_hour)
+                                                print("session and grand", gp, session)
+                                                print("check date", check_date_passed(race_date))
                                                 await conv.send_message(bot_text["problem"])
                                                 return
                                             race_hour = race_hour[0]
