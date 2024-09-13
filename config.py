@@ -15,7 +15,7 @@ if ENV:
     BOT_ID = "https://t.me/F1DataIQBot"
 else:
     BOT_TOKEN = "6300653200:AAFK0BuvMPJ4kZV3gj_sbvXezciah_ga1B4"
-    PROXY = False
+    PROXY = True
     BOT_ID = "https://t.me/F1data_Test_bot"
 PAY_TOKEN = "fced3227-3cf2-486f-95e7-52ee9e8fd77d"
 SESSION_NAME = "bot"
@@ -24,7 +24,7 @@ PROXY_ADDRESS = "127.0.0.1"
 PROXY_PORT = 2080
 DB_NAME = "bot.db"
 CHANNEL_ID = "https://t.me/F1DataOfficial"
-ergast = True
+ergast = False
 try:
     CHANNEL_ID_PLUS = cur.execute(f"SELECT channel_id FROM join_channel WHERE senior = {True}").fetchone()[0]
 except TypeError:
@@ -416,7 +416,7 @@ TEXT = {
     "loading_fia": "در حال دریافت اطلاعات از فیا...",
     "cant_get_fia": "خطا در دریافت اطلاعات از فیا!\nلطفا به پشتیبانی ربات اطلاع دهید",
     "enter_pdf_files": "تمام فایل های مورد نظر برای نمایش در قوانین فنی فیا ارسال کنید:",
-    "send_media": "لطفا رسانه ارسال کنید!"
+    "send_media": "لطفا رسانه ارسال کنید!",
 }
 
 EN_TEXT = {
