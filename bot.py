@@ -2723,6 +2723,7 @@ async def pay(event):
                                         else:
                                             await conv.send_message(bot_text["action_not_found"])
                                             return
+                                        print("rpm session", session)
                                         if check_date_passed(race_date) is False:
                                             race_hour = cur.execute(f"SELECT time FROM grand_time WHERE grand = '{gp}' AND session_type = '{session}';").fetchone()
                                             if race_hour is None:
