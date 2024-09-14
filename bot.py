@@ -387,6 +387,23 @@ async def pay(event):
                 ]
             ]
             await event.reply(bot_text["select"], buttons=keys)
+        elif text == bot_text["set_notifications"]:
+            keys = [
+                [
+                    Button.text(bot_text["enable_notifications"]),
+                    Button.text(bot_text["disable_notifications"])
+                ],
+                [
+                    Button.text(bot_text["back"])
+                ]
+            ]
+            await event.reply(bot_text["select"], buttons=keys)
+        elif text == bot_text["enable_notifications"]:
+            cur.execute(f"UPDATE users WHERE id = {user_id} SET notifications = 'yes'")
+            await event.reply(bot_text["successfully"])
+        elif text == bot_text["disable_notifications"]:
+            cur.execute(f"UPDATE users WHERE id = {user_id} SET notifications = 'no'")
+            await event.reply(bot_text["successfully"])
         elif text == bot_text["language"]:
             keys = [
                 [
