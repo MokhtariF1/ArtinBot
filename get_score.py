@@ -13,7 +13,7 @@ users = cursor.fetchall()
 # حلقه زدن در کاربران و به روز رسانی امتیاز و score_date
 for user in users:
     user_id, score, score_date = user
-    new_score = score + 2
+    new_score = score + 1
     new_score_date = datetime.strptime(score_date, '%Y-%m-%d %H:%M:%S') + timedelta(days=1)
     
     # به روز رسانی امتیاز و score_date در دیتابیس
