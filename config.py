@@ -8,7 +8,7 @@ cur = con.cursor()
 
 API_ID = 86576
 API_HASH = "385886b58b21b7f3762e1cde2d651925"
-ENV = 0
+ENV = 1
 if ENV:
     BOT_TOKEN = "7185706687:AAEkVBiMGDh0IigJs0iJBSSL1i7U7mN1e2k"
     PROXY = False
@@ -417,7 +417,9 @@ TEXT = {
     "cant_get_fia": "خطا در دریافت اطلاعات از فیا!\nلطفا به پشتیبانی ربات اطلاع دهید",
     "enter_pdf_files": "تمام فایل های مورد نظر برای نمایش در قوانین فنی فیا ارسال کنید:",
     "send_media": "لطفا رسانه ارسال کنید!",
-    "enable_notifications": 
+    "enable_notifications": "فعال کردن اعلانات",
+    "disable_notifications": "غیرفعال کردن اعلانات",
+    "lap_times_table": "Lap Times Table",
 }
 
 EN_TEXT = {
@@ -720,5 +722,8 @@ Your points balance is {score}, to get more points, you can subcategory or buy c
     "loading_fia": "Getting data from fia ...",
     "cant_get_fia": "Error in get data from fia, please connect to bot support!",
     "enter_pdf_files": "Send all the desired files to be displayed in the FIA ​​technical rules:",
-    "send_media": "please send media!"
+    "send_media": "please send media!",
+    "enable_notifications": "Enable notifications",
+    "disable_notifications": "Disable notifications",
+    "lap_times_table": "Lap Times Table",
 }

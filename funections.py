@@ -1070,6 +1070,193 @@ def driver_func_data(year, grand_prix, identifire, driver_one, driver_two):
     plt.savefig(driver_path)  # Display the plot
 
     return driver_path
+drivers = {
+    "VER": "Max Verstappen",
+    "HAM": "Lewis Hamilton",
+    "LEC": "Charles Leclerc",
+    "PER": "Sergio Pérez",
+    "SAI": "Carlos Sainz",
+    "NOR": "Lando Norris",
+    "RIC": "Daniel Ricciardo",
+    "ALO": "Fernando Alonso",
+    "RUS": "George Russell",
+    "GAS": "Pierre Gasly",
+    "OCO": "Esteban Ocon",
+    "BOT": "Valtteri Bottas",
+    "TSU": "Yuki Tsunoda",
+    "MAG": "Kevin Magnussen",
+    "HUL": "Nico Hülkenberg",
+    "ALB": "Alexander Albon",
+    "STR": "Lance Stroll",
+    "PIA": "Oscar Piastri",
+    "ZHO": "Guanyu Zhou",
+    "COL": "Franco Colapinto",
+}
+
+# Allow comparing multiple drivers
+selected_driver_codes = ['VER']  # List of drivers to compare
+
+# Helper function to format lap times
+def format_lap_time(lap_time_seconds):
+    if pd.isna(lap_time_seconds):
+        return 'NAT'  # Not Available Time
+    minutes = int(lap_time_seconds // 60)
+    seconds = lap_time_seconds % 60
+    return f"{minutes}:{seconds:06.3f}"  # Format as M:SS.mmm
+
+# Helper function to format sector times (no minutes, only seconds)
+def format_sector_time(sector_time_seconds):
+    if pd.isna(sector_time_seconds):
+        return 'NAN'  # Not Available Number
+    return f"{sector_time_seconds:06.3f}"  # Format as SS.mmm
+
+# Function to plot lap times and sectors
+def plot_lap_times(lap_data, driver_names, year, gp):
+    plt.figure(figsize=(10, 6))
+    for driver, lap_info in lap_data.items():
+        lap_numbers = lap_info['Lap Number']
+        lap_times = lap_info['Lap Time Seconds']
+        plt.plot(lap_numbers, lap_times, marker='o', label=driver_names[driver])
+
+    plt.xlabel("Lap Number")
+    plt.ylabel("Lap Time (Seconds)")
+    plt.title(f"{year} {gp} Grand Prix - Lap Time Comparison")
+    plt.legend(loc="upper right")
+    plt.grid(True)
+    plt.tight_layout()
+
+# Main function to display and process lap times
+def show_driver_lap_times(driver_codes, year, grand_prix, session_type):
+    all_lap_data = {}
+    fastest_lap = float('inf')
+    fastest_lap_driver = ''
+    driver_names = {code: drivers[code] for code in driver_codes}
+
+    # Load session and process laps for each driver
+    for driver_code in driver_codes:
+        ses = ff1.get_session(year, grand_prix, session_type)
+        ses.load()
+        laps = ses.laps.pick_driver(driver_code).copy()
+
+        if laps.empty:
+            print(f"No data found for driver: {driver_code} in session {session_type}.")
+            continue
+
+        # Handling Qualifying sessions (Q1, Q2, Q3 assignment)
+        if session_type == 'Q':
+            q1_cutoff = ses.results['Q1'].max()
+            q2_cutoff = ses.results['Q2'].max()
+            laps['SessionPart'] = np.where(laps['LapTime'] <= q1_cutoff, 'Q1', 
+                                           np.where(laps['LapTime'] <= q2_cutoff, 'Q2', 'Q3'))
+        else:
+            laps['SessionPart'] = session_type
+
+        # Prepare lap data with sectors
+        laps['LapTimeSeconds'] = laps['LapTime'].dt.total_seconds()
+        laps['FormattedLapTime'] = laps['LapTimeSeconds'].apply(format_lap_time)
+        laps['LapNumber'] = laps['LapNumber'].astype(int)
+
+        # Process sector times and format them as SS.mmm
+        if 'Sector1Time' in laps and 'Sector2Time' in laps and 'Sector3Time' in laps:
+            laps['Sector1Time'] = laps['Sector1Time'].dt.total_seconds().apply(format_sector_time)
+            laps['Sector2Time'] = laps['Sector2Time'].dt.total_seconds().apply(format_sector_time)
+            laps['Sector3Time'] = laps['Sector3Time'].dt.total_seconds().apply(format_sector_time)
+
+        # Update the fastest lap across drivers
+        valid_lap_times = laps['LapTimeSeconds'].dropna()
+        if not valid_lap_times.empty:
+            driver_fastest_lap = valid_lap_times.min()
+            if driver_fastest_lap < fastest_lap:
+                fastest_lap = driver_fastest_lap
+                fastest_lap_driver = driver_code
+
+        # Store lap data for this driver
+        all_lap_data[driver_code] = {
+            'Lap Number': laps['LapNumber'].tolist(),
+            'Lap Time': laps['FormattedLapTime'].tolist(),
+            'Lap Time Seconds': laps['LapTimeSeconds'].tolist(),
+            'Session Part': laps['SessionPart'].tolist(),
+            'Sector 1': laps.get('Sector1Time', []).tolist(),
+            'Sector 2': laps.get('Sector2Time', []).tolist(),
+            'Sector 3': laps.get('Sector3Time', []).tolist()
+        }
+
+    # Paginate the table display for large numbers of laps (18 rows per page)
+    rows_per_page = 18
+    images_list = []
+    for driver_code, lap_data in all_lap_data.items():
+        table_data = pd.DataFrame({
+            'Lap Number': lap_data['Lap Number'],
+            'Session Part': lap_data['Session Part'],
+            'Lap Time': lap_data['Lap Time'],
+            'Sector 1': lap_data['Sector 1'],
+            'Sector 2': lap_data['Sector 2'],
+            'Sector 3': lap_data['Sector 3'],
+        })
+
+        num_pages = (len(table_data) // rows_per_page) + 1
+
+        for page in range(num_pages):
+            fig, ax = plt.subplots(figsize=(12, 7))
+            ax.axis('tight')
+            ax.axis('off')
+
+            # Get the rows for the current page
+            start_row = page * rows_per_page
+            end_row = min(start_row + rows_per_page, len(table_data))
+            page_data = table_data.iloc[start_row:end_row]
+
+            # Create a color list for alternating row colors
+            colors = []
+            for i in range(len(page_data)):
+                if i % 2 == 0:
+                    colors.append(['#f1f1f2'] * len(page_data.columns))  # Light gray
+                else:
+                    colors.append(['#ffffff'] * len(page_data.columns))  # White
+
+            # Create the table
+            mpl_table = ax.table(cellText=page_data.values,
+                                 colLabels=table_data.columns,
+                                 cellColours=colors,
+                                 cellLoc='center',
+                                 loc='center')
+
+            mpl_table.auto_set_font_size(False)
+            mpl_table.set_fontsize(10)
+            mpl_table.scale(1.2, 1.2)
+
+            # Bold the headers
+            for key, cell in mpl_table.get_celld().items():
+                if key[0] == 0:
+                    cell.set_text_props(weight='bold', fontsize=12)
+                    cell.set_facecolor('#c0c0c0')
+
+            # Improved Title with Stylish Formatting
+            title_driver_info = f"{drivers[driver_code]} ({session_type})"
+            title_event_info = f"{year} {grand_prix} Grand Prix"
+            title_page_info = f"Page {page + 1}/{num_pages}"
+
+            # Stylish title: larger, bold, and color differentiation
+            fig.suptitle(f"{title_event_info}\n{title_driver_info}\n{title_page_info}",
+                         fontsize=18, weight='bold', color='darkblue', y=0.98, ha='center')
+
+            # Improved summary: Fastest lap info with styling
+            summary_text = (f"Fastest Lap: {format_lap_time(fastest_lap)} "
+                            f"by {drivers[fastest_lap_driver]}")
+            plt.figtext(0.5, 0.02, summary_text, wrap=True,
+                        horizontalalignment='center', fontsize=13, color='green', weight='bold')
+
+            # Add watermark
+            plt.text(0.5, 0.5, 'F1 DATA IQ', fontsize=50, color='gray', alpha=0.2,
+                     ha='center', va='center', rotation=30, transform=plt.gca().transAxes)
+
+            plt.tight_layout()
+            name = f"{year}-{grand_prix}-{session_type}-{page + 1}-lap_times_table.png"
+            plt.savefig(name)
+            images_list.append(name)
+    # Optionally plot lap times
+    plot_lap_times(all_lap_data, driver_names, year=year, gp=grand_prix)
+    return images_list
 # start = time.time()
 # try:
 #     test = speed_rpm_delta(2024, 'Bahrain Grand Prix', "R", "VER", "HAM")
