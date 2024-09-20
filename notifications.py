@@ -108,8 +108,8 @@ def main():
                         full_text = "The {event} event in {gp} will start in ten minutes!".format(event=session, gp=gp)
                     else:
                         session = type_tr[session_type]
-                        gp = country_tr[grand_notification]
-                        full_text = "رویداد {event} ده دقیقه دیگر در {gp} شروع خواهد شد".format(event=session)
+                        gp = country_tr[grand_notification.replace(" ", "_")]
+                        full_text = "رویداد {event} ده دقیقه دیگر در {gp} شروع خواهد شد".format(event=session, gp=gp)
                     telegram_send_message_url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage?chat_id={user_id}&text={full_text}"
                     response = requests.get(telegram_send_message_url)
             else:

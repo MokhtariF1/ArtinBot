@@ -310,10 +310,10 @@ TEXT = {
     "coin_management": "مدیریت سکه",
     "all_coin": "سکه برای همه",
     "one_coin": "سکه تکی",
-    "ask_all_coin": "مقدار سکه ای که میخواهید به همه کاربران اضافه شود را وارد کنید:",
+    "ask_all_coin": "مقدار سکه را وارد کنید:",
     "coin_from_admin": "{coin} سکه از طرف ادمین به کاربران داده شد🎉",
-    "adding_coin_to_users": "درحال افزودن سکه ها به حساب کاربران...",
-    "coins_added": "سکه ها با موفقیت به حساب کاربران اضافه شد✅",
+    "adding_coin_to_users": "درحال افزودن/کم کردن سکه ها از حساب کاربران...",
+    "coins_added": "سکه ها با موفقیت به حساب کاربران اضافه/کم شدند✅",
     "enter_user_id": "آیدی عددی کاربر را وارد کنید:",
     "enter_coin_amount": "مقدار سکه ای که میخواهید به حساب کاربر اضافه/کم شود را وارد کنید:",
     "loading_coin": "درحال افزودن/کم کردن سکه به حساب کاربر...",
@@ -323,7 +323,7 @@ TEXT = {
     "low_off": "کم کردن",
     "add_coin": "افزودن",
     "action_not_found": "حالت انتخابی شما معتبر نمیباشد❗",
-    "down_force": "Downforce Configuratins",
+    "down_force": "Downforce Configurations",
     "start_reaction": "Start Reaction",
     "grand_time": "مدیریت زمان مسابقات",
     "add_grand_time": "افزودن زمان",
@@ -420,6 +420,7 @@ TEXT = {
     "enable_notifications": "فعال کردن اعلانات",
     "disable_notifications": "غیرفعال کردن اعلانات",
     "lap_times_table": "Lap Times Table",
+    "version": "1.3",
 }
 
 EN_TEXT = {
@@ -629,7 +630,7 @@ otherwise the payment will not be confirmed and the money will be returned to yo
     "low_off": "Low-off",
     "add_coin": "Add",
     "action_not_found": "Your selected mode is not valid❗",
-    "down_force": "Downforce Configuratins",
+    "down_force": "Downforce Configurations",
     "start_reaction": "Start Reaction",
     "grand_time": "Event Time Management",
     "add_grand_time": "Add time",
@@ -726,4 +727,5 @@ Your points balance is {score}, to get more points, you can subcategory or buy c
     "enable_notifications": "Enable notifications",
     "disable_notifications": "Disable notifications",
     "lap_times_table": "Lap Times Table",
+    "version": "1.3"
 }

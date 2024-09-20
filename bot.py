@@ -367,7 +367,7 @@ async def pay(event):
                     Button.text(bot_text["language"], resize=True),
                 ],
                 [
-                    Button.text(bot_text["soon"]),
+                    Button.text(bot_text["version"]),
                     Button.text(bot_text["bot_ping"]),
                     Button.text(bot_text["account_setup"]),
                 ],
@@ -399,10 +399,10 @@ async def pay(event):
             ]
             await event.reply(bot_text["select"], buttons=keys)
         elif text == bot_text["enable_notifications"]:
-            cur.execute(f"UPDATE users WHERE id = {user_id} SET notifications = 'yes'")
+            cur.execute(f"UPDATE users SET notifications = 'yes' WHERE id = {user_id}")
             await event.reply(bot_text["successfully"])
         elif text == bot_text["disable_notifications"]:
-            cur.execute(f"UPDATE users WHERE id = {user_id} SET notifications = 'no'")
+            cur.execute(f"UPDATE users SET notifications = 'no' WHERE id = {user_id}")
             await event.reply(bot_text["successfully"])
         elif text == bot_text["language"]:
             keys = [
@@ -1427,6 +1427,45 @@ async def pay(event):
                             await bot.send_message(user_num_id, bot_text["coin_from_admin"].format(coin=amount))
                         except UserIsBlockedError:
                             pass
+                    await bot.delete_messages(user_id, loading_coins.id)
+                    await event.reply(bot_text["coins_added"])
+        elif text == bot_text["down_all_coin"]:
+            is_admin = check_admin(user_id)
+            if is_admin is False:
+                keys = [
+                    [Button.text(bot_text["archive"], resize=True)],
+                    [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
+                    [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
+                     Button.text(bot_text["rules"])],
+                ]
+                await event.reply(bot_text["select"], buttons=keys)
+            else:
+                async with bot.conversation(user_id) as conv:
+                    ask_coin = await conv.send_message(bot_text["ask_all_coin"])
+                    while True:
+                        try:
+                            amount = await conv.get_response(timeout=120)
+                            if amount.raw_text == bot_text["cancel"] or amount.raw_text == bot_text["back"]:
+                                await conv.send_message(bot_text["canceled"])
+                                await bot.delete_messages(user_id, ask_coin.id)
+                                return
+                            amount = int(amount.raw_text)
+                            break
+                        except ValueError:
+                            await conv.send_message(bot_text["just_num"])
+                        except TimeoutError:
+                            await conv.send_message(bot_text["timeout_error"])
+                            await bot.delete_messages(user_id, ask_coin.id)
+                            return
+                    loading_coins = await event.reply(bot_text["adding_coin_to_users"])
+                    users = cur.execute("SELECT id,score FROM users").fetchall()
+                    for user in users:
+                        score = int(user[1]) - amount
+                        if score < 0:
+                            score = 0
+                        user_num_id = user[0]
+                        cur.execute(f"UPDATE users SET score = {score} WHERE id = {user_num_id}")
+                        con.commit()
                     await bot.delete_messages(user_id, loading_coins.id)
                     await event.reply(bot_text["coins_added"])
         elif text == bot_text["one_coin"]:
