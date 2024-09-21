@@ -400,10 +400,10 @@ async def pay(event):
             await event.reply(bot_text["select"], buttons=keys)
         elif text == bot_text["enable_notifications"]:
             cur.execute(f"UPDATE users SET notifications = 'yes' WHERE id = {user_id}")
-            await event.reply(bot_text["successfully"])
+            await event.reply(bot_text["notifications_enabled"])
         elif text == bot_text["disable_notifications"]:
             cur.execute(f"UPDATE users SET notifications = 'no' WHERE id = {user_id}")
-            await event.reply(bot_text["successfully"])
+            await event.reply(bot_text["notifications_disabled"])
         elif text == bot_text["language"]:
             keys = [
                 [
