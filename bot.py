@@ -1304,6 +1304,13 @@ async def pay(event):
                     await conv.send_message(bot_text["ask_grand_event"])
                     session_type = await conv.get_response()
                     session_type = session_type.raw_text
+                    session_dict = {
+                        "FP1": "Practice_1",
+                        "FP2": "Practice_2",
+                        "FP3": "Practice_3",
+                    }
+                    if session_type in session_dict:
+                        session_type = session_dict[session_type]
                     if session_type == bot_text["cancel"] or session_type == bot_text["back"]:
                         await conv.send_message(bot_text["canceled"])
                         return

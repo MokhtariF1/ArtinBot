@@ -419,6 +419,8 @@ TEXT = {
     "send_media": "لطفا رسانه ارسال کنید!",
     "enable_notifications": "فعال کردن اعلانات",
     "disable_notifications": "غیرفعال کردن اعلانات",
+    "notifications_disabled": "اعلانات با موفقیت غیر فعال شد✅"
+    "notifications_enabled": "اعلانات با موفقیت فعال شد✅",
     "lap_times_table": "Lap Times Table",
     "version": "1.3",
 }
@@ -727,5 +729,7 @@ Your points balance is {score}, to get more points, you can subcategory or buy c
     "enable_notifications": "Enable notifications",
     "disable_notifications": "Disable notifications",
     "lap_times_table": "Lap Times Table",
-    "version": "1.3"
+    "version": "1.3",
+    "notifications_enabled": "Notifications have been activated successfully✅",
+    "notifications_disabled": "Notifications have been successfully disabled✅"
 }
