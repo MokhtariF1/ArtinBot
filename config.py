@@ -423,6 +423,8 @@ TEXT = {
     "notifications_enabled": "اعلانات با موفقیت فعال شد✅",
     "lap_times_table": "Lap Times Table",
     "version": "1.3",
+    "brake_configurations": "Brake Configurations",
+    "composite_perfomance": "Composite Perfomance",
 }
 
 EN_TEXT = {
@@ -731,5 +733,7 @@ Your points balance is {score}, to get more points, you can subcategory or buy c
     "lap_times_table": "Lap Times Table",
     "version": "1.3",
     "notifications_enabled": "Notifications have been activated successfully✅",
-    "notifications_disabled": "Notifications have been successfully disabled✅"
+    "notifications_disabled": "Notifications have been successfully disabled✅",
+    "brake_configurations": "Brake Configurations",
+    "composite_perfomance": "Composite Perfomance",
 }
