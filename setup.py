@@ -22,14 +22,14 @@ cur.execute("CREATE TABLE IF NOT EXISTS tickets(media,text,count,user_id,status)
 cur.execute("CREATE TABLE IF NOT EXISTS grand_time(grand, session_type, time, time_num, notifications, grand_date)")
 cur.execute("CREATE TABLE IF NOT EXISTS join_channel(channel_id, senior, channel_num)")
 cur.execute("CREATE TABLE IF NOT EXISTS idealization(user_id)")
-cur.execute("CREATE TABLE IF NOT EXISTS statistics_all(data)")
+cur.execute("CREATE TABLE IF NOT EXISTS statistics_all(data, user_id)")
 cur.execute("CREATE TABLE IF NOT EXISTS statistics_small(data, user_id)")
 cur.execute("CREATE TABLE IF NOT EXISTS data_status(data, status)")
-l = [bot_text["rpm"],bot_text["overtake"],bot_text["map_viz"],bot_text["down_force"],bot_text["top_speed"],bot_text["start_reaction"],bot_text["all_info"],bot_text["driver"],bot_text["lap_times"],bot_text["map_break"],bot_text["all"],bot_text["strategy"],bot_text["data_to_pole"],bot_text["lap_times_table"],bot_text["brake_configurations"],bot_text["composite_perfomance"]]
-for data in l:
-    cur.execute(f"INSERT INTO data_status VALUES ('{data}', 'on')")
-    con.commit()
-# cur.execute("ALTER TABLE users ADD COLUMN time_zone TEXT;")
+# l = [bot_text["rpm"],bot_text["overtake"],bot_text["map_viz"],bot_text["down_force"],bot_text["top_speed"],bot_text["start_reaction"],bot_text["all_info"],bot_text["driver"],bot_text["lap_times"],bot_text["map_break"],bot_text["all"],bot_text["strategy"],bot_text["data_to_pole"],bot_text["lap_times_table"],bot_text["brake_configurations"],bot_text["composite_perfomance"]]
+# for data in l:
+#     cur.execute(f"INSERT INTO data_status VALUES ('{data}', 'on')")
+#     con.commit()
+cur.execute("ALTER TABLE statistics_all ADD COLUMN user_id TEXT;")
 # cur.execute("ALTER TABLE users ADD COLUMN notifications TEXT;")
 # cur.execute(f"INSERT INTO admins VALUES (5415792594)")
 

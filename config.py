@@ -104,8 +104,8 @@ def check_number(num):
         return False
 
 
-def all_statistics(where):
-    cur.execute(f"INSERT INTO statistics_all VALUES ('{where}')")
+def all_statistics(where, user_id):
+    cur.execute(f"INSERT INTO statistics_all VALUES ('{where}', {user_id})")
     con.commit()
 def small_statistics(where, user_id):
     find_user = cur.execute(f"SELECT * FROM statistics_small WHERE user_id = '{user_id}'").fetchone()
@@ -437,6 +437,7 @@ TEXT = {
     "sure_off_all": "آیا از خاموش کردن کل دیتا ها مطمئن هستید؟",
     "sure_on_all": "آیا از روشن کردن کل دیتا ها مطمئن هستید؟",
     "on_all": "روشن کردن همه",
+    "personal_report": "تعداد درخواست های شما در دیتای {data} مساوی با {count} عدد بوده است",
 }
 
 EN_TEXT = {
@@ -760,4 +761,5 @@ Your points balance is {score}, to get more points, you can subcategory or buy c
     "sure_off_all": "Are you sure to turn off all data?",
     "sure_on_all": "Are you sure to turn on all data?",
     "on_all": "Turn on all",
+    "personal_report": "The number of your requests in {data} is equal to {count} number",
 }
