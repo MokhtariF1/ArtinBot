@@ -1120,7 +1120,7 @@ async def pay(event):
                     [
                         Button.inline(bot_text["brake_configurations"], b'bc'),
                         Button.inline(bot_text["composite_perfomance"], b'cp'),
-                    ]
+                    ],
                     [
                         Button.inline(bot_text["cancel"], b'cancel')
                     ]
