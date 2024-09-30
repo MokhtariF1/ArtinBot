@@ -1,6 +1,8 @@
 import sqlite3
 con = sqlite3.connect("bot.db")
 cur = con.cursor()
+import config
+bot_text = config.TEXT
 # cur.execute("DROP TABLE idealization")
 # cur.execute("DROP TABLE users")
 # cur.execute("DROP TABLE invite")
@@ -22,8 +24,13 @@ cur.execute("CREATE TABLE IF NOT EXISTS join_channel(channel_id, senior, channel
 cur.execute("CREATE TABLE IF NOT EXISTS idealization(user_id)")
 cur.execute("CREATE TABLE IF NOT EXISTS statistics_all(data)")
 cur.execute("CREATE TABLE IF NOT EXISTS statistics_small(data, user_id)")
+cur.execute("CREATE TABLE IF NOT EXISTS data_status(data, status)")
+l = [bot_text["rpm"],bot_text["overtake"],bot_text["map_viz"],bot_text["down_force"],bot_text["top_speed"],bot_text["start_reaction"],bot_text["all_info"],bot_text["driver"],bot_text["lap_times"],bot_text["map_break"],bot_text["all"],bot_text["strategy"],bot_text["data_to_pole"],bot_text["lap_times_table"],bot_text["brake_configurations"],bot_text["composite_perfomance"]]
+for data in l:
+    cur.execute(f"INSERT INTO data_status VALUES ('{data}', 'on')")
+    con.commit()
 # cur.execute("ALTER TABLE users ADD COLUMN time_zone TEXT;")
-cur.execute("ALTER TABLE users ADD COLUMN notifications TEXT;")
+# cur.execute("ALTER TABLE users ADD COLUMN notifications TEXT;")
 # cur.execute(f"INSERT INTO admins VALUES (5415792594)")
 
 # cur.execute(f"INSERT INTO join_channel VALUES ('https://t.me/RacePlusIran', {True}, {2020})")

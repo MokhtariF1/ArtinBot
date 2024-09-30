@@ -1,1 +1,9 @@
 .venv
+*.png
+*.db
+*.session
+*.session-journal
+__pycache__
+*.jpg
+bot.db
+test.py

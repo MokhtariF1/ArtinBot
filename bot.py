@@ -49,6 +49,8 @@ con = sqlite3.connect(config.DB_NAME)
 cur = con.cursor()
 manager = Manager()
 user_messages = {}
+bot_text = config.TEXT
+all_datas_list = [bot_text["rpm"],bot_text["overtake"],bot_text["map_viz"],bot_text["down_force"],bot_text["top_speed"],bot_text["start_reaction"],bot_text["all_info"],bot_text["driver"],bot_text["lap_times"],bot_text["map_break"],bot_text["all"],bot_text["strategy"],bot_text["data_to_pole"],bot_text["lap_times_table"],bot_text["brake_configurations"],bot_text["composite_perfomance"]]
 driver_short_codes = {
     "Max_Verstappen": "VER",
     "Lewis_Hamilton": "HAM",
@@ -1271,6 +1273,10 @@ async def pay(event):
                         Button.text(bot_text["grand_time"]),
                     ],
                     [
+                        Button.text(bot_text["off_data"]),
+                        Button.text(bot_text["off_all"]),
+                    ],
+                    [
                         Button.text(bot_text["back"])
                     ]
                 ]
@@ -2023,6 +2029,10 @@ async def pay(event):
             ]
             await event.reply(bot_text["select"], buttons=keys)
         elif text == bot_text["overtake"]:
+            find_status = cur.execute(f"SELECT status FROM data_status WHERE data = '{event.message.message}'").fetchone()
+            if find_status[0] == 'off' or find_status[0] is None:
+                await event.reply(bot_text["data_is_off"])
+                return
             user_find = cur.execute(f"SELECT * FROM users WHERE id = {user_id}").fetchone()
             user_scores = user_find[5]
             user_level = user_find[10]
@@ -2221,6 +2231,10 @@ async def pay(event):
                             
                             await conv.cancel_all()
         elif text == bot_text["top_speed"]:
+            find_status = cur.execute(f"SELECT status FROM data_status WHERE data = '{event.message.message}'").fetchone()
+            if find_status[0] == 'off' or find_status[0] is None:
+                await event.reply(bot_text["data_is_off"])
+                return
             user_find = cur.execute(f"SELECT * FROM users WHERE id = {user_id}").fetchone()
             user_scores = user_find[5]
             user_level = user_find[10]
@@ -2441,6 +2455,10 @@ async def pay(event):
                                 await event.reply(bot_text["score_data"].format(coin=1, level=user_level_fa))
                             await conv.cancel_all()
         elif text == bot_text["lap_times"]:
+            find_status = cur.execute(f"SELECT status FROM data_status WHERE data = '{event.message.message}'").fetchone()
+            if find_status[0] == 'off' or find_status[0] is None:
+                await event.reply(bot_text["data_is_off"])
+                return
             user_find = cur.execute(f"SELECT * FROM users WHERE id = {user_id}").fetchone()
             user_scores = user_find[5]
             user_level = user_find[10]
@@ -2651,6 +2669,10 @@ async def pay(event):
 
                             await conv.cancel_all()
         elif text == bot_text["rpm"]:
+            find_status = cur.execute(f"SELECT status FROM data_status WHERE data = '{event.message.message}'").fetchone()
+            if find_status[0] == 'off' or find_status[0] is None:
+                await event.reply(bot_text["data_is_off"])
+                return
             user_find = cur.execute(f"SELECT * FROM users WHERE id = {user_id}").fetchone()
             user_scores = user_find[5]
             user_level = user_find[10]
@@ -2965,6 +2987,10 @@ async def pay(event):
                                         await event.reply(bot_text["score_data"].format(coin=1, level=user_level_fa))
                                     await conv.cancel_all()
         elif text == bot_text["map_viz"]:
+            find_status = cur.execute(f"SELECT status FROM data_status WHERE data = '{event.message.message}'").fetchone()
+            if find_status[0] == 'off' or find_status[0] is None:
+                await event.reply(bot_text["data_is_off"])
+                return
             user_find = cur.execute(f"SELECT * FROM users WHERE id = {user_id}").fetchone()
             user_scores = user_find[5]
             user_level = user_find[10]
@@ -3218,6 +3244,10 @@ async def pay(event):
                                     await event.reply(bot_text["score_data"].format(coin=1, level=user_level_fa))
                                 await conv.cancel_all()
         elif text == bot_text["map_break"]:
+            find_status = cur.execute(f"SELECT status FROM data_status WHERE data = '{event.message.message}'").fetchone()
+            if find_status[0] == 'off' or find_status[0] is None:
+                await event.reply(bot_text["data_is_off"])
+                return
             user_find = cur.execute(f"SELECT * FROM users WHERE id = {user_id}").fetchone()
             user_scores = user_find[5]
             user_level = user_find[10]
@@ -3471,6 +3501,10 @@ async def pay(event):
                                     await event.reply(bot_text["score_data"].format(coin=1, level=user_level_fa))
                                 await conv.cancel_all()
         elif text == bot_text["down_force"]:
+            find_status = cur.execute(f"SELECT status FROM data_status WHERE data = '{event.message.message}'").fetchone()
+            if find_status[0] == 'off' or find_status[0] is None:
+                await event.reply(bot_text["data_is_off"])
+                return
             user_find = cur.execute(f"SELECT * FROM users WHERE id = {user_id}").fetchone()
             user_scores = user_find[5]
             user_level = user_find[10]
@@ -3683,6 +3717,10 @@ async def pay(event):
                                 await event.reply(bot_text["score_data"].format(coin=1, level=user_level_fa))
                             await conv.cancel_all()
         elif text == bot_text["start_reaction"]:
+            find_status = cur.execute(f"SELECT status FROM data_status WHERE data = '{event.message.message}'").fetchone()
+            if find_status[0] == 'off' or find_status[0] is None:
+                await event.reply(bot_text["data_is_off"])
+                return
             user_find = cur.execute(f"SELECT * FROM users WHERE id = {user_id}").fetchone()
             user_scores = user_find[5]
             user_level = user_find[10]
@@ -3869,6 +3907,10 @@ async def pay(event):
                             await event.reply(bot_text["score_data"].format(coin=1, level=user_level_fa))
                         await conv.cancel_all()
         elif text == bot_text["all"]:
+            find_status = cur.execute(f"SELECT status FROM data_status WHERE data = '{event.message.message}'").fetchone()
+            if find_status[0] == 'off' or find_status[0] is None:
+                await event.reply(bot_text["data_is_off"])
+                return
             user_find = cur.execute(f"SELECT * FROM users WHERE id = {user_id}").fetchone()
             user_scores = user_find[5]
             user_level = user_find[10]
@@ -4181,6 +4223,10 @@ async def pay(event):
                                         con.commit()
                                         await event.reply(bot_text["score_data"].format(coin=2, level=user_level_fa))
         elif text == bot_text["strategy"]:
+            find_status = cur.execute(f"SELECT status FROM data_status WHERE data = '{event.message.message}'").fetchone()
+            if find_status[0] == 'off' or find_status[0] is None:
+                await event.reply(bot_text["data_is_off"])
+                return
             user_find = cur.execute(f"SELECT * FROM users WHERE id = {user_id}").fetchone()
             user_scores = user_find[5]
             user_level = user_find[10]
@@ -4372,6 +4418,10 @@ async def pay(event):
                             
                             await conv.cancel_all()
         elif text == bot_text["g_force"]:
+            find_status = cur.execute(f"SELECT status FROM data_status WHERE data = '{event.message.message}'").fetchone()
+            if find_status[0] == 'off' or find_status[0] is None:
+                await event.reply(bot_text["data_is_off"])
+                return
             keys = [
                 [
                     Button.text(bot_text["driver"]),
@@ -4383,6 +4433,10 @@ async def pay(event):
             ]
             await event.reply(bot_text["select"], buttons=keys)
         elif text == bot_text["all_info"]:
+            find_status = cur.execute(f"SELECT status FROM data_status WHERE data = '{event.message.message}'").fetchone()
+            if find_status[0] == 'off' or find_status[0] is None:
+                await event.reply(bot_text["data_is_off"])
+                return
             user_find = cur.execute(f"SELECT * FROM users WHERE id = {user_id}").fetchone()
             user_scores = user_find[5]
             user_level = user_find[10]
@@ -4584,6 +4638,10 @@ async def pay(event):
                                 await event.reply(bot_text["score_data"].format(coin=1, level=user_level_fa))
                             await conv.cancel_all()
         elif text == bot_text["driver"]:
+            find_status = cur.execute(f"SELECT status FROM data_status WHERE data = '{event.message.message}'").fetchone()
+            if find_status[0] == 'off' or find_status[0] is None:
+                await event.reply(bot_text["data_is_off"])
+                return
             user_find = cur.execute(f"SELECT * FROM users WHERE id = {user_id}").fetchone()
             user_scores = user_find[5]
             user_level = user_find[10]
@@ -4852,6 +4910,10 @@ async def pay(event):
                                     config.small_statistics(event.message.message, user_id)
                                     await conv.cancel_all()
         elif text == bot_text["data_to_pole"]:
+            find_status = cur.execute(f"SELECT status FROM data_status WHERE data = '{event.message.message}'").fetchone()
+            if find_status[0] == 'off' or find_status[0] is None:
+                await event.reply(bot_text["data_is_off"])
+                return
             user_find = cur.execute(f"SELECT * FROM users WHERE id = {user_id}").fetchone()
             user_scores = user_find[5]
             user_level = user_find[10]
@@ -5002,6 +5064,10 @@ async def pay(event):
                         config.small_statistics(event.message.message, user_id)
                         await conv.cancel_all()
         elif text == bot_text["lap_times_table"]:
+            find_status = cur.execute(f"SELECT status FROM data_status WHERE data = '{event.message.message}'").fetchone()
+            if find_status[0] == 'off' or find_status[0] is None:
+                await event.reply(bot_text["data_is_off"])
+                return
             user_find = cur.execute(f"SELECT * FROM users WHERE id = {user_id}").fetchone()
             user_scores = user_find[5]
             user_level = user_find[10]
@@ -5257,6 +5323,10 @@ async def pay(event):
                                     await event.reply(bot_text["score_data"].format(coin=1, level=user_level_fa))
                                 await conv.cancel_all()
         elif text == bot_text["brake_configurations"]:
+            find_status = cur.execute(f"SELECT status FROM data_status WHERE data = '{event.message.message}'").fetchone()
+            if find_status[0] == 'off' or find_status[0] is None:
+                await event.reply(bot_text["data_is_off"])
+                return
             user_find = cur.execute(f"SELECT * FROM users WHERE id = {user_id}").fetchone()
             user_scores = user_find[5]
             user_level = user_find[10]
@@ -5473,6 +5543,10 @@ async def pay(event):
 
                             await conv.cancel_all()
         elif text == bot_text["composite_perfomance"]:
+            find_status = cur.execute(f"SELECT status FROM data_status WHERE data = '{event.message.message}'").fetchone()
+            if find_status[0] == 'off' or find_status[0] is None:
+                await event.reply(bot_text["data_is_off"])
+                return
             user_find = cur.execute(f"SELECT * FROM users WHERE id = {user_id}").fetchone()
             user_scores = user_find[5]
             user_level = user_find[10]
@@ -5688,6 +5762,146 @@ async def pay(event):
                                 await event.reply(bot_text["score_data"].format(coin=1, level=user_level_fa))
 
                             await conv.cancel_all()
+        elif text == bot_text["off_all"]:
+            is_admin = check_admin(user_id)
+            if is_admin is False:
+                keys = [
+                    [Button.text(bot_text["archive"], resize=True)],
+                    [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
+                    [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
+                     Button.text(bot_text["rules"])],
+                ]
+                await event.reply(bot_text["select"], buttons=keys)
+            else:
+                async with bot.conversation(user_id, timeout=1000) as conv_all:
+                    keys = [
+                        Button.inline(bot_text["off_all"], b'off'),
+                        Button.inline(bot_text["on_all"], b'on')
+                    ]
+                    await conv_all.send_message(bot_text["select"], buttons=keys)
+                    response = await conv_all.wait_event(events.CallbackQuery())
+                    if response.data == b'off':
+                        cur.execute(f"UPDATE data_status SET status = 'off'")
+                        con.commit()
+                    elif response.data == b'on':
+                        cur.execute(f"UPDATE data_status SET status = 'on'")
+                        con.commit()
+                    else:
+                        await event.reply(bot_text["action_not_found"])
+                        return
+                    await event.reply(bot_text["successfully"])
+        elif text == bot_text["off_data"]:
+            is_admin = check_admin(user_id)
+            if is_admin is False:
+                keys = [
+                    [Button.text(bot_text["archive"], resize=True)],
+                    [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
+                    [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
+                     Button.text(bot_text["rules"])],
+                ]
+                await event.reply(bot_text["select"], buttons=keys)
+            else:
+                async with bot.conversation(user_id, timeout=1000) as conv_all:
+                    keys_all = [
+                        [
+                            Button.inline(bot_text["rpm"], b'rs'),
+                            Button.inline(bot_text["overtake"], b'os'),
+                        ],
+                        [
+                            Button.inline(bot_text["map_viz"], b'ms'),
+                            Button.inline(bot_text["down_force"], b'ds'),
+                        ],
+                        [
+                            Button.inline(bot_text["top_speed"], b'ts'),
+                            Button.inline(bot_text["start_reaction"], b'sr'),
+                        ],
+                        [
+                            Button.inline(bot_text["all_info"], b'gr'),
+                            Button.inline(bot_text["driver"], b'gd'),
+                        ],
+                        [
+                            Button.inline(bot_text["lap_times"], b'pd'),
+                            Button.inline(bot_text["map_break"], b'mbs'),
+                        ],
+                        [
+                            Button.inline(bot_text["all"], b'as'),
+                            Button.inline(bot_text["strategy"], b'ss'),
+                        ],
+                        [
+                            Button.inline(bot_text["data_to_pole"], b'dp'),
+                            Button.inline(bot_text["lap_times_table"], b'lt'),
+                        ],
+                        [
+                            Button.inline(bot_text["brake_configurations"], b'bc'),
+                            Button.inline(bot_text["composite_perfomance"], b'cp'),
+                        ],
+                        [
+                            Button.inline(bot_text["cancel"], b'cancel')
+                        ]
+                    ]
+                    await conv_all.send_message(bot_text["select_off_data"], buttons=keys_all)
+                    response = await conv_all.wait_event(events.CallbackQuery())
+                    statistics_value = None
+                    if response.data == b'rs':
+                        statistics_value = bot_text["rpm"]
+                    elif response.data == b'os':
+                        statistics_value = bot_text["overtake"]
+                    elif response.data == b'ms':
+                        statistics_value = bot_text["map_viz"]
+                    elif response.data == b'ds':
+                        statistics_value = bot_text["down_force"]
+                    elif response.data == b'ts':
+                        statistics_value = bot_text["top_speed"]
+                    elif response.data == b'sr':
+                        statistics_value = bot_text["start_reaction"]
+                    elif response.data == b'gr':
+                        statistics_value = bot_text["all_info"]
+                    elif response.data == b'gd':
+                        statistics_value = bot_text["driver"]
+                    elif response.data == b'pd':
+                        statistics_value = bot_text["lap_times"]
+                    elif response.data == b'mbs':
+                        statistics_value = bot_text["map_break"]
+                    elif response.data == b'as':
+                        statistics_value = bot_text["all"]
+                    elif response.data == b'ss':
+                        statistics_value = bot_text["strategy"]
+                    elif response.data == b'dp':
+                        statistics_value = bot_text["data_to_pole"]
+                    elif response.data == b'lt':
+                        statistics_value = bot_text["lap_times_table"]
+                    elif response.data == b'bc':
+                        statistics_value = bot_text["brake_configurations"]
+                    elif response.data == b'cp':
+                        statistics_value = bot_text["composite_perfomance"]
+                    elif response.data == b'cancel':
+                        return
+                    else:
+                        await conv_all.send_message(bot_text["action_not_found"])
+                        return
+                    find_status = cur.execute(f"SELECT status FROM data_status WHERE data = '{statistics_value}'").fetchone()
+                    if find_status is not None:
+                        fa_status_dic = {
+                            "off": "خاموش",
+                            "on": "روشن",
+                        }
+                        print(find_status[0])
+                        fa_status = dict(fa_status_dic).get(str(find_status[0]))
+                        action_keys = [[Button.inline(bot_text["on"], b'on_data')] if fa_status == "خاموش" else [Button.inline(bot_text["off"], b'off_data')]]
+                        action_keys.append([Button.inline(bot_text["cancel"], b'cancel')])
+                        await conv_all.send_message(bot_text["data_status"].format(name=statistics_value, status=fa_status), buttons=action_keys)
+                        response = await conv_all.wait_event(events.CallbackQuery())
+                        if response.data == b'on_data':
+                            cur.execute(f"UPDATE data_status SET status = 'on' WHERE data = '{statistics_value}'")
+                            con.commit()
+                            await event.reply(bot_text["on_data_success"])
+                        elif response.data == b'off_data':
+                            cur.execute(f"UPDATE data_status SET status = 'off' WHERE data = '{statistics_value}'")
+                            con.commit()
+                            await event.reply(bot_text["off_data_success"])
+                        else:
+                            await event.reply(bot_text["canceled"])
+                            return
         elif text == bot_text["add_grand"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
