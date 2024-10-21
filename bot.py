@@ -977,9 +977,9 @@ async def pay(event):
                 current_score_time = score_time.strftime("%Y-%m-%d %H:%M:%S")
                 start_score_add = config.START_SCORE + config.DAILY_COIN
                 data = [
-                    (user_id, None, False, currentTime, 0, start_score_add, 0, 0, 0, current_score_time, 1, "iran"),
+                    (user_id, None, False, currentTime, 0, start_score_add, 0, 0, 0, current_score_time, 1, "iran", None),
                 ]
-                cur.executemany(f"INSERT INTO users VALUES (?,?,?,?,?,?,?,?,?,?,?,?)", data)
+                cur.executemany(f"INSERT INTO users VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)", data)
                 con.commit()
                 await event.reply(bot_text["start_score"])
                 await event.reply(bot_text["daily_coin"])
