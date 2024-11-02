@@ -2949,7 +2949,7 @@ async def pay(event):
                                     else:
                                         loading = await conv.send_message(bot_text["loading_two"].format(year=year, gp=country_tr[gp_country.replace(" ", "_")], event=type_tr[session.replace(" ", "_")], driver_one=driver_buy_code_fa[driver_one_code], driver_two=driver_buy_code_fa[driver_two_code]))
                                     BASE_DIR = Path(__file__).resolve().parent
-                                    if session == "Practice_1" or session == "Practice_2" or session == "Practice_3" or session = "Sprint_Qualifying":
+                                    if session == "Practice_1" or session == "Practice_2" or session == "Practice_3" or session == "Sprint_Qualifying":
                                         session = sessions_convert[session]
                                     image_rpm = f"{year}-{gp_round}-{session}-{driver_one_code}-{driver_two_code}-rpm.png"
                                     image_base_rpm = fr"{BASE_DIR}/{image_rpm}"
