@@ -12,7 +12,7 @@ import config
 import sqlite3
 from navlib import paginate
 from datetime import datetime, timedelta
-from funections import top_speed, overtake, map_viz, speed_rpm_delta, map_brake, lap_times, down_force, start_reaction, all_data, strategy, all_info, driver_func_data, show_driver_lap_times, brake_configurations, composite_perfomance
+from funections import get_year_calender, top_speed, overtake, map_viz, speed_rpm_delta, map_brake, lap_times, down_force, start_reaction, all_data, strategy, all_info, driver_func_data, show_driver_lap_times, brake_configurations, composite_perfomance
 from pathlib import Path
 from delta_to_pole import create_image
 import os
@@ -570,7 +570,50 @@ async def pay(event):
         elif text == bot_text["reply"]:
             await event.reply(bot_text["coming_soon"])
         elif text == bot_text["championship_calendar"]:
-            await event.reply(bot_text["coming_soon"])
+            async with bot.conversation(user_id) as conv:
+                year_keys = [
+                    [
+                        Button.inline("2024", b'2024')
+                    ],
+                    [
+                        Button.inline("2023", b'2023')
+                    ],
+                    [
+                        Button.inline("2022", b'2022')
+                    ],
+                    [
+                        Button.inline("2021", b'2021')
+                    ],
+                    [
+                        Button.inline("2020", b'2020')
+                    ],
+                    [
+                        Button.inline("2019", b'2019')
+                    ],
+                    [
+                        Button.inline("2018", b'2018')
+                    ],
+                    [
+                        Button.inline(bot_text["cancel"], b'cancel')
+                    ]
+                ]
+                ask_year = await conv.send_message(bot_text["select_year"], buttons=year_keys)
+                try:
+                    year_res = await conv.wait_event(events.CallbackQuery(), timeout=60)
+                    await bot.delete_messages(user_id, ask_year.id)
+                except TimeoutError:
+                    await conv.send_message(bot_text["timeout_error"])
+                    await bot.delete_messages(user_id, ask_year.id)
+                    return
+                year_data = year_res.data
+                if year_data == b'cancel':
+                    await conv.send_message(bot_text["canceled"])
+                    await bot.delete_messages(user_id, ask_year.id)
+                    await conv.cancel_all()
+                else:
+                    year = int(year_data)
+                    text = get_year_calender(year)
+                    await event.reply(text)
         elif text == bot_text["account"]:
             keys = [
                 [

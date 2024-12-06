@@ -1,4 +1,8 @@
+from datetime import datetime
+
 import fastf1 as ff1
+import pycountry
+import requests
 from fastf1 import plotting
 from fastf1.core import Laps
 import pandas as pd
@@ -1504,10 +1508,56 @@ def composite_perfomance(year, grand_prix, session_type):
     name = f"{year}-{grand_prix}-{session_type}-composite_perfomance.png"
     plt.savefig(name)
     return name
-# start = time.time()
-# try:
-#     test = speed_rpm_delta(2024, 'Bahrain Grand Prix', "R", "VER", "HAM")
-# except Exception as e:
-#     print(e)
-# end = time.time()
-# print(end - start)
+def country_flag(country_name):
+    try:
+        # Get the country object from the country name
+        country = pycountry.countries.lookup(country_name)
+        # Get the ISO 3166-1 alpha-2 country code
+        country_code = country.alpha_2
+        # Convert to flag emoji
+        flag_emoji = ''.join(chr(ord(character) + 0x1F1A5) for character in country_code)
+        return flag_emoji
+    except LookupError:
+        return "🏴"
+
+def check_date(date_str):
+    # Convert the string to a datetime object
+    input_date = datetime.strptime(date_str, '%Y-%m-%d')
+    # Get the current date
+    current_date = datetime.now()
+
+    # Check if the input date has passed
+    if input_date < current_date:
+        return False
+    else:
+        # Calculate the difference in days
+        days_remaining = (input_date - current_date).days
+        return days_remaining + 1
+
+def get_year_calender(year):
+    url = f"https://ergast.com/api/f1/{year}.json"
+    response = requests.get(url).json()
+    races = response["MRData"]["RaceTable"]["Races"]
+    text = f"🗓 The {year} F1 Grand Prix calendar:\n"
+    date_checked = False
+    for race in races:
+        race_name = race["raceName"]
+        race_date_er = race["date"]
+        race_time = race["time"]
+        time_obj = datetime.strptime(race_time, '%H:%M:%SZ')
+        # Format it to "HH:MM"
+        race_time = time_obj.strftime('%H:%M')
+        # Convert the string to a datetime object
+        date_obj = datetime.strptime(race_date_er, '%Y-%m-%d')
+        # Format the date to "Mon D"
+        race_date = date_obj.strftime('%b %d')
+        country_name = race["Circuit"]["Location"]["country"]
+        country_flag_emoji = country_flag(country_name)
+        grand_alarm = ''
+        if date_checked is False:
+            ch_date = check_date(race_date_er)
+            if ch_date is not False:
+                grand_alarm = f"⬇️ Next Grand Prix is in {ch_date} days ⬇️"
+        grand_text = f"{country_flag_emoji}{race_name}, {race_date} {race_time}"
+        text += "\n" + grand_alarm + "\n" + grand_text
+    return text
