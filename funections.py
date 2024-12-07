@@ -1567,7 +1567,7 @@ def next_grand_prix():
     url = "https://api.jolpi.ca/ergast/f1/2024/races/?format=json"
     response = requests.get(url).json()
     races = response["MRData"]["RaceTable"]["Races"]
-    text = "🗓 The 2024 F1 {grand} Grand Prix calendar:\n"
+    text = "🗓 The 2024 F1 {grand} calendar:\n"
     date_checked = False
     next_grand = None
     for race in races:
