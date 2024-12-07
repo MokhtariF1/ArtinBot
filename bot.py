@@ -10,6 +10,8 @@ from telethon.tl.types import ChannelParticipantsSearch, InputChannel
 from telethon.tl.types import PeerUser, PeerChat, PeerChannel
 import config
 import sqlite3
+
+import funections
 from navlib import paginate
 from datetime import datetime, timedelta
 from funections import get_year_calender, top_speed, overtake, map_viz, speed_rpm_delta, map_brake, lap_times, down_force, start_reaction, all_data, strategy, all_info, driver_func_data, show_driver_lap_times, brake_configurations, composite_perfomance
@@ -576,7 +578,7 @@ async def pay(event):
             ]
             await event.reply(bot_text["select"], buttons=buttons)
         elif text == bot_text["next_grand_prix"]:
-
+            await event.reply(funections.next_grand_prix())
         elif text == bot_text["calender_by_year"]:
             async with bot.conversation(user_id) as conv:
                 year_keys = [
