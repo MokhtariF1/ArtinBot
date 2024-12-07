@@ -570,6 +570,14 @@ async def pay(event):
         elif text == bot_text["reply"]:
             await event.reply(bot_text["coming_soon"])
         elif text == bot_text["championship_calendar"]:
+            buttons = [
+                Button.text(bot_text["calender_by_year"], resize=True),
+                Button.text(bot_text["next_grand_prix"], resize=True),
+            ]
+            await event.reply(bot_text["select"], buttons=buttons)
+        elif text == bot_text["next_grand_prix"]:
+
+        elif text == bot_text["calender_by_year"]:
             async with bot.conversation(user_id) as conv:
                 year_keys = [
                     [

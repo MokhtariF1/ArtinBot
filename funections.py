@@ -1561,3 +1561,27 @@ def get_year_calender(year):
         grand_text = f"{country_flag_emoji}{race_name}, {race_date} {race_time}"
         text += "\n" + grand_alarm + "\n" + grand_text
     return text
+def next_grand_prix():
+    url = f"https://ergast.com/api/f1/2024.json"
+    response = requests.get(url).json()
+    races = response["MRData"]["RaceTable"]["Races"]
+    text = "🗓 The 2024 F1 {grand} Grand Prix calendar:\n"
+    date_checked = False
+    for race in races:
+        race_name = race["raceName"]
+        race_date_er = race["date"]
+        race_time = race["time"]
+        time_obj = datetime.strptime(race_time, '%H:%M:%SZ')
+        # Format it to "HH:MM"
+        race_time = time_obj.strftime('%H:%M')
+        # Convert the string to a datetime object
+        date_obj = datetime.strptime(race_date_er, '%Y-%m-%d')
+        # Format the date to "Mon D"
+        race_date = date_obj.strftime('%b %d')
+        next_grand = None
+        if date_checked is False:
+            ch_date = check_date(race_date_er)
+            if ch_date is not False:
+                next_grand = race_name
+                text += next_grand + "\n" + race_date + "\n" + race_time
+    return text
