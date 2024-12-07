@@ -1,5 +1,4 @@
-from datetime import datetime
-
+from datetime import datetime, timedelta
 import fastf1 as ff1
 import pycountry
 import requests
@@ -1587,4 +1586,59 @@ def next_grand_prix():
                 next_grand = race_name
                 text += next_grand + "\n" + race_date + "\n" + race_time
     text = text.format(grand=next_grand)
+    return text
+
+
+def get_time_difference(target_date, target_time):
+    # Combine date and time into a single datetime object
+    target_datetime_str = f"{target_date} {target_time}"
+    target_datetime = datetime.strptime(target_datetime_str, "%Y-%m-%d %H:%M")
+
+    # Get the current time
+    now = datetime.now()
+
+    # Calculate the difference
+    time_difference = target_datetime - now
+
+    if time_difference.total_seconds() < 0:
+        return "The target time has already passed."
+
+    # Break down the difference into days, hours, minutes
+    days = time_difference.days
+    hours, remainder = divmod(time_difference.seconds, 3600)
+    minutes, _ = divmod(remainder, 60)
+
+    # Create a human-readable string
+    parts = []
+    if days > 0:
+        parts.append(f"{days} days")
+    if hours > 0:
+        parts.append(f"{hours} hours")
+    if minutes > 0:
+        parts.append(f"{minutes} minutes")
+
+    return "in " + " and ".join(parts)
+
+
+def get_time_until():
+    url = "https://api.jolpi.ca/ergast/f1/2024/races/?format=json"
+    response = requests.get(url).json()
+    races = response["MRData"]["RaceTable"]["Races"]
+    text = ""
+    date_checked = False
+    for race in races:
+        race_name = race["raceName"]
+        race_date_er = race["date"]
+        race_time = race["time"]
+        time_obj = datetime.strptime(race_time, '%H:%M:%SZ')
+        # Format it to "HH:MM"
+        race_time = time_obj.strftime('%H:%M')
+        # Convert the string to a datetime object
+        date_obj = datetime.strptime(race_date_er, '%Y-%m-%d')
+        # Format the date to "Mon D"
+        race_date = date_obj.strftime('%b %d')
+        if date_checked is False:
+            ch_date = check_date(race_date_er)
+            if ch_date is not False:
+                text += race_name + "\n" + get_time_difference(race_date_er, race_time) + "\n"
     return text

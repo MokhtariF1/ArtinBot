@@ -440,6 +440,7 @@ TEXT = {
     "personal_report": "تعداد درخواست های شما در دیتای {data} مساوی با {count} عدد بوده است",
     "next_grand_prix": "گرندپری بعدی",
     "calender_by_year": "تقویم سال",
+    "time_until": "زمان باقی مانده گرندپری آینده",
 }
 
 EN_TEXT = {
@@ -766,4 +767,5 @@ Your points balance is {score}, to get more points, you can subcategory or buy c
     "personal_report": "The number of your requests in {data} is equal to {count} number",
     "next_grand_prix": "Next Grand prix",
     "calender_by_year": "Calender by year",
+    "time_until": "Time until next Grand prix",
 }

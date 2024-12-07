@@ -573,10 +573,17 @@ async def pay(event):
             await event.reply(bot_text["coming_soon"])
         elif text == bot_text["championship_calendar"]:
             buttons = [
-                Button.text(bot_text["calender_by_year"], resize=True),
-                Button.text(bot_text["next_grand_prix"], resize=True),
+                [
+                    Button.text(bot_text["calender_by_year"], resize=True),
+                    Button.text(bot_text["next_grand_prix"], resize=True),
+                ],
+                [
+                    Button.text(bot_text["time_until"])
+                ]
             ]
             await event.reply(bot_text["select"], buttons=buttons)
+        elif text == bot_text["time_until"]:
+            await event.reply(funections.get_time_until())
         elif text == bot_text["next_grand_prix"]:
             await event.reply(funections.next_grand_prix())
         elif text == bot_text["calender_by_year"]:
