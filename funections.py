@@ -1586,5 +1586,5 @@ def next_grand_prix():
             if ch_date is not False:
                 next_grand = race_name
                 text += next_grand + "\n" + race_date + "\n" + race_time
-    text.format(grand=next_grand)
+    text = text.format(grand=next_grand)
     return text
