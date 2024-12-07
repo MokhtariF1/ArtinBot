@@ -1569,6 +1569,7 @@ def next_grand_prix():
     races = response["MRData"]["RaceTable"]["Races"]
     text = "🗓 The 2024 F1 {grand} Grand Prix calendar:\n"
     date_checked = False
+    next_grand = None
     for race in races:
         race_name = race["raceName"]
         race_date_er = race["date"]
@@ -1580,11 +1581,10 @@ def next_grand_prix():
         date_obj = datetime.strptime(race_date_er, '%Y-%m-%d')
         # Format the date to "Mon D"
         race_date = date_obj.strftime('%b %d')
-        next_grand = None
         if date_checked is False:
             ch_date = check_date(race_date_er)
             if ch_date is not False:
                 next_grand = race_name
                 text += next_grand + "\n" + race_date + "\n" + race_time
-                text.format(grand=next_grand)
+    text.format(grand=next_grand)
     return text
