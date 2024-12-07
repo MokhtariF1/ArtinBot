@@ -1535,7 +1535,8 @@ def check_date(date_str):
         return days_remaining + 1
 
 def get_year_calender(year):
-    url = f"https://ergast.com/api/f1/{year}.json"
+    # url = f"https://ergast.com/api/f1/{year}.json"
+    url = f"https://api.jolpi.ca/ergast/f1/{year}/races/?format=json"
     response = requests.get(url).json()
     races = response["MRData"]["RaceTable"]["Races"]
     text = f"🗓 The {year} F1 Grand Prix calendar:\n"
@@ -1562,7 +1563,8 @@ def get_year_calender(year):
         text += "\n" + grand_alarm + "\n" + grand_text
     return text
 def next_grand_prix():
-    url = f"https://ergast.com/api/f1/2024.json"
+    # url = f"https://ergast.com/api/f1/2024.json"
+    url = "https://api.jolpi.ca/ergast/f1/2024/races/?format=json"
     response = requests.get(url).json()
     races = response["MRData"]["RaceTable"]["Races"]
     text = "🗓 The 2024 F1 {grand} Grand Prix calendar:\n"
