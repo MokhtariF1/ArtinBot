@@ -441,6 +441,7 @@ TEXT = {
     "next_grand_prix": "گرندپری بعدی",
     "calender_by_year": "تقویم سال",
     "time_until": "زمان باقی مانده گرندپری آینده",
+    "session_ended": "فصل به پایان رسیده است!"
 }
 
 EN_TEXT = {
@@ -768,4 +769,5 @@ Your points balance is {score}, to get more points, you can subcategory or buy c
     "next_grand_prix": "Next Grand prix",
     "calender_by_year": "Calender by year",
     "time_until": "Time until next Grand prix",
+    "session_ended": "The season is over!",
 }

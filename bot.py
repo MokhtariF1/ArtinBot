@@ -583,9 +583,15 @@ async def pay(event):
             ]
             await event.reply(bot_text["select"], buttons=buttons)
         elif text == bot_text["time_until"]:
-            await event.reply(funections.get_time_until())
+            time_until = funections.get_time_until()
+            if time_until is None:
+                time_until = bot_text["session_ended"]
+            await event.reply(time_until)
         elif text == bot_text["next_grand_prix"]:
-            await event.reply(funections.next_grand_prix())
+            next_grand = funections.next_grand_prix()
+            if next_grand is None:
+                next_grand = bot_text["session_ended"]
+            await event.reply(next_grand)
         elif text == bot_text["calender_by_year"]:
             async with bot.conversation(user_id) as conv:
                 year_keys = [

@@ -1585,7 +1585,10 @@ def next_grand_prix():
             if ch_date is not False:
                 next_grand = race_name
                 text += next_grand + "\n" + race_date + "\n" + race_time
-    text = text.format(grand=next_grand)
+    if next_grand is not None:
+        text = text.format(grand=next_grand)
+    else:
+        text = None
     return text
 
 
@@ -1641,4 +1644,6 @@ def get_time_until():
             ch_date = check_date(race_date_er)
             if ch_date is not False:
                 text += race_name + "\n" + get_time_difference(race_date_er, race_time) + "\n"
+    if text == "":
+        text = None
     return text
