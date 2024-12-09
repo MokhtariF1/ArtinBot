@@ -355,11 +355,11 @@ async def pay(event):
         elif text == bot_text["rules"]:
             keys = [
                 [
-                    Button.text(bot_text["rules_show"]),
+                    Button.text(bot_text["rules_show"], resize=True),
                 ],
                 [
                     Button.text(bot_text["account_setup"]),
-                    Button.text(bot_text["language"], resize=True),
+                    Button.text(bot_text["language"]),
                 ],
                 [
                     Button.text(bot_text["version"]),
@@ -367,8 +367,8 @@ async def pay(event):
                     Button.text(bot_text["upgrade_level"]),
                 ],
                 [
-                    Button.text(bot_text["back"])
-                ]
+                    back
+                ],
             ]
             await event.reply(bot_text["select"], buttons=keys)
         elif text == bot_text["sports_meeting"]:
@@ -386,9 +386,10 @@ async def pay(event):
                     Button.text(bot_text["in_person_meeting"]),
                 ],
                 [
-                    Button.text(bot_text["back"])
+                    back
                 ]
             ]
+            await event.reply(bot_text["select"], buttons=keys)
         elif text == bot_text["account_setup"]:
             keys = [
                 [
@@ -533,6 +534,9 @@ async def pay(event):
                     Button.text(bot_text["page_two"]),
                     Button.text(bot_text["page_three"])
                 ],
+                [
+                    back
+                ]
             ]
             await event.reply(bot_text["select"], buttons=keys)
         elif text == bot_text["fantasy"]:
@@ -624,7 +628,7 @@ async def pay(event):
                     Button.text(bot_text["support"]),
                     Button.text(bot_text["protection"]),
                     Button.text(bot_text["search"]),
-                ]
+                ],
                 [
                     Button.text(bot_text["back"])
                 ]
