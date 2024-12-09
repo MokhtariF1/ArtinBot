@@ -1952,34 +1952,47 @@ async def pay(event):
             update_user_time = cur.execute(f"UPDATE users SET time_zone = 'london' WHERE id = {user_id}")
             con.commit()
             await event.reply(bot_text["london_time_set"])
-        elif text == bot_text["data_archive"]:
+        elif text == bot_text["page_one"]:
             keys = [
                 [
                     Button.text(bot_text["rpm"]),
-                ],
-                [
                     Button.text(bot_text["top_speed"]),
                     Button.text(bot_text["map_viz"]),
                 ],
                 [
-                    Button.text(bot_text["lap_times"]),
-                    Button.text(bot_text["down_force"]),
-                    Button.text(bot_text["start_reaction"]),
-                ],
-                [
-                    Button.text(bot_text["all"]),
+                    Button.text(bot_text["lap_times_table"]),
                     Button.text(bot_text["overtake"]),
                     Button.text(bot_text["map_break"]),
                 ],
                 [
+                    Button.text(bot_text["back"], resize=1)
+                ]
+            ]
+            await event.reply(bot_text["select"], buttons=keys)
+        elif text == bot_text["page_two"]:
+            keys = [
+                [
                     Button.text(bot_text["g_force"]),
-                    Button.text(bot_text["strategy"]),
+                    Button.text(bot_text["down_force"]),
+                    Button.text(bot_text["lap_times"]),
+
+                ],
+                [
+                    Button.text(bot_text["all"]),
+                    Button.text(bot_text["brake_configurations"]),
                     Button.text(bot_text["composite_perfomance"])
                 ],
                 [
+                    Button.text(bot_text["back"], resize=1)
+                ]
+            ]
+            await event.reply(bot_text["select"], buttons=keys)
+        elif text == bot_text["page_three"]:
+            keys = [
+                [
+                    Button.text(bot_text["strategy"]),
+                    Button.text(bot_text["start_reaction"]),
                     Button.text(bot_text["data_to_pole"]),
-                    Button.text(bot_text["lap_times_table"]),
-                    Button.text(bot_text["brake_configurations"])
                 ],
                 [
                     Button.text(bot_text["back"], resize=1)
