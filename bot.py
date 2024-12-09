@@ -360,7 +360,7 @@ async def pay(event):
                 [
                     Button.text(bot_text["account_setup"]),
                     Button.text(bot_text["language"], resize=True),
-                ]
+                ],
                 [
                     Button.text(bot_text["version"]),
                     Button.text(bot_text["delete_account"]),
@@ -379,7 +379,7 @@ async def pay(event):
                 [
                     Button.text(bot_text["fantasy"]),
                     Button.text(bot_text["forecast"], resize=True),
-                ]
+                ],
                 [
                     Button.text(bot_text["show_table"]),
                     Button.text(bot_text["set_notifications"]),
