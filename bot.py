@@ -254,7 +254,7 @@ public_keys = [
         [Button.text(bot_text["rules"]), Button.text(bot_text["sports_meeting"]), Button.text(bot_text["account"])],
 ]
 admin_public = [
-    [Button.text(bot_text["panel"])]
+    [Button.text(bot_text["panel"])],
     [Button.text(bot_text["archive"], resize=True)],
     [Button.text(bot_text["reply"]), Button.text(bot_text["championship_calendar"])],
     [Button.text(bot_text["rules"]), Button.text(bot_text["sports_meeting"]), Button.text(bot_text["account"])],
