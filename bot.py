@@ -248,7 +248,17 @@ def check_date_passed(input_date):
         return True
     else:
         return False
-
+public_keys = [
+        [Button.text(bot_text["archive"], resize=True)],
+        [Button.text(bot_text["reply"]), Button.text(bot_text["championship_calendar"])],
+        [Button.text(bot_text["rules"]), Button.text(bot_text["sports_meeting"]), Button.text(bot_text["account"])],
+]
+admin_public = [
+    [Button.text(bot_text["panel"])]
+    [Button.text(bot_text["archive"], resize=True)],
+    [Button.text(bot_text["reply"]), Button.text(bot_text["championship_calendar"])],
+    [Button.text(bot_text["rules"]), Button.text(bot_text["sports_meeting"]), Button.text(bot_text["account"])],
+]
 @bot.on(events.CallbackQuery())
 async def call_handler(event):
     user_id = event.sender_id
@@ -260,21 +270,9 @@ async def call_handler(event):
         bot_text = config.EN_TEXT
         en = bot_text["EN_SELECTED"]
         is_admin = check_admin(user_id)
-        keys = [
-            [Button.text(bot_text["archive"], resize=True)],
-            [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
-            [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
-             Button.text(bot_text["rules"])],
-        ]
+        keys = public_keys
         if is_admin:
-            keys = [
-                [Button.text(bot_text["panel"], resize=True)],
-                [Button.text(bot_text["archive"], resize=True)],
-                [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
-                [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
-                 Button.text(bot_text["rules"])],
-
-            ]
+            keys = admin_public
         await bot.delete_messages(user_id, msg_id)
         await bot.send_message(user_id, en, buttons=keys)
     elif event.data == b'lang:fa':
@@ -284,20 +282,9 @@ async def call_handler(event):
         bot_text = config.TEXT
         fa = bot_text["FA_SELECTED"]
         is_admin = check_admin(user_id)
-        keys = [
-            [Button.text(bot_text["archive"], resize=True)],
-            [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
-            [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
-             Button.text(bot_text["rules"])],
-        ]
+        keys = public_keys
         if is_admin:
-            keys = [
-                [Button.text(bot_text["panel"], resize=True)],
-                [Button.text(bot_text["archive"], resize=True)],
-                [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
-                [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
-                 Button.text(bot_text["rules"])],
-            ]
+            keys = admin_public
         await bot.delete_messages(user_id, msg_id)
         await bot.send_message(user_id, fa, buttons=keys)
 
@@ -369,18 +356,39 @@ async def pay(event):
             keys = [
                 [
                     Button.text(bot_text["rules_show"]),
-                    Button.text(bot_text["language"], resize=True),
                 ],
                 [
-                    Button.text(bot_text["version"]),
-                    Button.text(bot_text["bot_ping"]),
                     Button.text(bot_text["account_setup"]),
+                    Button.text(bot_text["language"], resize=True),
+                ]
+                [
+                    Button.text(bot_text["version"]),
+                    Button.text(bot_text["delete_account"]),
+                    Button.text(bot_text["upgrade_level"]),
                 ],
                 [
                     Button.text(bot_text["back"])
                 ]
             ]
             await event.reply(bot_text["select"], buttons=keys)
+        elif text == bot_text["sports_meeting"]:
+            keys = [
+                [
+                    Button.text(bot_text["scores"]),
+                ],
+                [
+                    Button.text(bot_text["fantasy"]),
+                    Button.text(bot_text["forecast"], resize=True),
+                ]
+                [
+                    Button.text(bot_text["show_table"]),
+                    Button.text(bot_text["set_notifications"]),
+                    Button.text(bot_text["in_person_meeting"]),
+                ],
+                [
+                    Button.text(bot_text["back"])
+                ]
+            ]
         elif text == bot_text["account_setup"]:
             keys = [
                 [
@@ -426,20 +434,9 @@ async def pay(event):
             bot_text = config.TEXT
             ch = check_admin(user_id)
             if ch is False:
-                keys = [
-                    [Button.text(bot_text["archive"], resize=True)],
-                    [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
-                    [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
-                    Button.text(bot_text["rules"])],
-                ]
+                keys = public_keys
             else:
-                keys = [
-                    [Button.text(bot_text["panel"])],
-                    [Button.text(bot_text["archive"], resize=True)],
-                    [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
-                    [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
-                    Button.text(bot_text["rules"])],
-                ]
+                keys = admin_public
             await event.reply(bot_text["FA_SELECTED"], buttons= keys)
         elif text == bot_text["en"]:
             cur.execute(f"UPDATE users SET lang = 1 WHERE id = {user_id}")
@@ -447,30 +444,14 @@ async def pay(event):
             bot_text = config.EN_TEXT
             ch = check_admin(user_id)
             if ch is False:
-                keys = [
-                    [Button.text(bot_text["archive"], resize=True)],
-                    [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
-                    [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
-                    Button.text(bot_text["rules"])],
-                ]
+                keys = public_keys
             else:
-                keys = [
-                    [Button.text(bot_text["panel"])],
-                    [Button.text(bot_text["archive"], resize=True)],
-                    [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
-                    [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
-                    Button.text(bot_text["rules"])],
-                ]
+                keys = public_keys.insert(0, Button.text(bot_text["panel"]))
             await event.reply(bot_text["EN_SELECTED"], buttons= keys)
         elif text == bot_text["join_channel_btn"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
-                keys = [
-                    [Button.text(bot_text["archive"], resize=True)],
-                    [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
-                    [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
-                     Button.text(bot_text["rules"])],
-                ]
+                keys = public_keys
                 await event.reply(bot_text["select"], buttons=keys)
             else:
                 keys = [
@@ -486,12 +467,7 @@ async def pay(event):
         elif text == bot_text["create_join_channel"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
-                keys = [
-                    [Button.text(bot_text["archive"], resize=True)],
-                    [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
-                    [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
-                     Button.text(bot_text["rules"])],
-                ]
+                keys = public_keys
                 await event.reply(bot_text["select"], buttons=keys)
             else:
                 async with bot.conversation(user_id) as conv:
@@ -551,20 +527,12 @@ async def pay(event):
         elif text == bot_text["archive"]:
             keys = [
                 [
-                    Button.text(bot_text["reply"], resize=True)
+                    Button.text(bot_text["page_one"], resize=True)
                 ],
                 [
-                    Button.text(bot_text["fantasy"]),
-                    Button.text(bot_text["data_archive"])
+                    Button.text(bot_text["page_two"]),
+                    Button.text(bot_text["page_three"])
                 ],
-                [
-                    Button.text(bot_text["championship_calendar"]),
-                    Button.text(bot_text["scores"]),
-                    Button.text(bot_text["fia"]),
-                ],
-                [
-                    Button.text(bot_text["back"])
-                ]
             ]
             await event.reply(bot_text["select"], buttons=keys)
         elif text == bot_text["fantasy"]:
@@ -579,6 +547,9 @@ async def pay(event):
                 ],
                 [
                     Button.text(bot_text["time_until"])
+                ],
+                [
+                    back
                 ]
             ]
             await event.reply(bot_text["select"], buttons=buttons)
@@ -595,6 +566,9 @@ async def pay(event):
         elif text == bot_text["calender_by_year"]:
             async with bot.conversation(user_id) as conv:
                 year_keys = [
+                    [
+                        Button.inline("2025", b'2025')
+                    ],
                     [
                         Button.inline("2024", b'2024')
                     ],
@@ -641,11 +615,16 @@ async def pay(event):
             keys = [
                 [
                     Button.text(bot_text["user_information"]),
+                ],
+                [
+                    Button.text(bot_text["sub_collection"], resize=1),
                     Button.text(bot_text["personal_account"]),
                 ],
                 [
-                    Button.text(bot_text["sub_collection"], resize=1)
-                ],
+                    Button.text(bot_text["support"]),
+                    Button.text(bot_text["protection"]),
+                    Button.text(bot_text["search"]),
+                ]
                 [
                     Button.text(bot_text["back"])
                 ]
@@ -841,12 +820,7 @@ async def pay(event):
         elif text == bot_text["tickets"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
-                keys = [
-                    [Button.text(bot_text["archive"], resize=True)],
-                    [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
-                    [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
-                     Button.text(bot_text["rules"])],
-                ]
+                keys = public_keys
                 await event.reply(bot_text["select"], buttons=keys)
             else:
                 find_count = len(cur.execute("SELECT * FROM tickets WHERE status='open'").fetchall())
@@ -1069,31 +1043,14 @@ async def pay(event):
                     await event.reply(select, buttons=keys)
                 else:
                     is_admin = cur.execute(f"SELECT * FROM admins WHERE _id = {user_id}").fetchone()
-                    keys = [
-                        [Button.text(bot_text["archive"], resize=True)],
-                        [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
-                        [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
-                         Button.text(bot_text["rules"])],
-                    ]
+                    keys = public_keys
                     if is_admin is not None:
-                        keys = [
-                            [Button.text(bot_text["panel"], resize=True)],
-                            [Button.text(bot_text["archive"], resize=True)],
-                            [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
-                            [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
-                             Button.text(bot_text["rules"])],
-
-                        ]
+                        keys = admin_public
                     await event.reply(bot_text["select"], buttons=keys)
         elif text == bot_text["panel"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
-                keys = [
-                    [Button.text(bot_text["archive"], resize=True)],
-                    [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
-                    [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
-                     Button.text(bot_text["rules"])],
-                ]
+                keys = public_keys
                 await event.reply(bot_text["select"], buttons=keys)
             else:
                 pn_keys = [
@@ -1110,12 +1067,7 @@ async def pay(event):
         elif text == bot_text["management"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
-                keys = [
-                    [Button.text(bot_text["archive"], resize=True)],
-                    [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
-                    [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
-                     Button.text(bot_text["rules"])],
-                ]
+                keys = public_keys
                 await event.reply(bot_text["select"], buttons=keys)
             else:
                 keys = [
@@ -1322,12 +1274,7 @@ async def pay(event):
         elif text == bot_text["data_management"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
-                keys = [
-                    [Button.text(bot_text["archive"], resize=True)],
-                    [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
-                    [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
-                     Button.text(bot_text["rules"])],
-                ]
+                keys = public_keys
                 await event.reply(bot_text["select"], buttons=keys)
             else:
                 keys = [
@@ -1351,12 +1298,7 @@ async def pay(event):
         elif text == bot_text["grand_time"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
-                keys = [
-                    [Button.text(bot_text["archive"], resize=True)],
-                    [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
-                    [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
-                     Button.text(bot_text["rules"])],
-                ]
+                keys = public_keys
                 await event.reply(bot_text["select"], buttons=keys)
             else:
                 keys = [
@@ -1372,12 +1314,7 @@ async def pay(event):
         elif text == bot_text["add_grand_time"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
-                keys = [
-                    [Button.text(bot_text["archive"], resize=True)],
-                    [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
-                    [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
-                     Button.text(bot_text["rules"])],
-                ]
+                keys = public_keys
                 await event.reply(bot_text["select"], buttons=keys)
             else:
                 async with bot.conversation(user_id, timeout=1000) as conv:
@@ -1460,12 +1397,7 @@ async def pay(event):
         elif text == bot_text["coin_management"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
-                keys = [
-                    [Button.text(bot_text["archive"], resize=True)],
-                    [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
-                    [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
-                     Button.text(bot_text["rules"])],
-                ]
+                keys = public_keys
                 await event.reply(bot_text["select"], buttons=keys)
             else:
                 keys = [
@@ -1484,12 +1416,7 @@ async def pay(event):
         elif text == bot_text["all_coin"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
-                keys = [
-                    [Button.text(bot_text["archive"], resize=True)],
-                    [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
-                    [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
-                     Button.text(bot_text["rules"])],
-                ]
+                keys = public_keys
                 await event.reply(bot_text["select"], buttons=keys)
             else:
                 async with bot.conversation(user_id) as conv:
@@ -1525,12 +1452,7 @@ async def pay(event):
         elif text == bot_text["down_all_coin"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
-                keys = [
-                    [Button.text(bot_text["archive"], resize=True)],
-                    [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
-                    [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
-                     Button.text(bot_text["rules"])],
-                ]
+                keys = public_keys
                 await event.reply(bot_text["select"], buttons=keys)
             else:
                 async with bot.conversation(user_id) as conv:
@@ -1564,12 +1486,7 @@ async def pay(event):
         elif text == bot_text["one_coin"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
-                keys = [
-                    [Button.text(bot_text["archive"], resize=True)],
-                    [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
-                    [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
-                     Button.text(bot_text["rules"])],
-                ]
+                keys = public_keys
                 await event.reply(bot_text["select"], buttons=keys)
             else:
                 async with bot.conversation(user_id) as conv:
@@ -1649,12 +1566,7 @@ async def pay(event):
         elif text == bot_text["users"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
-                keys = [
-                    [Button.text(bot_text["archive"], resize=True)],
-                    [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
-                    [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
-                     Button.text(bot_text["rules"])],
-                ]
+                keys = public_keys
                 await event.reply(bot_text["select"], buttons=keys)
             else:
                 us_keys = [
@@ -1677,12 +1589,7 @@ async def pay(event):
         elif text == bot_text["users_level"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
-                keys = [
-                    [Button.text(bot_text["archive"], resize=True)],
-                    [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
-                    [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
-                     Button.text(bot_text["rules"])],
-                ]
+                keys = public_keys
                 await event.reply(bot_text["select"], buttons=keys)
             else:
                 async with bot.conversation(user_id) as conv:
@@ -1795,12 +1702,7 @@ async def pay(event):
         elif text == bot_text["new_users"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
-                keys = [
-                    [Button.text(bot_text["archive"], resize=True)],
-                    [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
-                    [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
-                     Button.text(bot_text["rules"])],
-                ]
+                keys = public_keys
                 await event.reply(bot_text["select"], buttons=keys)
             else:
                 text = ""
@@ -1820,12 +1722,7 @@ async def pay(event):
         elif text == bot_text["robot_statistics"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
-                keys = [
-                    [Button.text(bot_text["archive"], resize=True)],
-                    [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
-                    [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
-                     Button.text(bot_text["rules"])],
-                ]
+                keys = public_keys
                 await event.reply(bot_text["select"], buttons=keys)
             else:
                 users = cur.execute("SELECT * FROM users").fetchall()
@@ -1839,12 +1736,7 @@ async def pay(event):
         elif text == bot_text["words"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
-                keys = [
-                    [Button.text(bot_text["archive"], resize=True)],
-                    [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
-                    [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
-                     Button.text(bot_text["rules"])],
-                ]
+                keys = public_keys
                 await event.reply(bot_text["select"], buttons=keys)
             else:
                 keys = [
@@ -1941,12 +1833,7 @@ async def pay(event):
         elif text == bot_text["add_word"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
-                keys = [
-                    [Button.text(bot_text["archive"], resize=True)],
-                    [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
-                    [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
-                     Button.text(bot_text["rules"])],
-                ]
+                keys = public_keys
                 await event.reply(bot_text["select"], buttons=keys)
             else:
                 async with bot.conversation(user_id, timeout=1000) as conv:
@@ -5832,12 +5719,7 @@ async def pay(event):
         elif text == bot_text["off_all"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
-                keys = [
-                    [Button.text(bot_text["archive"], resize=True)],
-                    [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
-                    [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
-                     Button.text(bot_text["rules"])],
-                ]
+                keys = public_keys
                 await event.reply(bot_text["select"], buttons=keys)
             else:
                 async with bot.conversation(user_id, timeout=1000) as conv_all:
@@ -5860,12 +5742,7 @@ async def pay(event):
         elif text == bot_text["off_data"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
-                keys = [
-                    [Button.text(bot_text["archive"], resize=True)],
-                    [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
-                    [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
-                     Button.text(bot_text["rules"])],
-                ]
+                keys = public_keys
                 await event.reply(bot_text["select"], buttons=keys)
             else:
                 async with bot.conversation(user_id, timeout=1000) as conv_all:
@@ -5972,12 +5849,7 @@ async def pay(event):
         elif text == bot_text["add_grand"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
-                keys = [
-                    [Button.text(bot_text["archive"], resize=True)],
-                    [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
-                    [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
-                     Button.text(bot_text["rules"])],
-                ]
+                keys = public_keys
                 await event.reply(bot_text["select"], buttons=keys)
             else:
                 async with bot.conversation(user_id, timeout=1000) as conv:
@@ -6099,12 +5971,7 @@ async def pay(event):
         elif text == bot_text["show_grand"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
-                keys = [
-                    [Button.text(bot_text["archive"], resize=True)],
-                    [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
-                    [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
-                     Button.text(bot_text["rules"])],
-                ]
+                keys = public_keys
                 await event.reply(bot_text["select"], buttons=keys)
             else:
                 find_count = len(cur.execute("SELECT * FROM grand").fetchall())
@@ -6291,12 +6158,7 @@ async def pay(event):
         elif text == bot_text["show_words"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
-                keys = [
-                    [Button.text(bot_text["archive"], resize=True)],
-                    [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
-                    [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
-                     Button.text(bot_text["rules"])],
-                ]
+                keys = public_keys
                 await event.reply(bot_text["select"], buttons=keys)
             else:
                 find_count = len(cur.execute("SELECT * FROM btn").fetchall())
@@ -6503,12 +6365,7 @@ async def eb(event):
     back = Button.text(bot_text["back"], resize=True)
     is_admin = check_admin(user_id)
     if is_admin is False:
-        keys = [
-            [Button.text(bot_text["archive"], resize=True)],
-            [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
-            [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
-             Button.text(bot_text["rules"])],
-        ]
+        keys = public_keys
         await event.reply(bot_text["select"], buttons=keys)
         return
     word_tag = event.data.decode().split(":")[1]
@@ -6542,12 +6399,7 @@ async def del_btn(event):
     back = Button.text(bot_text["back"], resize=True)
     is_admin = check_admin(user_id)
     if is_admin is False:
-        keys = [
-            [Button.text(bot_text["archive"], resize=True)],
-            [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
-            [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
-             Button.text(bot_text["rules"])],
-        ]
+        keys = public_keys
         await event.reply(bot_text["select"], buttons=keys)
         return
     btn_tag = event.data.decode().split(":")[1]
@@ -6572,12 +6424,7 @@ async def show_btn_handler(event):
     start_text = bot_text['select']
     ch_admin = check_admin(user_id)
     if ch_admin is False:
-        keys = [
-            [Button.text(bot_text["archive"], resize=True)],
-            [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
-            [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
-             Button.text(bot_text["rules"])],
-        ]
+        keys = public_keys
         await event.reply(bot_text["select"], buttons=keys)
         return
     find_count = len(cur.execute("SELECT * FROM btn").fetchall())
@@ -6623,12 +6470,7 @@ async def show_grand_handler(event):
     start_text = bot_text['select']
     ch_admin = check_admin(user_id)
     if ch_admin is False:
-        keys = [
-            [Button.text(bot_text["archive"], resize=True)],
-            [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
-            [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
-             Button.text(bot_text["rules"])],
-        ]
+        keys = public_keys
         await event.reply(bot_text["select"], buttons=keys)
         return
     find_count = len(cur.execute("SELECT * FROM grand ORDER BY num").fetchall())
@@ -6673,12 +6515,7 @@ async def show_join_handler(event):
     start_text = bot_text['select']
     ch_admin = check_admin(user_id)
     if ch_admin is False:
-        keys = [
-            [Button.text(bot_text["archive"], resize=True)],
-            [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
-            [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
-             Button.text(bot_text["rules"])],
-        ]
+        keys = public_keys
         await event.reply(bot_text["select"], buttons=keys)
         return
     find_count = len(cur.execute("SELECT * FROM join_channel").fetchall())
@@ -6715,12 +6552,7 @@ async def show_time_handler(event):
     start_text = bot_text['select']
     ch_admin = check_admin(user_id)
     if ch_admin is False:
-        keys = [
-            [Button.text(bot_text["archive"], resize=True)],
-            [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
-            [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
-             Button.text(bot_text["rules"])],
-        ]
+        keys = public_keys
         await event.reply(bot_text["select"], buttons=keys)
         return
     find_count = len(cur.execute("SELECT * FROM grand_time ORDER BY time_num").fetchall())
@@ -6765,12 +6597,7 @@ async def del_grand(event):
     back = Button.text(bot_text["back"], resize=True)
     is_admin = check_admin(user_id)
     if is_admin is False:
-        keys = [
-            [Button.text(bot_text["archive"], resize=True)],
-            [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
-            [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
-             Button.text(bot_text["rules"])],
-        ]
+        keys = public_keys
         await event.reply(bot_text["select"], buttons=keys)
         return
     grand_num = event.data.decode().split(":")[1]
@@ -6793,12 +6620,7 @@ async def del_time(event):
     back = Button.text(bot_text["back"], resize=True)
     is_admin = check_admin(user_id)
     if is_admin is False:
-        keys = [
-            [Button.text(bot_text["archive"], resize=True)],
-            [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
-            [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
-             Button.text(bot_text["rules"])],
-        ]
+        keys = public_keys
         await event.reply(bot_text["select"], buttons=keys)
         return
     grand_num = event.data.decode().split(":")[1]
@@ -6821,12 +6643,7 @@ async def close_grand_handler(event):
     back = Button.text(bot_text["back"], resize=True)
     is_admin = check_admin(user_id)
     if is_admin is False:
-        keys = [
-            [Button.text(bot_text["archive"], resize=True)],
-            [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
-            [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
-             Button.text(bot_text["rules"])],
-        ]
+        keys = public_keys
         await event.reply(bot_text["select"], buttons=keys)
         return
     grand_num = event.data.decode().split(":")[1]
@@ -7182,12 +6999,7 @@ async def show_ticket_handler(event):
     start_text = bot_text['select']
     ch_admin = check_admin(user_id)
     if ch_admin is False:
-        keys = [
-            [Button.text(bot_text["archive"], resize=True)],
-            [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
-            [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
-             Button.text(bot_text["rules"])],
-        ]
+        keys = public_keys
         await event.reply(bot_text["select"], buttons=keys)
         return
     find_count = len(cur.execute("SELECT * FROM tickets").fetchall())
@@ -7235,12 +7047,7 @@ async def close_ticket_handler(event):
         bot_text = config.TEXT
     is_admin = check_admin(user_id)
     if is_admin is False:
-        keys = [
-            [Button.text(bot_text["archive"], resize=True)],
-            [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
-            [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
-             Button.text(bot_text["rules"])],
-        ]
+        keys = public_keys
         await event.reply(bot_text["select"], buttons=keys)
         return
     ticket_num = event.data.decode().split(":")[1]
@@ -7277,12 +7084,7 @@ async def del_channel(event):
         bot_text = config.TEXT
     is_admin = check_admin(user_id)
     if is_admin is False:
-        keys = [
-            [Button.text(bot_text["archive"], resize=True)],
-            [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
-            [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
-             Button.text(bot_text["rules"])],
-        ]
+        keys = public_keys
         await event.reply(bot_text["select"], buttons=keys)
         return
     channel_num = event.data.decode().split(":")[1]
@@ -7303,12 +7105,7 @@ async def senior_channel(event):
         bot_text = config.TEXT
     is_admin = check_admin(user_id)
     if is_admin is False:
-        keys = [
-            [Button.text(bot_text["archive"], resize=True)],
-            [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
-            [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
-             Button.text(bot_text["rules"])],
-        ]
+        keys = public_keys
         await event.reply(bot_text["select"], buttons=keys)
         return
     channel_num = int(event.data.decode().split(":")[1])
@@ -7340,12 +7137,7 @@ async def down_channel(event):
         bot_text = config.TEXT
     is_admin = check_admin(user_id)
     if is_admin is False:
-        keys = [
-            [Button.text(bot_text["archive"], resize=True)],
-            [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
-            [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
-             Button.text(bot_text["rules"])],
-        ]
+        keys = public_keys
         await event.reply(bot_text["select"], buttons=keys)
         return
     channel_id = event.data.decode().split(":")[1]
@@ -7395,12 +7187,7 @@ async def reset_idea(event):
         bot_text = config.TEXT
     is_admin = check_admin(user_id)
     if is_admin is False:
-        keys = [
-            [Button.text(bot_text["archive"], resize=True)],
-            [Button.text(bot_text["account"]), Button.text(bot_text["support"])],
-            [Button.text(bot_text["protection"]), Button.text(bot_text["search"]),
-             Button.text(bot_text["rules"])],
-        ]
+        keys = public_keys
         await event.reply(bot_text["select"], buttons=keys)
         return
     cur.execute("DELETE FROM idealization")
