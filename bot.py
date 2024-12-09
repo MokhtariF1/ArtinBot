@@ -1956,6 +1956,8 @@ async def pay(event):
             keys = [
                 [
                     Button.text(bot_text["rpm"]),
+                ],
+                [
                     Button.text(bot_text["top_speed"]),
                     Button.text(bot_text["map_viz"]),
                 ],
@@ -1973,9 +1975,10 @@ async def pay(event):
             keys = [
                 [
                     Button.text(bot_text["g_force"]),
+                ],
+                [
                     Button.text(bot_text["down_force"]),
                     Button.text(bot_text["lap_times"]),
-
                 ],
                 [
                     Button.text(bot_text["all"]),
@@ -1991,6 +1994,8 @@ async def pay(event):
             keys = [
                 [
                     Button.text(bot_text["strategy"]),
+                ],
+                [
                     Button.text(bot_text["start_reaction"]),
                     Button.text(bot_text["data_to_pole"]),
                 ],
@@ -2009,7 +2014,7 @@ async def pay(event):
             user_level = user_find[10]
             score_dict = {
                 "1": 1,
-                "2": 1,
+                "2": 0,
                 "3": 0,
             }
             score_get = score_dict[f"{user_level}"]
@@ -2193,13 +2198,6 @@ async def pay(event):
                                 cur.execute(f"UPDATE users SET score = {user_score} WHERE id = {user_id}")
                                 con.commit()
                                 await event.reply(bot_text["score_data"].format(coin=1, level=user_level_fa))
-                            elif user_level == "2":
-                                user_score = user_find[5]
-                                user_score -= 1
-                                cur.execute(f"UPDATE users SET score = {user_score} WHERE id = {user_id}")
-                                con.commit()
-                                await event.reply(bot_text["score_data"].format(coin=1, level=user_level_fa))
-                            
                             await conv.cancel_all()
         elif text == bot_text["top_speed"]:
             find_status = cur.execute(f"SELECT status FROM data_status WHERE data = '{event.message.message}'").fetchone()
@@ -2211,8 +2209,8 @@ async def pay(event):
             user_level = user_find[10]
             score_dict = {
                 "1": 2,
-                "2": 2,
-                "3": 1,
+                "2": 1,
+                "3": 0,
             }
             score_get = score_dict[f"{user_level}"]
             if user_scores - score_get < 0:
@@ -2418,12 +2416,6 @@ async def pay(event):
                                 cur.execute(f"UPDATE users SET score = {user_score} WHERE id = {user_id}")
                                 con.commit()
                                 await event.reply(bot_text["score_data"].format(coin=1, level=user_level_fa))
-                            elif user_level == "3":
-                                user_score = user_find[5]
-                                user_score -= 1
-                                cur.execute(f"UPDATE users SET score = {user_score} WHERE id = {user_id}")
-                                con.commit()
-                                await event.reply(bot_text["score_data"].format(coin=1, level=user_level_fa))
                             await conv.cancel_all()
         elif text == bot_text["lap_times"]:
             find_status = cur.execute(f"SELECT status FROM data_status WHERE data = '{event.message.message}'").fetchone()
@@ -2436,7 +2428,7 @@ async def pay(event):
             score_dict = {
                 "1": 2,
                 "2": 1,
-                "3": 0,
+                "3": 1,
             }
             score_get = score_dict[f"{user_level}"]
             if user_scores - score_get < 0:
@@ -2632,6 +2624,12 @@ async def pay(event):
                                 con.commit()
                                 await event.reply(bot_text["score_data"].format(coin=2, level=user_level_fa))
                             elif user_level == "2":
+                                user_score = user_find[5]
+                                user_score -= 1
+                                cur.execute(f"UPDATE users SET score = {user_score} WHERE id = {user_id}")
+                                con.commit()
+                                await event.reply(bot_text["score_data"].format(coin=1, level=user_level_fa))
+                            elif user_level == "3":
                                 user_score = user_find[5]
                                 user_score -= 1
                                 cur.execute(f"UPDATE users SET score = {user_score} WHERE id = {user_id}")
@@ -2968,7 +2966,7 @@ async def pay(event):
             score_dict = {
                 "1": 2,
                 "2": 1,
-                "3": 0,
+                "3": 1,
             }
             score_get = score_dict[f"{user_level}"]
             if user_scores - score_get < 0:
@@ -3213,6 +3211,12 @@ async def pay(event):
                                     cur.execute(f"UPDATE users SET score = {user_score} WHERE id = {user_id}")
                                     con.commit()
                                     await event.reply(bot_text["score_data"].format(coin=1, level=user_level_fa))
+                                elif user_level == "3":
+                                    user_score = user_find[5]
+                                    user_score -= 1
+                                    cur.execute(f"UPDATE users SET score = {user_score} WHERE id = {user_id}")
+                                    con.commit()
+                                    await event.reply(bot_text["score_data"].format(coin=1, level=user_level_fa))
                                 await conv.cancel_all()
         elif text == bot_text["map_break"]:
             find_status = cur.execute(f"SELECT status FROM data_status WHERE data = '{event.message.message}'").fetchone()
@@ -3224,7 +3228,7 @@ async def pay(event):
             user_level = user_find[10]
             score_dict = {
                 "1": 1,
-                "2": 1,
+                "2": 0,
                 "3": 0,
             }
             score_get = score_dict[f"{user_level}"]
@@ -3459,12 +3463,6 @@ async def pay(event):
                                 }
                                 user_level_fa = level_dict[f"{user_level}"]
                                 if user_level == "1":
-                                    user_score = user_find[5]
-                                    user_score -= 1
-                                    cur.execute(f"UPDATE users SET score = {user_score} WHERE id = {user_id}")
-                                    con.commit()
-                                    await event.reply(bot_text["score_data"].format(coin=1, level=user_level_fa))
-                                elif user_level == "2":
                                     user_score = user_find[5]
                                     user_score -= 1
                                     cur.execute(f"UPDATE users SET score = {user_score} WHERE id = {user_id}")
@@ -3888,7 +3886,7 @@ async def pay(event):
             score_dict = {
                 "1": 5,
                 "2": 3,
-                "3": 2,
+                "3": 3,
             }
             score_get = score_dict[f"{user_level}"]
             if user_scores - score_get < 0:
@@ -4189,7 +4187,7 @@ async def pay(event):
                                         await event.reply(bot_text["score_data"].format(coin=3, level=user_level_fa))
                                     elif user_level == "3":
                                         user_score = user_find[5]
-                                        user_score -= 2
+                                        user_score -= 3
                                         cur.execute(f"UPDATE users SET score = {user_score} WHERE id = {user_id}")
                                         con.commit()
                                         await event.reply(bot_text["score_data"].format(coin=2, level=user_level_fa))
@@ -4203,7 +4201,7 @@ async def pay(event):
             user_level = user_find[10]
             score_dict = {
                 "1": 1,
-                "2": 0,
+                "2": 1,
                 "3": 0,
             }
             score_get = score_dict[f"{user_level}"]
@@ -4386,7 +4384,13 @@ async def pay(event):
                                 cur.execute(f"UPDATE users SET score = {user_score} WHERE id = {user_id}")
                                 con.commit()
                                 await event.reply(bot_text["score_data"].format(coin=1, level=user_level_fa))
-                            
+                            if user_level == "2":
+                                user_score = user_find[5]
+                                user_score -= 1
+                                cur.execute(f"UPDATE users SET score = {user_score} WHERE id = {user_id}")
+                                con.commit()
+                                await event.reply(bot_text["score_data"].format(coin=1, level=user_level_fa))
+
                             await conv.cancel_all()
         elif text == bot_text["g_force"]:
             find_status = cur.execute(f"SELECT status FROM data_status WHERE data = '{event.message.message}'").fetchone()
@@ -5043,8 +5047,8 @@ async def pay(event):
             user_scores = user_find[5]
             user_level = user_find[10]
             score_dict = {
-                "1": 2,
-                "2": 1,
+                "1": 3,
+                "2": 2,
                 "3": 1,
             }
             score_get = score_dict[f"{user_level}"]
@@ -5276,13 +5280,13 @@ async def pay(event):
                                 user_level_fa = level_dict[f"{user_level}"]
                                 if user_level == "1":
                                     user_score = user_find[5]
-                                    user_score -= 2
+                                    user_score -= 3
                                     cur.execute(f"UPDATE users SET score = {user_score} WHERE id = {user_id}")
                                     con.commit()
                                     await event.reply(bot_text["score_data"].format(coin=2, level=user_level_fa))
                                 elif user_level == "2":
                                     user_score = user_find[5]
-                                    user_score -= 1
+                                    user_score -= 2
                                     cur.execute(f"UPDATE users SET score = {user_score} WHERE id = {user_id}")
                                     con.commit()
                                     await event.reply(bot_text["score_data"].format(coin=1, level=user_level_fa))
@@ -5302,8 +5306,8 @@ async def pay(event):
             user_scores = user_find[5]
             user_level = user_find[10]
             score_dict = {
-                "1": 2,
-                "2": 1,
+                "1": 3,
+                "2": 2,
                 "3": 1,
             }
             score_get = score_dict[f"{user_level}"]
@@ -5522,8 +5526,8 @@ async def pay(event):
             user_scores = user_find[5]
             user_level = user_find[10]
             score_dict = {
-                "1": 3,
-                "2": 2,
+                "1": 2,
+                "2": 1,
                 "3": 1,
             }
             score_get = score_dict[f"{user_level}"]
