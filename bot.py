@@ -6111,8 +6111,8 @@ async def pay(event):
                             "off": "خاموش",
                             "on": "روشن",
                         }
-                        print(find_status[0])
-                        fa_status = dict(fa_status_dic).get(str(find_status[0]))
+                        status = "on"
+                        fa_status = dict(fa_status_dic).get(status)
                         action_keys = [[Button.inline(bot_text["on"], b'on_data')] if fa_status == "خاموش" else [Button.inline(bot_text["off"], b'off_data')]]
                         action_keys.append([Button.inline(bot_text["cancel"], b'cancel')])
                         await conv_all.send_message(bot_text["data_status"].format(name=statistics_value, status=fa_status), buttons=action_keys)
