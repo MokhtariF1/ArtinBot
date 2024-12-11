@@ -2000,6 +2000,9 @@ async def pay(event):
                     Button.text(bot_text["data_to_pole"]),
                 ],
                 [
+                    Button.text(bot_text["degradation_tyre"])
+                ],
+                [
                     Button.text(bot_text["back"], resize=1)
                 ]
             ]
