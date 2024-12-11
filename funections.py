@@ -1647,3 +1647,145 @@ def get_time_until():
     if text == "":
         text = None
     return text
+async def deg_tyre(year, gp, event):
+    # Load the race session, for example, the 2023 Bahrain Grand Prix (Race)
+    race = ff1.get_session(year, gp, event)
+
+    # Load the session data
+    race.load()
+
+    # Get the laps of the race
+    laps = race.laps
+
+    # Get the weather data, including track temperature
+    weather_data = race.weather_data
+
+    # Prepare lists to store track temperature, tyre degradation, tyre compound, and lap numbers
+    track_temps_per_lap = []
+    lap_numbers = []
+    tyre_degradation = []
+    tyre_compound = []
+
+    # Loop through each lap and match it with weather data based on lap times
+    for lap in laps.iterlaps():
+        lap_number = lap[1]['LapNumber']  # Get the lap number
+        lap_start_time = lap[1]['LapStartTime']  # Get the start time of the lap
+        lap_time = lap[1]['LapTime']  # Get the duration of the lap
+
+        # Extract tyre compound and degradation (mock example)
+        compound = lap[1].get('Compound', None)  # Compound used in this lap (Soft, Medium, Hard, etc.)
+        if compound is None:
+            continue  # Skip laps without compound data
+
+        degradation = 100 - (lap_number * 0.5)  # Mock degradation, reduces with each lap
+
+        tyre_degradation.append(degradation)
+        tyre_compound.append(compound)
+
+        # Calculate the end time of the lap
+        if lap_time is not None:
+            lap_end_time = lap_start_time + lap_time
+        else:
+            lap_end_time = lap_start_time
+
+        # Filter weather data between the lap's start and end time
+        lap_weather = weather_data[(weather_data['Time'] >= lap_start_time) & (weather_data['Time'] <= lap_end_time)]
+
+        # If there is weather data for this lap, calculate average temperature
+        if not lap_weather.empty:
+            avg_temp = lap_weather['TrackTemp'].mean()
+            track_temps_per_lap.append(avg_temp)
+            lap_numbers.append(lap_number)
+        else:
+            # Append a NaN value if no temperature data is available for this lap
+            track_temps_per_lap.append(np.nan)
+            lap_numbers.append(lap_number)
+
+    # Convert the lists into numpy arrays for better performance
+    track_temps_per_lap = np.array(track_temps_per_lap)
+    lap_numbers = np.array(lap_numbers)
+    tyre_degradation = np.array(tyre_degradation)
+    tyre_compound = np.array(tyre_compound)
+
+    # Handle NaN values by removing them
+    valid_mask = ~np.isnan(track_temps_per_lap)
+    lap_numbers = lap_numbers[valid_mask]
+    track_temps_per_lap = track_temps_per_lap[valid_mask]
+    tyre_degradation = tyre_degradation[valid_mask]
+    tyre_compound = tyre_compound[valid_mask]
+
+    # Group data by temperature ranges (bins)
+    temp_bins = [10, 20, 30, 40, 50]  # Define temperature bins
+    temp_bin_labels = ['<20°C', '20-30°C', '30-40°C', '>40°C']  # Labels for bins
+
+    # Categorize the temperature data into bins
+    temp_categories = pd.cut(track_temps_per_lap, bins=temp_bins, labels=temp_bin_labels)
+
+    # Create a DataFrame to store all the data
+    df = pd.DataFrame({
+        'LapNumber': lap_numbers,
+        'Temperature': track_temps_per_lap,
+        'TyreDegradation': tyre_degradation,
+        'TyreCompound': tyre_compound,
+        'TempCategory': temp_categories
+    })
+
+    # Calculate the average tyre degradation per temperature range and compound
+    avg_degradation_per_temp_compound = df.groupby(['TempCategory', 'TyreCompound'])['TyreDegradation'].mean().unstack()
+
+    # Calculate overall average degradation per tyre compound
+    overall_avg_degradation = df.groupby('TyreCompound')['TyreDegradation'].mean()
+
+    # Calculate the overall average track temperature for the entire session
+    overall_avg_temp = np.mean(track_temps_per_lap)
+
+    # Plot the average tyre degradation for each temperature range and compound
+    fig, axes = plt.subplots(2, 2, figsize=(14, 10), sharex=True)
+
+    # Add watermark (larger)
+    fig.text(0.5, 0.5, 'F1 DATA IQ', fontsize=90, color='gray', alpha=0.3, ha='center', va='center', rotation=30)
+
+    # Plot for Soft tyres
+    df_soft = df[df['TyreCompound'] == 'SOFT']
+    axes[0, 0].scatter(df_soft['Temperature'], df_soft['TyreDegradation'], c='red', s=70, label='Soft')
+    axes[0, 0].axvline(df_soft['Temperature'].mean(), color='red', linestyle='--', label='Avg Temp')
+    axes[0, 0].set_title('Soft Tyre Degradation', fontsize=14)
+    axes[0, 0].set_ylabel('Degradation (%)', fontsize=12)
+    axes[0, 0].grid(alpha=0.3)
+
+    # Plot for Medium tyres
+    df_medium = df[df['TyreCompound'] == 'MEDIUM']
+    axes[0, 1].scatter(df_medium['Temperature'], df_medium['TyreDegradation'], c='orange', s=70, label='Medium')
+    axes[0, 1].axvline(df_medium['Temperature'].mean(), color='orange', linestyle='--', label='Avg Temp')
+    axes[0, 1].set_title('Medium Tyre Degradation', fontsize=14)
+    axes[0, 1].grid(alpha=0.3)
+
+    # Plot for Hard tyres
+    df_hard = df[df['TyreCompound'] == 'HARD']
+    axes[1, 0].scatter(df_hard['Temperature'], df_hard['TyreDegradation'], c='blue', s=70, label='Hard')
+    axes[1, 0].axvline(df_hard['Temperature'].mean(), color='blue', linestyle='--', label='Avg Temp')
+    axes[1, 0].set_title('Hard Tyre Degradation', fontsize=14)
+    axes[1, 0].set_xlabel('Temperature (°C)', fontsize=12)
+    axes[1, 0].set_ylabel('Degradation (%)', fontsize=12)
+    axes[1, 0].grid(alpha=0.3)
+
+    # Plot for all tyres combined
+    axes[1, 1].scatter(df['Temperature'], df['TyreDegradation'], c='purple', s=70)
+    axes[1, 1].set_title('Overall Tyre Degradation', fontsize=14)
+    axes[1, 1].set_xlabel('Temperature (°C)', fontsize=12)
+    axes[1, 1].grid(alpha=0.3)
+
+    # Add a legend for the lines and markers
+    axes[0, 0].legend()
+    axes[0, 1].legend()
+    axes[1, 0].legend()
+    axes[1, 1].legend()
+
+    # Add a textual description for the lines
+    fig.text(0.5, 0.02, "Legend: Red = Soft, Orange = Medium, Blue = Hard, Green = Avg Temp", ha='center', fontsize=12)
+
+    # Adjust layout and show the plot
+    plt.tight_layout()
+    name = f"{year}-{gp}-{event}-deg_tyre.png"
+    plt.savefig(name)
+    return name
