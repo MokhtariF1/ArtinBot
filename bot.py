@@ -6106,6 +6106,25 @@ async def pay(event):
                         else:
                             await event.reply(bot_text["canceled"])
                             return
+                    else:
+                        fa_status_dic = {
+                            "off": "خاموش",
+                            "on": "روشن",
+                        }
+                        print(find_status[0])
+                        fa_status = dict(fa_status_dic).get(str(find_status[0]))
+                        action_keys = [[Button.inline(bot_text["on"], b'on_data')] if fa_status == "خاموش" else [Button.inline(bot_text["off"], b'off_data')]]
+                        action_keys.append([Button.inline(bot_text["cancel"], b'cancel')])
+                        await conv_all.send_message(bot_text["data_status"].format(name=statistics_value, status=fa_status), buttons=action_keys)
+                        response = await conv_all.wait_event(events.CallbackQuery())
+                        if response.data == b'on_data':
+                            cur.execute(f"UPDATE data_status SET status = 'on' WHERE data = '{statistics_value}'")
+                            con.commit()
+                            await event.reply(bot_text["on_data_success"])
+                        elif response.data == b'off_data':
+                            cur.execute(f"UPDATE data_status SET status = 'off' WHERE data = '{statistics_value}'")
+                            con.commit()
+                            await event.reply(bot_text["off_data_success"])
         elif text == bot_text["add_grand"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
