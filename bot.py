@@ -5937,7 +5937,7 @@ async def pay(event):
                             image_dyre = f"{year}-{gp}-{session}-deg_tyre.png"
                             image_base_dyre = fr"{BASE_DIR}/{image_dyre}"
                             if os.path.exists(image_base_dyre) is False:
-                                deg_tyre_path = deg_tyre(year, gp, session)
+                                deg_tyre_path = await deg_tyre(year, gp, session)
                             await bot.delete_messages(user_id, loading.id)
                             await bot.send_file(user_id, caption="Lap Times", file=image_base_dyre)
                             await bot.send_file(user_id, caption="Lap Times", file=image_base_dyre, force_document=True)
