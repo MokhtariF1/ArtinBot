@@ -9,7 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.collections import LineCollection
 import seaborn as sns
-import time
+from matplotlib import cm
 import random
 def top_speed(year, gp, identifier):
     race = ff1.get_event(year, gp)
