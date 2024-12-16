@@ -6342,7 +6342,7 @@ async def pay(event):
                     ],
                     [
                         Button.inline(bot_text["degradation_tyre"], b'dt')
-                    ]
+                    ],
                     [
                         Button.inline(bot_text["cancel"], b'cancel')
                     ]
