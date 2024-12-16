@@ -2050,6 +2050,7 @@ async def pay(event):
                 [
                     Button.text(bot_text["degradation_tyre"]),
                     Button.text(bot_text["weather_data"]),
+                    Button.text(bot_text["tyre_performance"])
                 ],
                 [
                     Button.text(bot_text["back"], resize=1)
