@@ -6205,7 +6205,7 @@ async def pay(event):
                             BASE_DIR = Path(__file__).resolve().parent
                             if session == "Practice_1" or session == "Practice_2" or session == "Practice_3":
                                 session = sessions_convert[session]
-                            image_weather = f"{year}-{gp}-{session}-deg_tyre.png"
+                            image_weather = f"{year}-{gp}-{session}-weather_data.png"
                             image_base_weather = fr"{BASE_DIR}/{image_weather}"
                             if os.path.exists(image_base_weather) is False:
                                 weather_data_path = await weather_data(year, gp, session)
