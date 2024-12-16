@@ -9,7 +9,7 @@ bot_text = config.TEXT
 # cur.execute("DROP TABLE grand_time")
 # cur.execute("DROP TABLE drivers")
 # cur.execute("DROP TABLE driver_score")
-# cur.execute("DROP TABLE grand_time")
+cur.execute("DROP TABLE data_status")
 cur.execute("CREATE TABLE IF NOT EXISTS users(id,lang,lastd,join_time,sub_count,score,fantasy,protection,validity,score_date,level,time_zone, notifications)")
 cur.execute("CREATE TABLE IF NOT EXISTS pay(user_id,pay_id,order_id,type)")
 cur.execute("CREATE TABLE IF NOT EXISTS btn(tag,text)")
@@ -25,13 +25,13 @@ cur.execute("CREATE TABLE IF NOT EXISTS idealization(user_id)")
 cur.execute("CREATE TABLE IF NOT EXISTS statistics_all(data, user_id)")
 cur.execute("CREATE TABLE IF NOT EXISTS statistics_small(data, user_id)")
 cur.execute("CREATE TABLE IF NOT EXISTS data_status(data, status)")
-# l = [bot_text["rpm"],bot_text["overtake"],bot_text["map_viz"],bot_text["down_force"],bot_text["top_speed"],bot_text["start_reaction"],bot_text["all_info"],bot_text["driver"],bot_text["lap_times"],bot_text["map_break"],bot_text["all"],bot_text["strategy"],bot_text["data_to_pole"],bot_text["lap_times_table"],bot_text["brake_configurations"],bot_text["composite_perfomance"]]
-l = [bot_text["weather_data"]]
+l = [bot_text["rpm"],bot_text["overtake"],bot_text["map_viz"],bot_text["down_force"],bot_text["top_speed"],bot_text["start_reaction"],bot_text["all_info"],bot_text["driver"],bot_text["lap_times"],bot_text["map_break"],bot_text["all"],bot_text["strategy"],bot_text["data_to_pole"],bot_text["lap_times_table"],bot_text["brake_configurations"],bot_text["composite_perfomance"], bot_text["degradation_tyre"], bot_text["weather_data"]]
+# l = [bot_text["degradation_tyre"]]
 for data in l:
     cur.execute(f"INSERT INTO data_status VALUES ('{data}', 'on')")
     con.commit()
 # cur.execute("ALTER TABLE statistics_all ADD COLUMN user_id TEXT;")
-cur.execute("ALTER TABLE users ADD COLUMN notifications TEXT;")
+# cur.execute("ALTER TABLE users ADD COLUMN notifications TEXT;")
 # cur.execute(f"INSERT INTO admins VALUES (5415792594)")
 
 # cur.execute(f"INSERT INTO join_channel VALUES ('https://t.me/RacePlusIran', {True}, {2020})")
