@@ -1166,6 +1166,9 @@ async def pay(event):
                         Button.inline(bot_text["composite_perfomance"], b'cp'),
                     ],
                     [
+                        Button.inline(bot_text["degradation_tyre"], b'dt'),
+                    ],
+                    [
                         Button.inline(bot_text["cancel"], b'cancel')
                     ]
                 ]
@@ -1204,6 +1207,8 @@ async def pay(event):
                     statistics_value = bot_text["brake_configurations"]
                 elif response.data == b'cp':
                     statistics_value = bot_text["composite_perfomance"]
+                elif response.data == b'dt':
+                    statistics_value = bot_text["degradation_tyre"]
                 elif response.data == b'cancel':
                     return
                 else:
@@ -1249,6 +1254,9 @@ async def pay(event):
                         Button.inline(bot_text["composite_perfomance"], b'cp'),
                     ],
                     [
+                        Button.inline(bot_text["degradation_tyre"], b'dt'),
+                    ],
+                    [
                         Button.inline(bot_text["cancel"], b'cancel')
                     ]
                 ]
@@ -1287,6 +1295,8 @@ async def pay(event):
                     statistics_value = bot_text["brake_configurations"]
                 elif response.data == b'cp':
                     statistics_value = bot_text["composite_perfomance"]
+                elif response.data == b'dt':
+                    statistics_value = bot_text["degradation_tyre"]
                 elif response.data == b'cancel':
                     return
                 else:
