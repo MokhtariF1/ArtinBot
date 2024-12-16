@@ -10,7 +10,7 @@ bot_text = config.TEXT
 # cur.execute("DROP TABLE drivers")
 # cur.execute("DROP TABLE driver_score")
 # cur.execute("DROP TABLE grand_time")
-cur.execute("CREATE TABLE IF NOT EXISTS users(id,lang,lastd,join_time,sub_count,score,fantasy,protection,validity,score_date,level,time_zone)")
+cur.execute("CREATE TABLE IF NOT EXISTS users(id,lang,lastd,join_time,sub_count,score,fantasy,protection,validity,score_date,level,time_zone, notifications)")
 cur.execute("CREATE TABLE IF NOT EXISTS pay(user_id,pay_id,order_id,type)")
 cur.execute("CREATE TABLE IF NOT EXISTS btn(tag,text)")
 cur.execute("CREATE TABLE IF NOT EXISTS drivers(for_grand,name,driver_id,avg,avg_plus,avg_count)")
@@ -31,7 +31,7 @@ for data in l:
     cur.execute(f"INSERT INTO data_status VALUES ('{data}', 'on')")
     con.commit()
 # cur.execute("ALTER TABLE statistics_all ADD COLUMN user_id TEXT;")
-# cur.execute("ALTER TABLE users ADD COLUMN notifications TEXT;")
+cur.execute("ALTER TABLE users ADD COLUMN notifications TEXT;")
 # cur.execute(f"INSERT INTO admins VALUES (5415792594)")
 
 # cur.execute(f"INSERT INTO join_channel VALUES ('https://t.me/RacePlusIran', {True}, {2020})")
