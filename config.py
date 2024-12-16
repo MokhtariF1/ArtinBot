@@ -451,6 +451,7 @@ TEXT = {
     "forecast": "پیش بینی",
     "in_person_meeting": "دورهمی حضوری",
     "degradation_tyre": "Degradation Tyre",
+    "weather_data": "Weather Data",
 }
 
 EN_TEXT = {
@@ -788,4 +789,5 @@ Your points balance is {score}, to get more points, you can subcategory or buy c
     "forecast": "Forecast",
     "in_person_meeting": "In person meeting",
     "degradation_tyre": "Degradation Tyre",
+    "weather_data": "Weather Data",
 }

@@ -1789,3 +1789,178 @@ async def deg_tyre(year, gp, event):
     name = f"{year}-{gp}-{event}-deg_tyre.png"
     plt.savefig(name)
     return name
+def load_weather_data(session):
+    """Extract weather data from the session."""
+    weather_data = session.weather_data
+
+    # بررسی وجود ستون‌ها
+    print("Available Columns in Weather Data:", weather_data.columns)
+
+    if 'AirTemp' not in weather_data.columns or 'TrackTemp' not in weather_data.columns:
+        raise KeyError("Weather data is missing necessary columns like 'AirTemp' or 'TrackTemp'.")
+
+    return weather_data[['Time', 'AirTemp', 'TrackTemp', 'Humidity', 'Rainfall']]
+def calculate_weather_impact(session):
+    """Analyze the impact of weather conditions on driver performance."""
+    laps = session.laps
+    drivers = session.drivers
+    results = []
+
+    for driver in drivers:
+        driver_laps = laps.pick_driver(driver)
+        driver_name = session.get_driver(driver)['LastName']
+
+        # بررسی وجود ستون‌های دمای هوا و مسیر
+        if 'AirTemp' not in driver_laps.columns or 'TrackTemp' not in driver_laps.columns:
+            print(f"Skipping {driver_name} due to missing weather columns.")
+            continue
+
+        # میانگین دما و عملکرد راننده
+        avg_speed = driver_laps['SpeedST'].mean()
+        avg_air_temp = driver_laps['AirTemp'].mean()
+        avg_track_temp = driver_laps['TrackTemp'].mean()
+
+        # عملکرد در شرایط مختلف آب و هوایی
+        wet_conditions = driver_laps.loc[
+            driver_laps['Rainfall'] > 0] if 'Rainfall' in driver_laps.columns else pd.DataFrame()
+        dry_conditions = driver_laps.loc[
+            driver_laps['Rainfall'] == 0] if 'Rainfall' in driver_laps.columns else pd.DataFrame()
+
+        wet_avg_speed = wet_conditions['SpeedST'].mean() if not wet_conditions.empty else None
+        dry_avg_speed = dry_conditions['SpeedST'].mean() if not dry_conditions.empty else None
+
+        results.append({
+            'Driver': driver_name,
+            'Avg Air Temp (°C)': avg_air_temp,
+            'Avg Track Temp (°C)': avg_track_temp,
+            'Avg Speed (km/h)': avg_speed,
+            'Wet Speed (km/h)': wet_avg_speed,
+            'Dry Speed (km/h)': dry_avg_speed,
+        })
+
+    return pd.DataFrame(results)
+def plot_weather_data(weather_data, year, gp, event):
+    """Plot weather data over the session."""
+    fig, ax1 = plt.subplots(figsize=(15, 7), facecolor='black')
+    ax1.set_facecolor('black')
+    ax1.set_title('Weather Conditions Over Time', color='white', fontsize=18)
+
+    ax1.plot(weather_data['Time'], weather_data['AirTemp'], label='Air Temperature (°C)', color='red', linewidth=2)
+    ax1.plot(weather_data['Time'], weather_data['TrackTemp'], label='Track Temperature (°C)', color='orange',
+             linewidth=2)
+    # اضافه کردن واترمارک
+    fig.text(0.5, 0.5, 'F1 DATA IQ', fontsize=70, color='white', ha='center', va='center', alpha=0.55)
+
+    ax2 = ax1.twinx()
+    if 'Humidity' in weather_data.columns:
+        ax2.plot(weather_data['Time'], weather_data['Humidity'], label='Humidity (%)', color='blue', linewidth=2,
+                 linestyle='--')
+    if 'Rainfall' in weather_data.columns:
+        ax2.plot(weather_data['Time'], weather_data['Rainfall'], label='Rainfall', color='cyan', linewidth=2,
+                 linestyle=':')
+
+    # تنظیمات محورها
+    ax1.set_xlabel('Time (hh:mm:ss)', color='white', fontsize=12)
+    ax1.set_ylabel('Temperature (°C)', color='white', fontsize=12)
+    ax2.set_ylabel('Humidity (%) / Rainfall', color='white', fontsize=12)
+    ax1.tick_params(axis='x', colors='white', rotation=45)
+    ax1.tick_params(axis='y', colors='white')
+    ax2.tick_params(axis='y', colors='white')
+
+    # اضافه کردن توضیحات
+    avg_air_temp = weather_data['AirTemp'].mean()
+    avg_track_temp = weather_data['TrackTemp'].mean()
+    ax1.text(
+        0.05, 0.95,
+        f'Avg Air Temp: {avg_air_temp:.1f} °C\nAvg Track Temp: {avg_track_temp:.1f} °C',
+        color='white', fontsize=10, transform=ax1.transAxes, ha='left', va='top',
+        bbox=dict(facecolor='black', alpha=0.8, edgecolor='white')
+    )
+
+    # Legend
+    lines, labels = ax1.get_legend_handles_labels()
+    lines2, labels2 = ax2.get_legend_handles_labels()
+    ax1.legend(lines + lines2, labels + labels2, loc='upper right', facecolor='white', edgecolor='white',
+               fontsize=10)
+
+    plt.tight_layout()
+    name = f"{year}-{gp}-{event}-weather_data.png"
+    plt.savefig(name)
+    return name
+def plot_weather_impact(weather_impact, year, gp, event):
+    """Plot the impact of weather conditions on drivers."""
+    fig, axs = plt.subplots(1, 3, figsize=(18, 6), facecolor='black')
+    fig.suptitle('Weather Impact on Driver Performance', color='white', fontsize=18)
+
+    # میانگین سرعت در دماهای مختلف
+    axs[0].scatter(weather_impact['Avg Air Temp (°C)'], weather_impact['Avg Speed (km/h)'], color='red',
+                   label='Avg Speed')
+    axs[0].set_title('Avg Speed vs Air Temp', color='white', fontsize=12)
+    axs[0].set_xlabel('Air Temp (°C)', color='white', fontsize=10)
+    axs[0].set_ylabel('Avg Speed (km/h)', color='white', fontsize=10)
+    axs[0].tick_params(axis='x', colors='white')
+    axs[0].tick_params(axis='y', colors='white')
+    axs[0].text(
+        0.5, 0.85,
+        'This chart shows the relationship between air temperature and speed.',
+        color='white', fontsize=10, transform=axs[0].transAxes, ha='center',
+        bbox=dict(facecolor='black', alpha=0.8, edgecolor='white')
+    )
+
+    # سرعت در شرایط بارانی و خشک
+    axs[1].bar(weather_impact['Driver'], weather_impact['Wet Speed (km/h)'], color='blue', label='Wet Speed')
+    axs[1].bar(weather_impact['Driver'], weather_impact['Dry Speed (km/h)'], color='green', alpha=0.7,
+               label='Dry Speed')
+    axs[1].set_title('Speed in Wet vs Dry Conditions', color='white', fontsize=12)
+    axs[1].set_xlabel('Driver', color='white', fontsize=10)
+    axs[1].set_ylabel('Speed (km/h)', color='white', fontsize=10)
+    axs[1].tick_params(axis='x', colors='white', rotation=45)
+    axs[1].tick_params(axis='y', colors='white')
+    axs[1].text(
+        0.5, 0.85,
+        'This bar chart compares driver speeds in wet and dry conditions.',
+        color='white', fontsize=10, transform=axs[1].transAxes, ha='center',
+        bbox=dict(facecolor='black', alpha=0.8, edgecolor='white')
+    )
+
+    # دمای مسیر و سرعت
+    axs[2].scatter(weather_impact['Avg Track Temp (°C)'], weather_impact['Avg Speed (km/h)'], color='orange',
+                   label='Avg Speed')
+    axs[2].set_title('Avg Speed vs Track Temp', color='white', fontsize=12)
+    axs[2].set_xlabel('Track Temp (°C)', color='white', fontsize=10)
+    axs[2].set_ylabel('Avg Speed (km/h)', color='white', fontsize=10)
+    axs[2].tick_params(axis='x', colors='white')
+    axs[2].tick_params(axis='y', colors='white')
+    axs[2].text(
+        0.5, 0.85,
+        'This chart shows the relationship between track temperature and speed.',
+        color='white', fontsize=10, transform=axs[2].transAxes, ha='center',
+        bbox=dict(facecolor='black', alpha=0.8, edgecolor='white')
+    )
+
+    # Legend
+    for ax in axs:
+        ax.legend(facecolor='black', edgecolor='white', fontsize=8)
+
+    plt.tight_layout()
+    name = f"{year}-{gp}-{event}-weather_data.png"
+    plt.savefig(name)
+    return name
+async def weather_data(year, gp, event):
+    DEFAULT_YEAR = year
+    DEFAULT_GRAND_PRIX = gp
+    DEFAULT_SESSION_TYPE = event
+
+
+    session = ff1.get_session(DEFAULT_YEAR, DEFAULT_GRAND_PRIX, DEFAULT_SESSION_TYPE)
+    session.load()
+
+    # استخراج داده‌های آب و هوا
+    weather_data = load_weather_data(session)
+    weather_impact = calculate_weather_impact(session)
+
+    # رسم نمودارها
+    plot_weather_data(weather_data, year, gp, event)
+    plot_weather_impact(weather_impact, year, gp, event)
+    name = f"{year}-{gp}-{event}-weather_data.png"
+    return name
