@@ -1893,8 +1893,8 @@ def plot_weather_impact(weather_impact, year, gp, event):
     fig.suptitle('Weather Impact on Driver Performance', color='white', fontsize=18)
 
     # میانگین سرعت در دماهای مختلف
-    axs[0].scatter(weather_impact['Avg Air Temp (°C)'], weather_impact['Avg Speed (km/h)'], color='red',
-                   label='Avg Speed')
+    # axs[0].scatter(weather_impact['Avg Air Temp (°C)'], weather_impact['Avg Speed (km/h)'], color='red',
+    #                label='Avg Speed')
     axs[0].set_title('Avg Speed vs Air Temp', color='white', fontsize=12)
     axs[0].set_xlabel('Air Temp (°C)', color='white', fontsize=10)
     axs[0].set_ylabel('Avg Speed (km/h)', color='white', fontsize=10)
