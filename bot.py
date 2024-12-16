@@ -1173,7 +1173,7 @@ async def pay(event):
                         Button.inline(bot_text["weather_data"], b'wd'),
                     ],
                     [
-                        BUtton.inline(bot_text["tyre_performance"], b'tp')
+                        Button.inline(bot_text["tyre_performance"], b'tp')
                     ],
                     [
                         Button.inline(bot_text["cancel"], b'cancel')
@@ -6534,7 +6534,7 @@ async def pay(event):
                         ],
                         [
                             Button.inline(bot_text["tyre_performance"], b'tp')
-                        ]
+                        ],
                         [
                             Button.inline(bot_text["cancel"], b'cancel')
                         ]
