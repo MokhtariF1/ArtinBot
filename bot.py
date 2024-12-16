@@ -10,7 +10,6 @@ from telethon.tl.types import ChannelParticipantsSearch, InputChannel
 from telethon.tl.types import PeerUser, PeerChat, PeerChannel
 import config
 import sqlite3
-
 import funections
 from navlib import paginate
 from datetime import datetime, timedelta
@@ -248,17 +247,43 @@ def check_date_passed(input_date):
         return True
     else:
         return False
-public_keys = [
-        [Button.text(bot_text["archive"], resize=True)],
-        [Button.text(bot_text["reply"]), Button.text(bot_text["championship_calendar"])],
-        [Button.text(bot_text["rules"]), Button.text(bot_text["sports_meeting"]), Button.text(bot_text["account"])],
-]
-admin_public = [
-    [Button.text(bot_text["panel"])],
-    [Button.text(bot_text["archive"], resize=True)],
-    [Button.text(bot_text["reply"]), Button.text(bot_text["championship_calendar"])],
-    [Button.text(bot_text["rules"]), Button.text(bot_text["sports_meeting"]), Button.text(bot_text["account"])],
-]
+def get_public_keys(user_id):
+    user = cur.execute(f"SELECT * FROM users WHERE id = {user_id}").fetchone()
+    if user is None:
+        lang = None
+        return None
+    else:
+        lang = user[1]
+        bot_text = None
+        if lang == 1:
+            bot_text = config.EN_TEXT
+        else:
+            bot_text = config.TEXT
+        k = [
+            [Button.text(bot_text["archive"], resize=True)],
+            [Button.text(bot_text["reply"]), Button.text(bot_text["championship_calendar"])],
+            [Button.text(bot_text["rules"]), Button.text(bot_text["sports_meeting"]), Button.text(bot_text["account"])],
+        ]
+        return k
+def admin_public_keys(user_id):
+    user = cur.execute(f"SELECT * FROM users WHERE id = {user_id}").fetchone()
+    if user is None:
+        lang = None
+        return None
+    else:
+        lang = user[1]
+        bot_text = None
+        if lang == 1:
+            bot_text = config.EN_TEXT
+        else:
+            bot_text = config.TEXT
+        k = [
+                [Button.text(bot_text["panel"])],
+                [Button.text(bot_text["archive"], resize=True)],
+                [Button.text(bot_text["reply"]), Button.text(bot_text["championship_calendar"])],
+                [Button.text(bot_text["rules"]), Button.text(bot_text["sports_meeting"]), Button.text(bot_text["account"])],
+        ]
+        return k
 @bot.on(events.CallbackQuery())
 async def call_handler(event):
     user_id = event.sender_id
@@ -270,9 +295,9 @@ async def call_handler(event):
         bot_text = config.EN_TEXT
         en = bot_text["EN_SELECTED"]
         is_admin = check_admin(user_id)
-        keys = public_keys
+        keys = get_public_keys(user_id)
         if is_admin:
-            keys = admin_public
+            keys = admin_public_keys(user_id)
         await bot.delete_messages(user_id, msg_id)
         await bot.send_message(user_id, en, buttons=keys)
     elif event.data == b'lang:fa':
@@ -282,9 +307,9 @@ async def call_handler(event):
         bot_text = config.TEXT
         fa = bot_text["FA_SELECTED"]
         is_admin = check_admin(user_id)
-        keys = public_keys
+        keys = get_public_keys(user_id)
         if is_admin:
-            keys = admin_public
+            keys = admin_public_keys(user_id)
         await bot.delete_messages(user_id, msg_id)
         await bot.send_message(user_id, fa, buttons=keys)
 
@@ -435,9 +460,9 @@ async def pay(event):
             bot_text = config.TEXT
             ch = check_admin(user_id)
             if ch is False:
-                keys = public_keys
+                keys = get_public_keys(user_id)
             else:
-                keys = admin_public
+                keys = admin_public_keys(user_id)
             await event.reply(bot_text["FA_SELECTED"], buttons= keys)
         elif text == bot_text["en"]:
             cur.execute(f"UPDATE users SET lang = 1 WHERE id = {user_id}")
@@ -445,14 +470,14 @@ async def pay(event):
             bot_text = config.EN_TEXT
             ch = check_admin(user_id)
             if ch is False:
-                keys = public_keys
+                keys = get_public_keys(user_id)
             else:
-                keys = public_keys.insert(0, Button.text(bot_text["panel"]))
+                keys = admin_public_keys(user_id)
             await event.reply(bot_text["EN_SELECTED"], buttons= keys)
         elif text == bot_text["join_channel_btn"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
-                keys = public_keys
+                keys = get_public_keys(user_id)
                 await event.reply(bot_text["select"], buttons=keys)
             else:
                 keys = [
@@ -468,7 +493,7 @@ async def pay(event):
         elif text == bot_text["create_join_channel"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
-                keys = public_keys
+                keys = get_public_keys(user_id)
                 await event.reply(bot_text["select"], buttons=keys)
             else:
                 async with bot.conversation(user_id) as conv:
@@ -824,7 +849,7 @@ async def pay(event):
         elif text == bot_text["tickets"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
-                keys = public_keys
+                keys = get_public_keys(user_id)
                 await event.reply(bot_text["select"], buttons=keys)
             else:
                 find_count = len(cur.execute("SELECT * FROM tickets WHERE status='open'").fetchall())
@@ -1047,14 +1072,14 @@ async def pay(event):
                     await event.reply(select, buttons=keys)
                 else:
                     is_admin = cur.execute(f"SELECT * FROM admins WHERE _id = {user_id}").fetchone()
-                    keys = public_keys
+                    keys = get_public_keys(user_id)
                     if is_admin is not None:
-                        keys = admin_public
+                        keys = admin_public_keys(user_id)
                     await event.reply(bot_text["select"], buttons=keys)
         elif text == bot_text["panel"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
-                keys = public_keys
+                keys = get_public_keys(user_id)
                 await event.reply(bot_text["select"], buttons=keys)
             else:
                 pn_keys = [
@@ -1071,7 +1096,7 @@ async def pay(event):
         elif text == bot_text["management"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
-                keys = public_keys
+                keys = get_public_keys(user_id)
                 await event.reply(bot_text["select"], buttons=keys)
             else:
                 keys = [
@@ -1278,7 +1303,7 @@ async def pay(event):
         elif text == bot_text["data_management"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
-                keys = public_keys
+                keys = get_public_keys(user_id)
                 await event.reply(bot_text["select"], buttons=keys)
             else:
                 keys = [
@@ -1302,7 +1327,7 @@ async def pay(event):
         elif text == bot_text["grand_time"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
-                keys = public_keys
+                keys = get_public_keys(user_id)
                 await event.reply(bot_text["select"], buttons=keys)
             else:
                 keys = [
@@ -1318,7 +1343,7 @@ async def pay(event):
         elif text == bot_text["add_grand_time"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
-                keys = public_keys
+                keys = get_public_keys(user_id)
                 await event.reply(bot_text["select"], buttons=keys)
             else:
                 async with bot.conversation(user_id, timeout=1000) as conv:
@@ -1401,7 +1426,7 @@ async def pay(event):
         elif text == bot_text["coin_management"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
-                keys = public_keys
+                keys = get_public_keys(user_id)
                 await event.reply(bot_text["select"], buttons=keys)
             else:
                 keys = [
@@ -1420,7 +1445,7 @@ async def pay(event):
         elif text == bot_text["all_coin"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
-                keys = public_keys
+                keys = get_public_keys(user_id)
                 await event.reply(bot_text["select"], buttons=keys)
             else:
                 async with bot.conversation(user_id) as conv:
@@ -1456,7 +1481,7 @@ async def pay(event):
         elif text == bot_text["down_all_coin"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
-                keys = public_keys
+                keys = get_public_keys(user_id)
                 await event.reply(bot_text["select"], buttons=keys)
             else:
                 async with bot.conversation(user_id) as conv:
@@ -1490,7 +1515,7 @@ async def pay(event):
         elif text == bot_text["one_coin"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
-                keys = public_keys
+                keys = get_public_keys(user_id)
                 await event.reply(bot_text["select"], buttons=keys)
             else:
                 async with bot.conversation(user_id) as conv:
@@ -1570,7 +1595,7 @@ async def pay(event):
         elif text == bot_text["users"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
-                keys = public_keys
+                keys = get_public_keys(user_id)
                 await event.reply(bot_text["select"], buttons=keys)
             else:
                 us_keys = [
@@ -1593,7 +1618,7 @@ async def pay(event):
         elif text == bot_text["users_level"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
-                keys = public_keys
+                keys = get_public_keys(user_id)
                 await event.reply(bot_text["select"], buttons=keys)
             else:
                 async with bot.conversation(user_id) as conv:
@@ -1706,7 +1731,7 @@ async def pay(event):
         elif text == bot_text["new_users"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
-                keys = public_keys
+                keys = get_public_keys(user_id)
                 await event.reply(bot_text["select"], buttons=keys)
             else:
                 text = ""
@@ -1726,21 +1751,19 @@ async def pay(event):
         elif text == bot_text["robot_statistics"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
-                keys = public_keys
+                keys = get_public_keys(user_id)
                 await event.reply(bot_text["select"], buttons=keys)
             else:
                 users = cur.execute("SELECT * FROM users").fetchall()
                 await event.reply(bot_text["statistics_text"].format(users=len(users)))
-        elif text == bot_text["fia_info_management"]:
-            ch_admin = check_admin(user_id=user_id)
-            if ch_admin:
-                from telethon.utils import pack_bot_file_id
-                doc = InputMediaPhoto(5967749589576569761, -3710000705773719688, b'\x01\x00\x00\x1f<f\xe1UD0\xeaK\xf86\xd6\xedE\xf7\xf07ZKCh\x8f')
-                await bot.send_file(user_id, )
+        # elif text == bot_text["fia_info_management"]:
+        #     ch_admin = check_admin(user_id=user_id)
+        #     if ch_admin:
+        #         await bot.send_file(user_id, )
         elif text == bot_text["words"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
-                keys = public_keys
+                keys = get_public_keys(user_id)
                 await event.reply(bot_text["select"], buttons=keys)
             else:
                 keys = [
@@ -1837,7 +1860,7 @@ async def pay(event):
         elif text == bot_text["add_word"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
-                keys = public_keys
+                keys = get_public_keys(user_id)
                 await event.reply(bot_text["select"], buttons=keys)
             else:
                 async with bot.conversation(user_id, timeout=1000) as conv:
@@ -2007,6 +2030,7 @@ async def pay(event):
                 ]
             ]
             await event.reply(bot_text["select"], buttons=keys)
+        # All bot datas
         elif text == bot_text["overtake"]:
             find_status = cur.execute(f"SELECT status FROM data_status WHERE data = '{event.message.message}'").fetchone()
             if find_status[0] == 'off' or find_status[0] is None:
@@ -4193,7 +4217,7 @@ async def pay(event):
                                         user_score -= 3
                                         cur.execute(f"UPDATE users SET score = {user_score} WHERE id = {user_id}")
                                         con.commit()
-                                        await event.reply(bot_text["score_data"].format(coin=2, level=user_level_fa))
+                                        await event.reply(bot_text["score_data"].format(coin=3, level=user_level_fa))
         elif text == bot_text["strategy"]:
             find_status = cur.execute(f"SELECT status FROM data_status WHERE data = '{event.message.message}'").fetchone()
             if find_status[0] == 'off' or find_status[0] is None:
@@ -5038,12 +5062,17 @@ async def pay(event):
                         await bot.delete_messages(user_id, loading.id)
                         await bot.send_file(user_id, caption="Delta To Pole", file=image_base_pole)
                         await bot.send_file(user_id, caption="Delta To Pole", file=image_base_pole, force_document=True)
+                        user_level_fa = {
+                            "1": "برنزی",
+                            "2": "نقره ای",
+                            "3": "طلایی"
+                        }
                         if user_level == "1":
                             user_score = user_find[5]
                             user_score -= 1
                             cur.execute(f"UPDATE users SET score = {user_score} WHERE id = {user_id}")
                             con.commit()
-                            await event.reply(bot_text["score_data"].format(coin=2, level=user_level_fa))
+                            await event.reply(bot_text["score_data"].format(coin=1, level=user_level_fa))
                         config.all_statistics(event.message.message, user_id)
                         config.small_statistics(event.message.message, user_id)
                         await conv.cancel_all()
@@ -5292,13 +5321,13 @@ async def pay(event):
                                     user_score -= 3
                                     cur.execute(f"UPDATE users SET score = {user_score} WHERE id = {user_id}")
                                     con.commit()
-                                    await event.reply(bot_text["score_data"].format(coin=2, level=user_level_fa))
+                                    await event.reply(bot_text["score_data"].format(coin=3, level=user_level_fa))
                                 elif user_level == "2":
                                     user_score = user_find[5]
                                     user_score -= 2
                                     cur.execute(f"UPDATE users SET score = {user_score} WHERE id = {user_id}")
                                     con.commit()
-                                    await event.reply(bot_text["score_data"].format(coin=1, level=user_level_fa))
+                                    await event.reply(bot_text["score_data"].format(coin=2, level=user_level_fa))
                                 elif user_level == "3":
                                     user_score = user_find[5]
                                     user_score -= 1
@@ -5508,16 +5537,16 @@ async def pay(event):
                             user_level_fa = level_dict[f"{user_level}"]
                             if user_level == "1":
                                 user_score = user_find[5]
+                                user_score -= 3
+                                cur.execute(f"UPDATE users SET score = {user_score} WHERE id = {user_id}")
+                                con.commit()
+                                await event.reply(bot_text["score_data"].format(coin=3, level=user_level_fa))
+                            elif user_level == "2":
+                                user_score = user_find[5]
                                 user_score -= 2
                                 cur.execute(f"UPDATE users SET score = {user_score} WHERE id = {user_id}")
                                 con.commit()
                                 await event.reply(bot_text["score_data"].format(coin=2, level=user_level_fa))
-                            elif user_level == "2":
-                                user_score = user_find[5]
-                                user_score -= 1
-                                cur.execute(f"UPDATE users SET score = {user_score} WHERE id = {user_id}")
-                                con.commit()
-                                await event.reply(bot_text["score_data"].format(coin=1, level=user_level_fa))
                             elif user_level == "3":
                                 user_score = user_find[5]
                                 user_score -= 1
@@ -5728,13 +5757,13 @@ async def pay(event):
                             user_level_fa = level_dict[f"{user_level}"]
                             if user_level == "1":
                                 user_score = user_find[5]
-                                user_score -= 3
+                                user_score -= 2
                                 cur.execute(f"UPDATE users SET score = {user_score} WHERE id = {user_id}")
                                 con.commit()
                                 await event.reply(bot_text["score_data"].format(coin=2, level=user_level_fa))
                             elif user_level == "2":
                                 user_score = user_find[5]
-                                user_score -= 2
+                                user_score -= 1
                                 cur.execute(f"UPDATE users SET score = {user_score} WHERE id = {user_id}")
                                 con.commit()
                                 await event.reply(bot_text["score_data"].format(coin=1, level=user_level_fa))
@@ -5939,8 +5968,8 @@ async def pay(event):
                             if os.path.exists(image_base_dyre) is False:
                                 deg_tyre_path = await deg_tyre(year, gp, session)
                             await bot.delete_messages(user_id, loading.id)
-                            await bot.send_file(user_id, caption="Lap Times", file=image_base_dyre)
-                            await bot.send_file(user_id, caption="Lap Times", file=image_base_dyre, force_document=True)
+                            await bot.send_file(user_id, caption="Degradation Tyre", file=image_base_dyre)
+                            await bot.send_file(user_id, caption="Degradation Tyre", file=image_base_dyre, force_document=True)
                             config.all_statistics(event.message.message, user_id)
                             config.small_statistics(event.message.message, user_id)
                             user_find = cur.execute(f"SELECT * FROM users WHERE id = {user_id}").fetchone()
@@ -5956,25 +5985,25 @@ async def pay(event):
                                 user_score -= 3
                                 cur.execute(f"UPDATE users SET score = {user_score} WHERE id = {user_id}")
                                 con.commit()
-                                await event.reply(bot_text["score_data"].format(coin=2, level=user_level_fa))
+                                await event.reply(bot_text["score_data"].format(coin=3, level=user_level_fa))
                             elif user_level == "2":
                                 user_score = user_find[5]
                                 user_score -= 3
                                 cur.execute(f"UPDATE users SET score = {user_score} WHERE id = {user_id}")
                                 con.commit()
-                                await event.reply(bot_text["score_data"].format(coin=1, level=user_level_fa))
+                                await event.reply(bot_text["score_data"].format(coin=3, level=user_level_fa))
                             elif user_level == "3":
                                 user_score = user_find[5]
                                 user_score -= 2
                                 cur.execute(f"UPDATE users SET score = {user_score} WHERE id = {user_id}")
                                 con.commit()
-                                await event.reply(bot_text["score_data"].format(coin=1, level=user_level_fa))
+                                await event.reply(bot_text["score_data"].format(coin=2, level=user_level_fa))
 
                             await conv.cancel_all()
         elif text == bot_text["off_all"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
-                keys = public_keys
+                keys = get_public_keys(user_id)
                 await event.reply(bot_text["select"], buttons=keys)
             else:
                 async with bot.conversation(user_id, timeout=1000) as conv_all:
@@ -5997,7 +6026,7 @@ async def pay(event):
         elif text == bot_text["off_data"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
-                keys = public_keys
+                keys = get_public_keys(user_id)
                 await event.reply(bot_text["select"], buttons=keys)
             else:
                 async with bot.conversation(user_id, timeout=1000) as conv_all:
@@ -6128,7 +6157,7 @@ async def pay(event):
         elif text == bot_text["add_grand"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
-                keys = public_keys
+                keys = get_public_keys(user_id)
                 await event.reply(bot_text["select"], buttons=keys)
             else:
                 async with bot.conversation(user_id, timeout=1000) as conv:
@@ -6250,7 +6279,7 @@ async def pay(event):
         elif text == bot_text["show_grand"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
-                keys = public_keys
+                keys = get_public_keys(user_id)
                 await event.reply(bot_text["select"], buttons=keys)
             else:
                 find_count = len(cur.execute("SELECT * FROM grand").fetchall())
@@ -6437,7 +6466,7 @@ async def pay(event):
         elif text == bot_text["show_words"]:
             is_admin = check_admin(user_id)
             if is_admin is False:
-                keys = public_keys
+                keys = get_public_keys(user_id)
                 await event.reply(bot_text["select"], buttons=keys)
             else:
                 find_count = len(cur.execute("SELECT * FROM btn").fetchall())
@@ -6644,7 +6673,7 @@ async def eb(event):
     back = Button.text(bot_text["back"], resize=True)
     is_admin = check_admin(user_id)
     if is_admin is False:
-        keys = public_keys
+        keys = get_public_keys(user_id)
         await event.reply(bot_text["select"], buttons=keys)
         return
     word_tag = event.data.decode().split(":")[1]
@@ -6678,7 +6707,7 @@ async def del_btn(event):
     back = Button.text(bot_text["back"], resize=True)
     is_admin = check_admin(user_id)
     if is_admin is False:
-        keys = public_keys
+        keys = get_public_keys(user_id)
         await event.reply(bot_text["select"], buttons=keys)
         return
     btn_tag = event.data.decode().split(":")[1]
@@ -6703,7 +6732,7 @@ async def show_btn_handler(event):
     start_text = bot_text['select']
     ch_admin = check_admin(user_id)
     if ch_admin is False:
-        keys = public_keys
+        keys = get_public_keys(user_id)
         await event.reply(bot_text["select"], buttons=keys)
         return
     find_count = len(cur.execute("SELECT * FROM btn").fetchall())
@@ -6749,7 +6778,7 @@ async def show_grand_handler(event):
     start_text = bot_text['select']
     ch_admin = check_admin(user_id)
     if ch_admin is False:
-        keys = public_keys
+        keys = get_public_keys(user_id)
         await event.reply(bot_text["select"], buttons=keys)
         return
     find_count = len(cur.execute("SELECT * FROM grand ORDER BY num").fetchall())
@@ -6794,7 +6823,7 @@ async def show_join_handler(event):
     start_text = bot_text['select']
     ch_admin = check_admin(user_id)
     if ch_admin is False:
-        keys = public_keys
+        keys = get_public_keys(user_id)
         await event.reply(bot_text["select"], buttons=keys)
         return
     find_count = len(cur.execute("SELECT * FROM join_channel").fetchall())
@@ -6831,7 +6860,7 @@ async def show_time_handler(event):
     start_text = bot_text['select']
     ch_admin = check_admin(user_id)
     if ch_admin is False:
-        keys = public_keys
+        keys = get_public_keys(user_id)
         await event.reply(bot_text["select"], buttons=keys)
         return
     find_count = len(cur.execute("SELECT * FROM grand_time ORDER BY time_num").fetchall())
@@ -6876,7 +6905,7 @@ async def del_grand(event):
     back = Button.text(bot_text["back"], resize=True)
     is_admin = check_admin(user_id)
     if is_admin is False:
-        keys = public_keys
+        keys = get_public_keys(user_id)
         await event.reply(bot_text["select"], buttons=keys)
         return
     grand_num = event.data.decode().split(":")[1]
@@ -6899,7 +6928,7 @@ async def del_time(event):
     back = Button.text(bot_text["back"], resize=True)
     is_admin = check_admin(user_id)
     if is_admin is False:
-        keys = public_keys
+        keys = get_public_keys(user_id)
         await event.reply(bot_text["select"], buttons=keys)
         return
     grand_num = event.data.decode().split(":")[1]
@@ -6922,7 +6951,7 @@ async def close_grand_handler(event):
     back = Button.text(bot_text["back"], resize=True)
     is_admin = check_admin(user_id)
     if is_admin is False:
-        keys = public_keys
+        keys = get_public_keys(user_id)
         await event.reply(bot_text["select"], buttons=keys)
         return
     grand_num = event.data.decode().split(":")[1]
@@ -7278,7 +7307,7 @@ async def show_ticket_handler(event):
     start_text = bot_text['select']
     ch_admin = check_admin(user_id)
     if ch_admin is False:
-        keys = public_keys
+        keys = get_public_keys(user_id)
         await event.reply(bot_text["select"], buttons=keys)
         return
     find_count = len(cur.execute("SELECT * FROM tickets").fetchall())
@@ -7326,7 +7355,7 @@ async def close_ticket_handler(event):
         bot_text = config.TEXT
     is_admin = check_admin(user_id)
     if is_admin is False:
-        keys = public_keys
+        keys = get_public_keys(user_id)
         await event.reply(bot_text["select"], buttons=keys)
         return
     ticket_num = event.data.decode().split(":")[1]
@@ -7363,7 +7392,7 @@ async def del_channel(event):
         bot_text = config.TEXT
     is_admin = check_admin(user_id)
     if is_admin is False:
-        keys = public_keys
+        keys = get_public_keys(user_id)
         await event.reply(bot_text["select"], buttons=keys)
         return
     channel_num = event.data.decode().split(":")[1]
@@ -7384,7 +7413,7 @@ async def senior_channel(event):
         bot_text = config.TEXT
     is_admin = check_admin(user_id)
     if is_admin is False:
-        keys = public_keys
+        keys = get_public_keys(user_id)
         await event.reply(bot_text["select"], buttons=keys)
         return
     channel_num = int(event.data.decode().split(":")[1])
@@ -7416,7 +7445,7 @@ async def down_channel(event):
         bot_text = config.TEXT
     is_admin = check_admin(user_id)
     if is_admin is False:
-        keys = public_keys
+        keys = get_public_keys(user_id)
         await event.reply(bot_text["select"], buttons=keys)
         return
     channel_id = event.data.decode().split(":")[1]
@@ -7466,7 +7495,7 @@ async def reset_idea(event):
         bot_text = config.TEXT
     is_admin = check_admin(user_id)
     if is_admin is False:
-        keys = public_keys
+        keys = get_public_keys(user_id)
         await event.reply(bot_text["select"], buttons=keys)
         return
     cur.execute("DELETE FROM idealization")
