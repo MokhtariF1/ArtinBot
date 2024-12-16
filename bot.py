@@ -6019,6 +6019,7 @@ async def pay(event):
         elif text == bot_text["weather_data"]:
             find_status = cur.execute(
                 f"SELECT status FROM data_status WHERE data = '{event.message.message}'").fetchone()
+            print(find_status)
             if find_status[0] == 'off' or find_status[0] is None:
                 await event.reply(bot_text["data_is_off"])
                 return
