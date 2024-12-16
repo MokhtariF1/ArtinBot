@@ -1779,8 +1779,8 @@ async def pay(event):
                 keys = get_public_keys(user_id)
                 await event.reply(bot_text["select"], buttons=keys)
             else:
-                users = cur.execute("SELECT * FROM users").fetchall()
-                await event.reply(bot_text["statistics_text"].format(users=len(users)))
+                users = cur.execute('SELECT COUNT(*) FROM users').fetchone()[0]
+                await event.reply(bot_text["statistics_text"].format(users=users))
         # elif text == bot_text["fia_info_management"]:
         #     ch_admin = check_admin(user_id=user_id)
         #     if ch_admin:
