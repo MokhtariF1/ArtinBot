@@ -50,7 +50,7 @@ cur = con.cursor()
 manager = Manager()
 user_messages = {}
 bot_text = config.TEXT
-all_datas_list = [bot_text["rpm"],bot_text["overtake"],bot_text["map_viz"],bot_text["down_force"],bot_text["top_speed"],bot_text["start_reaction"],bot_text["all_info"],bot_text["driver"],bot_text["lap_times"],bot_text["map_break"],bot_text["all"],bot_text["strategy"],bot_text["data_to_pole"],bot_text["lap_times_table"],bot_text["brake_configurations"],bot_text["composite_perfomance"], bot_text["degradation_tyre"]]
+all_datas_list = [bot_text["rpm"],bot_text["overtake"],bot_text["map_viz"],bot_text["down_force"],bot_text["top_speed"],bot_text["start_reaction"],bot_text["all_info"],bot_text["driver"],bot_text["lap_times"],bot_text["map_break"],bot_text["all"],bot_text["strategy"],bot_text["data_to_pole"],bot_text["lap_times_table"],bot_text["brake_configurations"],bot_text["composite_perfomance"], bot_text["degradation_tyre"], bot_text["weather_data"]]
 driver_short_codes = {
     "Max_Verstappen": "VER",
     "Lewis_Hamilton": "HAM",
@@ -6292,6 +6292,7 @@ async def pay(event):
                         ],
                         [
                             Button.inline(bot_text["degradation_tyre"], b'dt'),
+                            Button.inline(bot_text["weather_data"], b'wd'),
                         ],
                         [
                             Button.inline(bot_text["cancel"], b'cancel')
@@ -6334,6 +6335,8 @@ async def pay(event):
                         statistics_value = bot_text["composite_perfomance"]
                     elif response.data == b'dt':
                         statistics_value = bot_text["degradation_tyre"]
+                    elif response.data == b'wd':
+                        statistics_value = bot_text["weather_data"]
                     elif response.data == b'cancel':
                         return
                     else:
