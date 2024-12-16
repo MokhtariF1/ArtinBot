@@ -25,7 +25,7 @@ cur.execute("CREATE TABLE IF NOT EXISTS idealization(user_id)")
 cur.execute("CREATE TABLE IF NOT EXISTS statistics_all(data, user_id)")
 cur.execute("CREATE TABLE IF NOT EXISTS statistics_small(data, user_id)")
 cur.execute("CREATE TABLE IF NOT EXISTS data_status(data, status)")
-l = [bot_text["rpm"],bot_text["overtake"],bot_text["map_viz"],bot_text["down_force"],bot_text["top_speed"],bot_text["start_reaction"],bot_text["all_info"],bot_text["driver"],bot_text["lap_times"],bot_text["map_break"],bot_text["all"],bot_text["strategy"],bot_text["data_to_pole"],bot_text["lap_times_table"],bot_text["brake_configurations"],bot_text["composite_perfomance"], bot_text["degradation_tyre"], bot_text["weather_data"]]
+l = [bot_text["rpm"],bot_text["overtake"],bot_text["map_viz"],bot_text["down_force"],bot_text["top_speed"],bot_text["start_reaction"],bot_text["all_info"],bot_text["driver"],bot_text["lap_times"],bot_text["map_break"],bot_text["all"],bot_text["strategy"],bot_text["data_to_pole"],bot_text["lap_times_table"],bot_text["brake_configurations"],bot_text["composite_perfomance"], bot_text["degradation_tyre"], bot_text["weather_data"], bot_text["tyre_performance"]]
 # l = [bot_text["degradation_tyre"]]
 for data in l:
     cur.execute(f"INSERT INTO data_status VALUES ('{data}', 'on')")
