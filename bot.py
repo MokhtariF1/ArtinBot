@@ -1,12 +1,9 @@
 import requests
 from random import randint
 import openpyxl
-from datetime import datetime
-import pandas as pd
 from telethon import TelegramClient, events, Button
 from telethon.errors.rpcerrorlist import UserIsBlockedError
-from telethon.tl.functions.channels import GetParticipantsRequest, GetFullChannelRequest
-from telethon.tl.types import ChannelParticipantsSearch, InputChannel
+from telethon.tl.functions.channels import GetFullChannelRequest
 from telethon.tl.types import PeerUser, PeerChat, PeerChannel
 import config
 import sqlite3
@@ -14,7 +11,6 @@ import funections
 from navlib import paginate
 from datetime import datetime, timedelta
 from funections import get_year_calender, top_speed, overtake, map_viz, speed_rpm_delta, map_brake, lap_times, down_force, start_reaction, all_data, strategy, all_info, driver_func_data, show_driver_lap_times, brake_configurations, composite_perfomance, deg_tyre
-from pathlib import Path
 from delta_to_pole import create_image
 import os
 import time
@@ -51,7 +47,7 @@ cur = con.cursor()
 manager = Manager()
 user_messages = {}
 bot_text = config.TEXT
-all_datas_list = [bot_text["rpm"],bot_text["overtake"],bot_text["map_viz"],bot_text["down_force"],bot_text["top_speed"],bot_text["start_reaction"],bot_text["all_info"],bot_text["driver"],bot_text["lap_times"],bot_text["map_break"],bot_text["all"],bot_text["strategy"],bot_text["data_to_pole"],bot_text["lap_times_table"],bot_text["brake_configurations"],bot_text["composite_perfomance"]]
+all_datas_list = [bot_text["rpm"],bot_text["overtake"],bot_text["map_viz"],bot_text["down_force"],bot_text["top_speed"],bot_text["start_reaction"],bot_text["all_info"],bot_text["driver"],bot_text["lap_times"],bot_text["map_break"],bot_text["all"],bot_text["strategy"],bot_text["data_to_pole"],bot_text["lap_times_table"],bot_text["brake_configurations"],bot_text["composite_perfomance"], bot_text["degradation_tyre"]]
 driver_short_codes = {
     "Max_Verstappen": "VER",
     "Lewis_Hamilton": "HAM",
@@ -6345,6 +6341,9 @@ async def pay(event):
                         Button.inline(bot_text["composite_perfomance"], b'cp'),
                     ],
                     [
+                        Button.inline(bot_text["degradation_tyre"], b'dt')
+                    ]
+                    [
                         Button.inline(bot_text["cancel"], b'cancel')
                     ]
                 ]
@@ -6383,6 +6382,8 @@ async def pay(event):
                     statistics_value = bot_text["brake_configurations"]
                 elif response.data == b'cp':
                     statistics_value = bot_text["composite_perfomance"]
+                elif response.data == b'dt':
+                    statistics_value = bot_text["degradation_tyre"]
                 elif response.data == b'cancel':
                     return
                 else:
@@ -7501,5 +7502,6 @@ async def reset_idea(event):
     cur.execute("DELETE FROM idealization")
     con.commit()
     await event.reply(bot_text["reset_success"])
-    
+
+
 bot.run_until_disconnected()
