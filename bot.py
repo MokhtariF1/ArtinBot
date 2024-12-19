@@ -2096,7 +2096,8 @@ async def pay(event):
                     Button.text(bot_text["ers_analysis"])
                 ],
                 [
-                    Button.text(bot_text["comparison_fastest_lap"], resize=1)
+                    Button.text(bot_text["comparison_fastest_lap"], resize=1),
+                    Button.text(bot_text["efficiency_breakdown"])
                 ],
                 [
                     Button.text(bot_text["fia"])
