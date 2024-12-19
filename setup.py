@@ -31,7 +31,7 @@ l = [bot_text["rpm"],bot_text["overtake"],bot_text["map_viz"],bot_text["down_for
      bot_text["all"],bot_text["strategy"],bot_text["data_to_pole"],bot_text["lap_times_table"],
      bot_text["brake_configurations"],bot_text["composite_perfomance"], bot_text["degradation_tyre"],
      bot_text["weather_data"], bot_text["tyre_performance"], bot_text["ers_analysis"],
-     bot_text["comparison_fastest_lap"], bot_text["efficiency_breakdown"]]
+     bot_text["comparison_fastest_lap"], bot_text["efficiency_breakdown"], bot_text["stress_index"]]
 # l = [bot_text["degradation_tyre"]]
 for data in l:
     cur.execute(f"INSERT INTO data_status VALUES ('{data}', 'on')")
