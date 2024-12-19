@@ -157,7 +157,8 @@ drivers_translate = {
     "Yuki_Tsunoda": "یوکی سونودا",
     "Nico_Hülkenberg": "نیکو هالکنبرگ",
     "Kevin_Magnussen": "کوین مگنوسن",
-    "Franco_Colapinto ": "فرانکو کولاپینتو"
+    "Franco_Colapinto ": "فرانکو کولاپینتو",
+    "Franco_Colapinto": 'فرانکو کولاپینتو',
 }
 
 country_tr = {
