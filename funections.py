@@ -2085,3 +2085,186 @@ async def tyre_performance(year, gp, event):
     plot_tire_performance(df_tires, DEFAULT_GRAND_PRIX, DEFAULT_YEAR, DEFAULT_SESSION_TYPE)
     name = f"{year}-{gp}-{event}-tyre_performance.png"
     return name
+async def ers_analysis(year, gp, event, driver_code):
+    race = ff1.get_session(year, gp, event)
+    race.load()
+
+    # Select a specific driver and lap
+    laps = race.laps.pick_driver(driver_code)
+
+    # Select the fastest lap for analysis
+    lap = laps.pick_fastest()
+
+    # Get telemetry data for the selected lap
+    telemetry = lap.get_telemetry()
+
+    # Extract telemetry data
+    distance = telemetry['Distance']  # Distance along the track
+    speed = telemetry['Speed']  # Speed of the car (km/h)
+    throttle = telemetry['Throttle']  # Throttle usage (%)
+    brake = telemetry['Brake']  # Brake usage (Boolean: 0 or 1)
+    rpm = telemetry['RPM']  # Engine RPM
+
+    # Calculate acceleration (change in speed)
+    acceleration = np.gradient(speed, distance)
+
+    # Estimate energy usage
+    # More throttle, high RPM, and low braking indicate higher energy usage
+    energy_usage = (throttle * (1 - brake) * rpm) / rpm.max()
+
+    # Normalize energy usage to percentage
+    energy_usage_percentage = (energy_usage / energy_usage.max()) * 100
+
+    # Calculate ERS performance index
+    # Acceleration combined with energy usage
+    ers_performance = (acceleration * energy_usage_percentage) / np.max(acceleration * energy_usage_percentage)
+
+    # Calculate averages
+    avg_energy_usage = np.mean(energy_usage_percentage)
+    avg_ers_performance = np.mean(ers_performance)
+
+    # Plotting
+    fig, ax1 = plt.subplots(figsize=(14, 8))
+
+    # Add watermark
+    fig.text(0.5, 0.5, 'F1 DATA IQ', fontsize=60, color='gray', alpha=0.2, ha='center', va='center', rotation=30)
+
+    # Plot energy usage percentage
+    ax1.plot(distance, energy_usage_percentage, label='ERS Usage (%)', color='green', linewidth=2)
+    ax1.axhline(avg_energy_usage, color='green', linestyle='--', alpha=0.7,
+                label=f'Avg ERS Usage: {avg_energy_usage:.2f}%')
+    ax1.set_xlabel('Distance Along Track (m)', fontsize=14)
+    ax1.set_ylabel('ERS Usage (%)', fontsize=14, color='green')
+    ax1.tick_params(axis='y', labelcolor='green')
+    ax1.set_title(f'Advanced ERS Analysis - {driver_code}', fontsize=16)
+
+    # Create a secondary axis for ERS performance index
+    ax2 = ax1.twinx()
+    ax2.plot(distance, ers_performance, label='ERS Performance Index', color='blue', linewidth=2, linestyle='--')
+    ax2.axhline(avg_ers_performance, color='blue', linestyle='--', alpha=0.7,
+                label=f'Avg ERS Performance: {avg_ers_performance:.2f}')
+    ax2.set_ylabel('ERS Performance Index', fontsize=14, color='blue')
+    ax2.tick_params(axis='y', labelcolor='blue')
+
+    # Legends and grid
+    fig.legend(loc='upper right', fontsize=12)
+    ax1.grid(alpha=0.3)
+
+    # Tight layout
+    plt.tight_layout()
+    name = f"{year}-{gp}-{event}-{driver_code}-ers_analysis.png"
+    plt.savefig(name)
+    return name
+async def comparison_fastest_lap(year, gp, event, driver_one, driver_two):
+    race = ff1.get_session(year, gp, event)
+    race.load()
+
+    # Select two drivers for comparison
+    driver_1 = driver_one  # Max Verstappen
+    driver_2 = driver_two  # Charles Leclerc
+
+    # Get laps for both drivers
+    laps_driver_1 = race.laps.pick_driver(driver_1)
+    laps_driver_2 = race.laps.pick_driver(driver_2)
+
+    # Get fastest lap for each driver
+    fastest_lap_1 = laps_driver_1.pick_fastest()
+    fastest_lap_2 = laps_driver_2.pick_fastest()
+
+    # Extract sector times
+    sectors_1 = [
+        fastest_lap_1['Sector1Time'].total_seconds(),
+        fastest_lap_1['Sector2Time'].total_seconds(),
+        fastest_lap_1['Sector3Time'].total_seconds()
+    ]
+    sectors_2 = [
+        fastest_lap_2['Sector1Time'].total_seconds(),
+        fastest_lap_2['Sector2Time'].total_seconds(),
+        fastest_lap_2['Sector3Time'].total_seconds()
+    ]
+
+    # Calculate total time for each driver in seconds
+    total_time_1_sec = sum(sectors_1)
+    total_time_2_sec = sum(sectors_2)
+
+    # Convert total times to minute:second.millisecond format
+    def format_total_time(seconds):
+        minutes = int(seconds // 60)
+        secs = seconds % 60
+        return f"{minutes}:{secs:06.3f}"
+
+    # Highlight fastest sector
+    fastest_sector_indices = [np.argmin([s1, s2]) for s1, s2 in zip(sectors_1, sectors_2)]
+
+    # Add percentage contribution of each sector
+    sector_percent_1 = [(s / total_time_1_sec) * 100 for s in sectors_1]
+    sector_percent_2 = [(s / total_time_2_sec) * 100 for s in sectors_2]
+
+    # Create a DataFrame for comparison
+    df = pd.DataFrame({
+        'Sector': ['Sector 1', 'Sector 2', 'Sector 3'],
+        f'{driver_1} Time': [f"{s:.3f}" for s in sectors_1],
+        f'{driver_2} Time': [f"{s:.3f}" for s in sectors_2],
+        'Difference (s)': [f"{s2 - s1:+.3f}" for s1, s2 in zip(sectors_1, sectors_2)],
+    })
+
+    # Plot sector comparison with summary
+    fig, ax = plt.subplots(figsize=(14, 8))
+
+    # Add watermark
+    fig.text(0.5, 0.5, 'F1 DATA IQ', fontsize=70, color='gray', alpha=0.2, ha='center', va='center', rotation=30)
+
+    # Bar plot for sector times
+    bar_width = 0.35
+    x = range(len(df))
+    ax.bar(x, sectors_1, width=bar_width, label=driver_1, color='blue', alpha=0.8)
+    ax.bar([i + bar_width for i in x], sectors_2, width=bar_width, label=driver_2, color='red', alpha=0.8)
+
+    # Highlight fastest sectors
+    for i, idx in enumerate(fastest_sector_indices):
+        ax.bar(x[i] + (bar_width * idx), sectors_1[i] if idx == 0 else sectors_2[i],
+               width=bar_width, color='green', alpha=0.6)
+
+    # Add differences as text above bars
+    for i in x:
+        diff = sectors_2[i] - sectors_1[i]
+        color = 'green' if diff > 0 else 'red'
+        ax.text(i + bar_width / 2, max(sectors_1[i], sectors_2[i]) + 0.1,
+                f"{diff:+.3f}s", ha='center', fontsize=10, color=color)
+
+    # Add summary inside the plot with improved style
+    summary_text = (
+        f"FASTEST LAP SUMMARY\n\n"
+        f"{driver_1}:\n"
+        f"  - Sector 1: {sectors_1[0]:.3f}s ({sector_percent_1[0]:.2f}%)\n"
+        f"  - Sector 2: {sectors_1[1]:.3f}s ({sector_percent_1[1]:.2f}%)\n"
+        f"  - Sector 3: {sectors_1[2]:.3f}s ({sector_percent_1[2]:.2f}%)\n"
+        f"  - Total: {format_total_time(total_time_1_sec)}\n\n"
+        f"{driver_2}:\n"
+        f"  - Sector 1: {sectors_2[0]:.3f}s ({sector_percent_2[0]:.2f}%)\n"
+        f"  - Sector 2: {sectors_2[1]:.3f}s ({sector_percent_2[1]:.2f}%)\n"
+        f"  - Sector 3: {sectors_2[2]:.3f}s ({sector_percent_2[2]:.2f}%)\n"
+        f"  - Total: {format_total_time(total_time_2_sec)}\n\n"
+        f"DIFFERENCE\n"
+        f"  - Total: {total_time_2_sec - total_time_1_sec:+.3f}s"
+    )
+    ax.text(1.05, 0.5, summary_text, transform=ax.transAxes, fontsize=12, verticalalignment='center',
+            bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=1', alpha=0.8))
+
+    # Customizations
+    ax.set_xlabel('Sectors', fontsize=14)
+    ax.set_ylabel('Time (s)', fontsize=14)
+    ax.set_title(f'Comparison of Fastest Lap Times: {driver_1} vs {driver_2}', fontsize=16)
+    ax.set_xticks([i + bar_width / 2 for i in range(len(df))])
+    ax.set_xticklabels(df['Sector'])
+    ax.legend()
+
+    # Add dynamic grid
+    ax.grid(which='both', alpha=0.3, linestyle='--')
+    ax.minorticks_on()
+
+    # Show plot
+    plt.tight_layout()
+    name = f"{year}-{gp}-{event}-{driver_one}-{driver_two}-comparison_fastest_lap.png"
+    plt.savefig(name)
+    return name

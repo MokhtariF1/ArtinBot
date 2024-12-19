@@ -24,7 +24,7 @@ PROXY_ADDRESS = "127.0.0.1"
 PROXY_PORT = 2080
 DB_NAME = "bot.db"
 CHANNEL_ID = "https://t.me/F1DataOfficial"
-ergast = False
+ergast = True
 try:
     CHANNEL_ID_PLUS = cur.execute(f"SELECT channel_id FROM join_channel WHERE senior = {True}").fetchone()[0]
 except TypeError:
@@ -453,6 +453,9 @@ TEXT = {
     "degradation_tyre": "Degradation Tyre",
     "weather_data": "Weather Data",
     "tyre_performance": "Tyre Performance",
+    "forth_page": "صفحه چهارم",
+    "ers_analysis": "ERS Analysis",
+    "comparison_fastest_lap": "Comparison Fastest Lap",
 }
 
 EN_TEXT = {
@@ -792,4 +795,7 @@ Your points balance is {score}, to get more points, you can subcategory or buy c
     "degradation_tyre": "Degradation Tyre",
     "weather_data": "Weather Data",
     "tyre_performance": "Tyre Performance",
+    "forth_page": "Forth Page",
+    "ers_analysis": "ERS Analysis",
+    "comparison_fastest_lap": "Comparison Fastest Lap",
 }
