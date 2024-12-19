@@ -159,6 +159,7 @@ drivers_translate = {
     "Kevin_Magnussen": "کوین مگنوسن",
     "Franco_Colapinto ": "فرانکو کولاپینتو",
     "Franco_Colapinto": 'فرانکو کولاپینتو',
+    "Jack_Doohan": "جک دوهان"
 }
 
 country_tr = {
