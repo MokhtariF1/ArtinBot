@@ -564,6 +564,9 @@ async def pay(event):
                     Button.text(bot_text["page_three"])
                 ],
                 [
+                    Button.text(bot_text["forth_page"])
+                ],
+                [
                     back
                 ]
             ]
@@ -2085,7 +2088,10 @@ async def pay(event):
                 ],
                 [
                     Button.text(bot_text["comparison_fastest_lap"], resize=1)
-                ]
+                ],
+                [
+                    Button.text(bot_text["fia"])
+                ],
                 [
                     Button.text(bot_text["back"])
                 ]
