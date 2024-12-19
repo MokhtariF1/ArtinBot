@@ -6750,7 +6750,7 @@ async def pay(event):
                                 image_base_ers = fr"{BASE_DIR}/{image_ers}"
                                 if os.path.exists(image_base_ers) is False:
                                     # print(year, gp_round, session, driver_code)
-                                    image_ers_path = ers_analysis(year, gp_round, session, driver_code)
+                                    image_ers_path = await ers_analysis(year, gp_round, session, driver_code)
                                 await bot.delete_messages(user_id, loading.id)
                                 await bot.send_file(user_id, caption="ERS Analysis", file=image_base_ers)
                                 await bot.send_file(user_id, caption="ERS Analysis", file=image_base_ers,
@@ -7088,7 +7088,7 @@ async def pay(event):
                                     image_com = f"{year}-{gp_round}-{session}-{driver_one_code}-{driver_two_code}-comparison_fastest_lap.png"
                                     image_base_com = fr"{BASE_DIR}/{image_com}"
                                     if os.path.exists(image_base_com) is False:
-                                        image_com_path = speed_rpm_delta(year, gp_round, session, driver_one_code,
+                                        image_com_path = await comparison_fastest_lap(year, gp_round, session, driver_one_code,
                                                                          driver_two_code)
                                     await bot.delete_messages(user_id, loading.id)
                                     await bot.send_file(user_id, caption="Comparison Fastest Lap", file=image_base_com)
