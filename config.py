@@ -456,6 +456,7 @@ TEXT = {
     "forth_page": "صفحه چهارم",
     "ers_analysis": "ERS Analysis",
     "comparison_fastest_lap": "Comparison Fastest Lap",
+    "efficiency_breakdown": "Efficiency Breakdown",
 }
 
 EN_TEXT = {
@@ -798,4 +799,5 @@ Your points balance is {score}, to get more points, you can subcategory or buy c
     "forth_page": "Forth Page",
     "ers_analysis": "ERS Analysis",
     "comparison_fastest_lap": "Comparison Fastest Lap",
+    "efficiency_breakdown": "Efficiency Breakdown",
 }

@@ -10,7 +10,7 @@ bot_text = config.TEXT
 # cur.execute("DROP TABLE drivers")
 # cur.execute("DROP TABLE driver_score")
 cur.execute("DROP TABLE data_status")
-cur.execute("DROP TABLE statistics_all")
+# cur.execute("DROP TABLE statistics_all")
 cur.execute("CREATE TABLE IF NOT EXISTS users(id,lang,lastd,join_time,sub_count,score,fantasy,protection,validity,score_date,level,time_zone, notifications)")
 cur.execute("CREATE TABLE IF NOT EXISTS pay(user_id,pay_id,order_id,type)")
 cur.execute("CREATE TABLE IF NOT EXISTS btn(tag,text)")
@@ -31,7 +31,7 @@ l = [bot_text["rpm"],bot_text["overtake"],bot_text["map_viz"],bot_text["down_for
      bot_text["all"],bot_text["strategy"],bot_text["data_to_pole"],bot_text["lap_times_table"],
      bot_text["brake_configurations"],bot_text["composite_perfomance"], bot_text["degradation_tyre"],
      bot_text["weather_data"], bot_text["tyre_performance"], bot_text["ers_analysis"],
-     bot_text["comparison_fastest_lap"]]
+     bot_text["comparison_fastest_lap"], bot_text["efficiency_breakdown"]]
 # l = [bot_text["degradation_tyre"]]
 for data in l:
     cur.execute(f"INSERT INTO data_status VALUES ('{data}', 'on')")

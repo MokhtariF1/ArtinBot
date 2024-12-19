@@ -2268,3 +2268,131 @@ async def comparison_fastest_lap(year, gp, event, driver_one, driver_two):
     name = f"{year}-{gp}-{event}-{driver_one}-{driver_two}-comparison_fastest_lap.png"
     plt.savefig(name)
     return name
+
+def calculate_driver_performance(session):
+    """Calculate performance metrics for all drivers."""
+    drivers = session.drivers
+    results = []
+
+    for driver in drivers:
+        driver_laps = session.laps.pick_driver(driver)
+        fastest_lap = driver_laps.pick_fastest()
+
+        if fastest_lap.empty or pd.isna(fastest_lap['DriverNumber']):
+            continue
+
+        try:
+            telemetry = fastest_lap.get_car_data().add_distance()
+        except KeyError:
+            continue
+
+        # Metrics calculation
+        speed_data = telemetry['Speed']
+        acceleration_data = speed_data.diff() / telemetry['Distance'].diff()
+        lap_time_seconds = fastest_lap['LapTime'].total_seconds()
+        brake_data = telemetry['Brake']
+        braking_duration = brake_data.sum() * (telemetry['Distance'].diff().mean() / speed_data.mean())
+        brake_efficiency = (braking_duration / lap_time_seconds) * 100
+        speed_factor = speed_data.mean()
+        acceleration_factor = acceleration_data[acceleration_data > 0].mean()
+        handling_threshold = speed_data.mean() * 0.7
+        handling_time = len(speed_data[speed_data < handling_threshold]) * (
+                telemetry['Distance'].diff().mean() / speed_data.mean())
+        composite_performance_index = (speed_factor * acceleration_factor) / (brake_efficiency + handling_time)
+
+        driver_name = session.get_driver(driver)['LastName'][:3].upper()
+        team_name = session.get_driver(driver)['TeamName']
+
+        results.append({
+            'Driver': driver_name,
+            'Composite Performance Index': composite_performance_index,
+            'Speed Factor': speed_factor,
+            'Acceleration Factor': acceleration_factor,
+            'Brake Efficiency (%)': brake_efficiency,
+            'Handling Time (s)': handling_time,
+            'Lap Time (s)': lap_time_seconds,
+            'Team': team_name
+        })
+
+    return pd.DataFrame(results)
+def plot_performance_charts(df_results, grand_prix, year, event):
+    """Plot multiple performance charts."""
+    fig, axs = plt.subplots(2, 1, figsize=(15, 10), facecolor='black')
+    fig.suptitle(f'{grand_prix} {year} Performance Analysis', color='white', fontsize=18, y=0.96)
+
+    # اضافه کردن واترمارک
+    fig.text(0.5, 0.5, 'F1 DATA IQ', fontsize=100, color='white', ha='center', va='center', alpha=0.4)
+
+    # Bar Chart: Composite Performance Index with Dynamic Coloring
+    ax1 = axs[0]
+    normalized_values = df_results['Composite Performance Index'] / df_results['Composite Performance Index'].max()
+    colors = cm.viridis(normalized_values)
+    bars = ax1.bar(df_results['Driver'], df_results['Composite Performance Index'], color=colors)
+    ax1.set_facecolor('black')
+    ax1.set_title('Composite Performance Index (Dynamic Coloring)', color='white', fontsize=12, pad=8)
+    ax1.set_xlabel('Driver', color='white', fontsize=10)
+    ax1.set_ylabel('Index Value', color='white', fontsize=10)
+    ax1.tick_params(axis='x', colors='white', rotation=45, labelsize=8)
+    ax1.tick_params(axis='y', colors='white', labelsize=8)
+
+    # Add Maximum, Minimum, and Mean Values
+    max_value = df_results['Composite Performance Index'].max()
+    min_value = df_results['Composite Performance Index'].min()
+    mean_value = df_results['Composite Performance Index'].mean()
+    ax1.axhline(mean_value, color='red', linestyle='--', linewidth=1.5, label=f'Mean: {mean_value:.2f}')
+    ax1.legend(facecolor='black', edgecolor='white', fontsize=8)
+
+    # Annotate max and min values
+    max_index = df_results['Composite Performance Index'].idxmax()
+    min_index = df_results['Composite Performance Index'].idxmin()
+    ax1.text(max_index, max_value + 0.5, f'Max: {max_value:.2f}', color='white', fontsize=8, ha='center')
+    ax1.text(min_index, min_value - 0.5, f'Min: {min_value:.2f}', color='white', fontsize=8, ha='center')
+
+    # Line Plot: Brake Efficiency and Handling Time with Legend
+    ax2 = axs[1]
+    line1 = ax2.plot(df_results['Driver'], df_results['Brake Efficiency (%)'], label='Brake Efficiency', color='cyan',
+                     marker='o', linewidth=1.5)
+    line2 = ax2.plot(df_results['Driver'], df_results['Handling Time (s)'], label='Handling Time', color='magenta',
+                     marker='o', linewidth=1.5)
+    ax2.set_facecolor('black')
+    ax2.set_title('Brake Efficiency vs Handling Time', color='white', fontsize=12, pad=8)
+    ax2.set_xlabel('Driver', color='white', fontsize=10)
+    ax2.set_ylabel('Values', color='white', fontsize=10)
+    ax2.grid(color='gray', linestyle='--', linewidth=0.5, alpha=0.7)
+
+    # تنظیم رنگ متن Legend به سفید
+    legend = ax2.legend(facecolor='black', edgecolor='white', fontsize=10, loc='upper left')
+    for text in legend.get_texts():
+        text.set_color('white')
+
+    ax2.tick_params(axis='x', colors='white', rotation=45, labelsize=8)
+    ax2.tick_params(axis='y', colors='white', labelsize=8)
+
+    plt.tight_layout(rect=[0, 0, 1, 0.94])
+    plt.savefig('performance_analysis_with_watermark.png', dpi=300, facecolor=fig.get_facecolor())
+    name = f"{year}-{grand_prix}-{event}-Efficiency_Breakdown.png"
+    plt.savefig(name)
+    return name
+async def efficiency_breakdown(year, gp, event):
+    team_colors = {
+        'Mercedes': '#00D2BE',
+        'Red Bull Racing': '#1E41FF',
+        'Ferrari': '#DC0000',
+        'McLaren': '#FF8700',
+        'Alpine': '#0090FF',
+        'AlphaTauri': '#4E7C9B',
+        'Aston Martin': '#006F62',
+        'Williams': '#005AFF',
+        'Alfa Romeo': '#900000',
+        'Haas F1 Team': '#FFFFFF'
+    }
+    DEFAULT_YEAR = year
+    DEFAULT_GRAND_PRIX = gp
+    DEFAULT_SESSION_TYPE = event
+    session = load_session_data(DEFAULT_YEAR, DEFAULT_GRAND_PRIX, DEFAULT_SESSION_TYPE)
+    df_results = calculate_driver_performance(session)
+    df_results = df_results.sort_values(by='Composite Performance Index', ascending=False)
+    # نمایش نمودارها
+    plot_performance_charts(df_results, DEFAULT_GRAND_PRIX, DEFAULT_YEAR, DEFAULT_SESSION_TYPE)
+    name = f"{year}-{gp}-{event}-Efficiency_Breakdown.png"
+    return name
