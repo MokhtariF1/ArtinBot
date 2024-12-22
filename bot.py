@@ -2074,14 +2074,14 @@ async def pay(event):
         elif text == bot_text["upgrade_level"]:
             keys = [
                 [
-                    Button.text(bot_text["now_plan"], resize=1),
+                    Button.text(bot_text["now_plan"], resize=True),
                     Button.text(bot_text["up_plan"])
                 ],
                 [
                     back
                 ]
             ]
-            await event.reply(bot_text["select"], keys=keys)
+            await event.reply(bot_text["select"], buttons=keys)
         elif text == bot_text["now_plan"]:
             find_user_level = cur.execute(f"SELECT level FROM users WHERE user_id={user_id}").fetchone()
             level_dict = {
