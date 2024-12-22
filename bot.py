@@ -2097,8 +2097,8 @@ async def pay(event):
             text = bot_text["now_plan_text"].format(level=user_level_fa, next_level=next_level)
             datas_text = ""
             for k, v in data_scores.items():
-                datas_text += f"{k}: {v[f'{find_user_level[0]}']}"
-            text += "\n\n" + datas_text
+                datas_text += f"**{k}**: ``{v[f'{find_user_level[0]}']}``"
+            text += "\n\n" + datas_text + "\n"
             await event.reply(text)
         elif text == bot_text["fia"]:
             keys = [
