@@ -1145,7 +1145,7 @@ async def pay(event):
                                 con.commit()
                             elif find_invites + 1 == 5:
                                 await bot.send_message(start_parameter, bot_text["five_sub_count"])
-                                cur.execute(f"UPDATE users SET sub_count = {user_score + 20} WHERE id = {start_parameter}")
+                                cur.execute(f"UPDATE users SET score = {user_score + 20} WHERE id = {start_parameter}")
                                 con.commit()
                             data = [
                                 (user_id, start_parameter)
@@ -1157,6 +1157,14 @@ async def pay(event):
                             cur.execute(f"UPDATE users SET score = {score_sub} WHERE id = {start_parameter}")
                             con.commit()
                             sub_score = sub_count + 1
+                            if sub_score >= 10:
+                                if find_user[10] == "1":
+                                    cur.execute(f"UPDATE users SET level = 2 WHERE id = {start_parameter}")
+                                    await bot.send_message(start_parameter, bot_text["level_two_up"])
+                            if sub_score >= 20:
+                                if find_user[10] == "2":
+                                    cur.execute(f"UPDATE users SET level = 2 WHERE id = {start_parameter}")
+                                    await bot.send_message(start_parameter, bot_text["level_three_up"])
                             print(sub_score)
                             cur.execute(f"UPDATE users SET sub_count = {sub_score} WHERE id = {start_parameter}")
                             con.commit()
@@ -1170,9 +1178,9 @@ async def pay(event):
                 current_score_time = score_time.strftime("%Y-%m-%d %H:%M:%S")
                 start_score_add = config.START_SCORE + config.DAILY_COIN
                 data = [
-                    (user_id, None, False, currentTime, 0, start_score_add, 0, 0, 0, current_score_time, 1, "iran", None),
+                    (user_id, None, False, currentTime, 0, start_score_add, 0, 0, 0, current_score_time, 1, "iran"),
                 ]
-                cur.executemany(f"INSERT INTO users VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)", data)
+                cur.executemany(f"INSERT INTO users VALUES (?,?,?,?,?,?,?,?,?,?,?,?)", data)
                 con.commit()
                 await event.reply(bot_text["start_score"])
                 await event.reply(bot_text["daily_coin"])

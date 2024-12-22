@@ -462,6 +462,8 @@ TEXT = {
     "up_plan": "ارتقا سطح",
     "now_plan_text": """\nکاربر عزیز، سطح حساب شما {level} است\nسطح بعدی: {next_level}\nهزینه دیتا ها در سطح کاربری شما به شرح زیر میباشید:
     """,
+    "level_two_up": "تبریک!\nتعداد زیر مجموعه شما به ۱۰ عدد رسید، سطح عضویت شما از برنزی به نقره ای ارتقا یافت!",
+    "level_three_up": "تبریک!\nتعداد زیر مجموعه شما به ۲۰ عدد رسید، سطح عضویت شما از نقره ای به طلایی ارتقا یافت!"
 }
 
 EN_TEXT = {
@@ -808,7 +810,7 @@ Your points balance is {score}, to get more points, you can subcategory or buy c
     "stress_index": "Stress Index",
     "now_plan": "Current membership level",
     "up_plan": "Level Up",
-    "now_plan_text": """Dear user, your account level is {level}
-    Next level: {next_level}
-    Data charges at your user level are as follows:""",
+    "now_plan_text": """Dear user, your account level is {level}\nNext level: {next_level}\nData charges at your user level are as follows:""",
+    "level_two_up": "Congratulations!\nYour number of sub-groups has reached 10, your membership level has been upgraded from bronze to silver!",
+    "level_three_up": "Congratulations!\nYour number of followers has reached 20, your membership level has been upgraded from Silver to Gold!"
 }
