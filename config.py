@@ -458,6 +458,13 @@ TEXT = {
     "comparison_fastest_lap": "Comparison Fastest Lap",
     "efficiency_breakdown": "Efficiency Breakdown",
     "stress_index": "Stress Index",
+    "now_plan": "سطح عضویت فعلی",
+    "up_plan": "ارتقا سطح",
+    "now_plan_text": """
+    کاربر عزیز، سطح حساب شما {level} است
+    سطح بعدی: {next_level}
+    هزینه دیتا ها در سطح کاربری شما به شرح زیر میباشید:
+    """,
 }
 
 EN_TEXT = {
@@ -802,4 +809,9 @@ Your points balance is {score}, to get more points, you can subcategory or buy c
     "comparison_fastest_lap": "Comparison Fastest Lap",
     "efficiency_breakdown": "Efficiency Breakdown",
     "stress_index": "Stress Index",
+    "now_plan": "Current membership level",
+    "up_plan": "Level Up",
+    "now_plan_text": """Dear user, your account level is {level}
+Next level: {next_level}
+Data charges at your user level are as follows:""",
 }

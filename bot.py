@@ -9,11 +9,7 @@ import config
 import sqlite3
 import funections
 from navlib import paginate
-from datetime import datetime, timedelta
 from funections import *
-# from funections import (get_year_calender, top_speed, overtake, map_viz, speed_rpm_delta, map_brake, lap_times
-# , down_force, start_reaction, all_data, strategy, all_info, driver_func_data, show_driver_lap_times,
-#                         brake_configurations, composite_perfomance, deg_tyre, weather_data)
 from delta_to_pole import create_image
 import os
 import time
@@ -56,6 +52,123 @@ all_datas_list = [bot_text["rpm"],bot_text["overtake"],bot_text["map_viz"],bot_t
      bot_text["brake_configurations"],bot_text["composite_perfomance"], bot_text["degradation_tyre"],
      bot_text["weather_data"], bot_text["tyre_performance"], bot_text["ers_analysis"],
      bot_text["comparison_fastest_lap"], bot_text["efficiency_breakdown"], bot_text["stress_index"]]
+data_scores = {
+     bot_text["rpm"]: {
+         "1": 3,
+         "2": 2,
+         "3": 1,
+     },
+     bot_text["overtake"]: {
+         "1": 1,
+         "2": 0,
+         "3": 0,
+     },
+     bot_text["map_viz"]: {
+         "1": 2,
+         "2": 1,
+         "3": 1,
+     },
+     bot_text["down_force"]: {
+         "1": 2,
+         "2": 1,
+         "3": 1,
+     },
+     bot_text["top_speed"]: {
+         "1": 2,
+         "2": 1,
+         "3": 0,
+     },
+     bot_text["start_reaction"]: {
+         "1": 2,
+         "2": 1,
+         "3": 1,
+     },
+     bot_text["all_info"]: {
+         "1": 0,
+         "2": 0,
+         "3": 0,
+     },
+     bot_text["driver"]: {
+         "1": 0,
+         "2": 0,
+         "3": 0,
+     },
+     bot_text["lap_times"]: {
+         "1": 2,
+         "2": 1,
+         "3": 1,
+     },
+     bot_text["map_break"]: {
+         "1": 1,
+         "2": 0,
+         "3": 0,
+     },
+     bot_text["all"]: {
+         "1": 5,
+         "2": 3,
+         "3": 3,
+     },
+     bot_text["strategy"]: {
+         "1": 1,
+         "2": 1,
+         "3": 0,
+     },
+     bot_text["data_to_pole"]: {
+         "1": 1,
+         "2": 0,
+         "3": 0,
+     },
+     bot_text["lap_times_table"]: {
+         "1": 3,
+         "2": 2,
+         "3": 1,
+     },
+     bot_text["brake_configurations"]: {
+         "1": 3,
+         "2": 2,
+         "3": 1,
+     },
+     bot_text["composite_perfomance"]: {
+         "1": 2,
+         "2": 1,
+         "3": 1,
+     },
+     bot_text["degradation_tyre"]: {
+         "1": 3,
+         "2": 3,
+         "3": 2,
+     },
+     bot_text["weather_data"]: {
+         "1": 1,
+         "2": 0,
+         "3": 0,
+     },
+     bot_text["tyre_performance"]: {
+         "1": 3,
+         "2": 2,
+         "3": 1,
+     },
+     bot_text["ers_analysis"]: {
+         "1": 1,
+         "2": 1,
+         "3": 0,
+     },
+     bot_text["comparison_fastest_lap"]: {
+         "1": 1,
+         "2": 0,
+         "3": 0,
+     },
+     bot_text["efficiency_breakdown"]: {
+         "1": 2,
+         "2": 1,
+         "3": 1,
+     },
+     bot_text["stress_index"]: {
+         "1": 2,
+         "2": 2,
+         "3": 1,
+     }
+}
 driver_short_codes = {
     "Max_Verstappen": "VER",
     "Lewis_Hamilton": "HAM",
@@ -1958,6 +2071,35 @@ async def pay(event):
                             con.commit()
                             await conv.send_message(bot_text["saved"])
                             await conv.cancel_all()
+        elif text == bot_text["upgrade_level"]:
+            keys = [
+                [
+                    Button.text(bot_text["now_plan"], resize=1),
+                    Button.text(bot_text["up_plan"])
+                ],
+                [
+                    back
+                ]
+            ]
+            await event.reply(bot_text["select"], keys=keys)
+        elif text == bot_text["now_plan"]:
+            find_user_level = cur.execute(f"SELECT level FROM users WHERE user_id={user_id}").fetchone()
+            level_dict = {
+                "1": bot_text["level_one"],
+                "2": bot_text["level_two"],
+                "3": bot_text["level_three"],
+            }
+            user_level_fa = level_dict[f"{find_user_level[0]}"]
+            try:
+                next_level = level_dict[str(int(find_user_level[0]) + 1)]
+            except KeyError:
+                next_level = level_dict["3"]
+            text = bot_text["now_plan_text"].format(level=user_level_fa, next_level=next_level)
+            datas_text = ""
+            for k, v in data_scores.items():
+                datas_text += f"{k}: {v[f'{user_level_fa}']}"
+            text += "\n\n" + datas_text
+            await event.reply(text)
         elif text == bot_text["fia"]:
             keys = [
                 [
