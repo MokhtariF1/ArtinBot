@@ -2083,7 +2083,7 @@ async def pay(event):
             ]
             await event.reply(bot_text["select"], buttons=keys)
         elif text == bot_text["now_plan"]:
-            find_user_level = cur.execute(f"SELECT level FROM users WHERE user_id={user_id}").fetchone()
+            find_user_level = cur.execute(f"SELECT level FROM users WHERE id={user_id}").fetchone()
             level_dict = {
                 "1": bot_text["level_one"],
                 "2": bot_text["level_two"],
