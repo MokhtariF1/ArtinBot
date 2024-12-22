@@ -2083,7 +2083,6 @@ async def pay(event):
             keys = [
                 [
                     Button.text(bot_text["now_plan"], resize=True),
-                    Button.text(bot_text["up_plan"])
                 ],
                 [
                     back
