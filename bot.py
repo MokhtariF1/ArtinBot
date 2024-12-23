@@ -516,6 +516,29 @@ async def pay(event):
                 ],
             ]
             await event.reply(bot_text["select"], buttons=keys)
+        elif text == bot_text["delete_account"]:
+            keys = [
+                [
+                    Button.inline(bot_text["yes"], b'yes'),
+                    Button.inline(bot_text["no"], b'no')
+                ],
+                [
+                    Button.inline(bot_text["cancel"], b'cancel')
+                ]
+            ]
+            async with bot.conversation(user_id, timeout=200) as conv:
+                await conv.send_message("sure_delete", buttons=keys)
+                response = await conv.wait_event(events.CallbackQuery())
+                data = response.data
+                if data == b'yes':
+                    cur.execute(f"DELETE FROM users WHERE id = {user_id}")
+                    cur.execute(f"DELETE FROM invite WHERE user_id = {user_id}")
+                    con.commit()
+                    await conv.send_message(bot_text["account_deleted"])
+                    return
+                else:
+                    await conv.send_message(bot_text["canceled"])
+                    return
         elif text == bot_text["sports_meeting"]:
             keys = [
                 [
@@ -656,19 +679,6 @@ async def pay(event):
                     paginate_keys = paginate('show_join', 1, pages, ':')
                     await event.reply(bot_text["come_next"], buttons=paginate_keys)   
         elif text == bot_text["rules_show"]:
-            keys = [
-                [
-                    Button.text(bot_text["technical_rules"], resize=1),
-                    Button.text(bot_text["copy_right"])
-                ],
-                [
-                    Button.text(bot_text["back"])
-                ]
-            ]
-            await event.reply(bot_text["select"], buttons=keys)
-        elif text == bot_text["technical_rules"]:
-            await event.reply(bot_text["rules_text"])
-        elif text == bot_text["copy_right"]:
             await event.reply(bot_text["rules_text"])
         elif text == bot_text["archive"]:
             keys = [
@@ -2083,12 +2093,15 @@ async def pay(event):
             keys = [
                 [
                     Button.text(bot_text["now_plan"], resize=True),
+                    Button.text(bot_text["up_plan"], resize=True),
                 ],
                 [
                     back
                 ]
             ]
             await event.reply(bot_text["select"], buttons=keys)
+        elif text == bot_text["up_plan"]:
+            await event.reply(bot_text["soon"])
         elif text == bot_text["now_plan"]:
             find_user_level = cur.execute(f"SELECT level FROM users WHERE id={user_id}").fetchone()
             level_dict = {
