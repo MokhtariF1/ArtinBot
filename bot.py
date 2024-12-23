@@ -527,7 +527,7 @@ async def pay(event):
                 ]
             ]
             async with bot.conversation(user_id, timeout=200) as conv:
-                await conv.send_message("sure_delete", buttons=keys)
+                await conv.send_message(bot_text["sure_delete"], buttons=keys)
                 response = await conv.wait_event(events.CallbackQuery())
                 data = response.data
                 if data == b'yes':
