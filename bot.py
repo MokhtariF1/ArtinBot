@@ -581,29 +581,30 @@ async def pay(event):
                 a_tag = f'<a href="tg://user?id={user_id}">{full_name}</a>'
                 c_tag = f'<code>{num_id}</code>'
                 if lang == 1:
-                    # b_tag = "<b>📜 Your user information is as follows:</b>"
-                    text += "⁣👦🏻name: {name}\n"
-                            "🌐id: {username}\n" \
-                            "👤number id: {num_id}\n" \
-                            "🕰join date: {join_date}\n" \
-                            "🌟level: {user_level}\n" \
-                            "⭐️score count: {score}\n" \
-                            "💳validity: {validity}\n" \
-                            "💰sub collection count: {sub_count}\n" \
-                            "💵amount of support: {protection}\n" \
-                            "💎fantasy coins: {fantasy}\n" \
-                            "delete time: {delete_time}\n".format(num_id=c_tag, join_date=join_date,
-                                                                  sub_count=sub_count,
-                                                                  protection=protection, score=score,
-                                                                  fantasy=fantasy,
-                                                                  validity=validity, name=a_tag, username=username,
-                                                                  btag=b_tag,user_level=user_level,
-                                                                  delete_time=delete_time)
-
+                    b_tag = "<b>info</b>"
+                    text += "{btag}\n\n" \
+                                "⁣👦🏻name: {name}\n" \
+                                "🌐id: {username}\n" \
+                                "👤number id: {num_id}\n" \
+                                "🕰join date: {join_date}\n" \
+                                "🌟level: {user_level}\n" \
+                                "⭐️score count: {score}\n" \
+                                "💳validity: {validity}\n" \
+                                "💰sub collection count: {sub_count}\n" \
+                                "💵amount of support: {protection}\n" \
+                                "💎fantasy coins: {fantasy}\n" \
+                                "delete time: {delete_time}\n".format(num_id=c_tag, join_date=join_date,
+                                                                      sub_count=sub_count,
+                                                                      protection=protection, score=score,
+                                                                      fantasy=fantasy,
+                                                                      validity=validity, name=a_tag, username=username,
+                                                                      btag=b_tag,user_level=user_level,
+                                                                      delete_time=delete_time)
                     text += "\n" + "➖➖➖➖➖➖➖➖➖"
                 else:
-                    # b_tag = f''
-                    text +=     "⁣👦🏻نام: {name}\n"
+                    b_tag = f'<b>اطلاعات</b>'
+                    text += "{btag}\n\n" \
+                                "⁣👦🏻نام: {name}\n" \
                                 "🌐آیدی: {username}\n" \
                                 "👤آیدی عددی: {num_id}\n" \
                                 "🕰زمان عضویت: {join_date}\n" \
@@ -620,7 +621,6 @@ async def pay(event):
                                                                       validity=validity, name=a_tag, username=username,
                                                                       btag=b_tag,
                                                                       user_level=user_level, delete_time=delete_time)
-
                     text += "\n" + "➖➖➖➖➖➖➖➖➖"
             await bot.send_message(user_id, text, parse_mode="html")
         elif text == bot_text["sports_meeting"]:
