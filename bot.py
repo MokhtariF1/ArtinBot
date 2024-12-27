@@ -535,6 +535,8 @@ async def pay(event):
                     cur.execute(f"DELETE FROM users WHERE id = {user_id}")
                     cur.execute(f"DELETE FROM invite WHERE user_id = {user_id}")
                     con.commit()
+                    print(int(time.time()))
+                    print(find_user)
                     cur.execute(f"INSERT INTO users VALUES ({find_user[0]}, {find_user[1]}, {find_user[2]}, {find_user[3]}, {find_user[4]}, {find_user[5]}, {find_user[6]}, {find_user[7]}, {find_user[8]}, {find_user[9]}, {find_user[10]}, {find_user[11]}, {int(time.time())})")
                     con.commit()
                     await conv.send_message(bot_text["account_deleted"])
