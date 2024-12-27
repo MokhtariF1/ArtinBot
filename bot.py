@@ -574,12 +574,12 @@ async def pay(event):
                     user_level = bot_text["level_two"]
                 elif user_level == "3":
                     user_level = bot_text["level_three"]
-                tel_user = await bot.get_entity(user_id)
+                tel_user = await bot.get_entity(num_id)
                 first_name = tel_user.first_name
                 last_name = tel_user.last_name
                 username = tel_user.username if tel_user.username is not None else '❌'
                 full_name = first_name + last_name if last_name is not None else first_name
-                a_tag = f'<a href="tg://user?id={user_id}">{full_name}</a>'
+                a_tag = f'<a href="tg://user?id={num_id}">{full_name}</a>'
                 c_tag = f'<code>{num_id}</code>'
                 if lang == 1:
                     b_tag = "<b>info</b>"
