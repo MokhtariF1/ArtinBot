@@ -548,6 +548,7 @@ async def pay(event):
             text = ""
             delete_users = cur.execute("SELECT * FROM deleted_accounts").fetchall()
             for user in delete_users:
+                print(user)
                 num_id = user[0]
                 join_date = user[3]
                 sub_count = user[4]
