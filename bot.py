@@ -565,7 +565,8 @@ async def pay(event):
                     hour=dt_obj.hour,
                     minute=dt_obj.minute,
                     second=dt_obj.second,
-                ).__str__
+                )
+                delete_time = f"{delete_time.year}-{delete_time.month}-{delete_time.day} {delete_time.hour}:{delete_time.minute}:{delete_time.second}"
                 if user_level == "1":
                     user_level = bot_text["level_one"]
                 elif user_level == "2":
@@ -621,7 +622,7 @@ async def pay(event):
                                                                       btag=b_tag,
                                                                       user_level=user_level, delete_time=delete_time)
                     text += "\n" + "➖➖➖➖➖➖➖➖➖"
-            await event.reply(text)
+            await event.reply(text, parsemode="html")
         elif text == bot_text["sports_meeting"]:
             keys = [
                 [
