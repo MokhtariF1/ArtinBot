@@ -537,7 +537,7 @@ async def pay(event):
                     con.commit()
                     print(int(time.time()))
                     print(find_user)
-                    cur.execute(f"INSERT INTO deleted_accounts VALUES ({find_user[0]}, {find_user[1]}, {find_user[2]}, '{find_user[3]}', {find_user[4]}, {find_user[5]}, {find_user[6]}, {find_user[7]}, {find_user[8]}, '{find_user[9]}', {find_user[10]}, '{find_user[11]}', {int(time.time())})")
+                    cur.execute(f"INSERT INTO deleted_accounts VALUES ({user_id}, {find_user[1]}, {find_user[2]}, '{find_user[3]}', {find_user[4]}, {find_user[5]}, {find_user[6]}, {find_user[7]}, {find_user[8]}, '{find_user[9]}', {find_user[10]}, '{find_user[11]}', {int(time.time())})")
                     con.commit()
                     await conv.send_message(bot_text["account_deleted"])
                     return
@@ -582,7 +582,7 @@ async def pay(event):
                 c_tag = f'<code>{num_id}</code>'
                 if lang == 1:
                     b_tag = "<b>info</b>"
-                    text += "{btag}\n\n" \
+                    text += "\n{btag}\n\n" \
                                 "⁣👦🏻name: {name}\n" \
                                 "🌐id: {username}\n" \
                                 "👤number id: {num_id}\n" \
@@ -603,7 +603,7 @@ async def pay(event):
                     text += "\n" + "➖➖➖➖➖➖➖➖➖"
                 else:
                     b_tag = f'<b>اطلاعات</b>'
-                    text += "{btag}\n\n" \
+                    text += "\n{btag}\n\n" \
                                 "⁣👦🏻نام: {name}\n" \
                                 "🌐آیدی: {username}\n" \
                                 "👤آیدی عددی: {num_id}\n" \
