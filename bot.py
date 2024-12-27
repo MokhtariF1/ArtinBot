@@ -599,6 +599,7 @@ async def pay(event):
                                                                       validity=validity, name=a_tag, username=username,
                                                                       btag=b_tag,user_level=user_level,
                                                                       delete_time=delete_time)
+                    text += "\n" + "➖➖➖➖➖➖➖➖➖"
                 else:
                     b_tag = f'<b>📜 اطلاعات کاربری شما به شرح ذیل می باشد:</b>'
                     text += "{btag}\n\n" \
@@ -619,6 +620,8 @@ async def pay(event):
                                                                       validity=validity, name=a_tag, username=username,
                                                                       btag=b_tag,
                                                                       user_level=user_level, delete_time=delete_time)
+                    text += "\n" + "➖➖➖➖➖➖➖➖➖"
+            await event.reply(text)
         elif text == bot_text["sports_meeting"]:
             keys = [
                 [
