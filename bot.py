@@ -581,9 +581,8 @@ async def pay(event):
                 a_tag = f'<a href="tg://user?id={user_id}">{full_name}</a>'
                 c_tag = f'<code>{num_id}</code>'
                 if lang == 1:
-                    b_tag = "<b>📜 Your user information is as follows:</b>"
-                    text += "{btag}\n\n" \
-                                "⁣👦🏻name: {name}\n" \
+                    # b_tag = "<b>📜 Your user information is as follows:</b>"
+                    text += "⁣👦🏻name: {name}\n"
                                 "🌐id: {username}\n" \
                                 "👤number id: {num_id}\n" \
                                 "🕰join date: {join_date}\n" \
@@ -600,11 +599,11 @@ async def pay(event):
                                                                       validity=validity, name=a_tag, username=username,
                                                                       btag=b_tag,user_level=user_level,
                                                                       delete_time=delete_time)
+
                     text += "\n" + "➖➖➖➖➖➖➖➖➖"
                 else:
-                    b_tag = f'<b>📜 اطلاعات کاربری شما به شرح ذیل می باشد:</b>'
-                    text += "{btag}\n\n" \
-                                "⁣👦🏻نام: {name}\n" \
+                    # b_tag = f''
+                    text +=     "⁣👦🏻نام: {name}\n"
                                 "🌐آیدی: {username}\n" \
                                 "👤آیدی عددی: {num_id}\n" \
                                 "🕰زمان عضویت: {join_date}\n" \
@@ -621,6 +620,7 @@ async def pay(event):
                                                                       validity=validity, name=a_tag, username=username,
                                                                       btag=b_tag,
                                                                       user_level=user_level, delete_time=delete_time)
+
                     text += "\n" + "➖➖➖➖➖➖➖➖➖"
             await bot.send_message(user_id, text, parse_mode="html")
         elif text == bot_text["sports_meeting"]:
