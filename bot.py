@@ -537,7 +537,7 @@ async def pay(event):
                     con.commit()
                     print(int(time.time()))
                     print(find_user)
-                    cur.execute(f"INSERT INTO users VALUES ({find_user[0]}, {find_user[1]}, {find_user[2]}, '{find_user[3]}', {find_user[4]}, {find_user[5]}, {find_user[6]}, {find_user[7]}, {find_user[8]}, '{find_user[9]}', {find_user[10]}, '{find_user[11]}', {int(time.time())})")
+                    cur.execute(f"INSERT INTO deleted_accounts VALUES ({find_user[0]}, {find_user[1]}, {find_user[2]}, '{find_user[3]}', {find_user[4]}, {find_user[5]}, {find_user[6]}, {find_user[7]}, {find_user[8]}, '{find_user[9]}', {find_user[10]}, '{find_user[11]}', {int(time.time())})")
                     con.commit()
                     await conv.send_message(bot_text["account_deleted"])
                     return
