@@ -609,7 +609,7 @@ async def pay(event):
                                 "💳میزان اعتبار: {validity}\n" \
                                 "💰تعداد زیر مجموعه: {sub_count}\n" \
                                 "💵مقدار حمایت: {protection}\n" \
-                                "💎تعداد سکه فانتزی: {fantasy}\n"
+                                "💎تعداد سکه فانتزی: {fantasy}\n" \
                                 "تاریخ حذف: {delete_time}".format(num_id=c_tag, join_date=join_date,
                                                                       sub_count=sub_count,
                                                                       protection=protection, score=score,
