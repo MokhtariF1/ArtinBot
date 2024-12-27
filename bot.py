@@ -583,22 +583,22 @@ async def pay(event):
                 if lang == 1:
                     # b_tag = "<b>📜 Your user information is as follows:</b>"
                     text += "⁣👦🏻name: {name}\n"
-                                "🌐id: {username}\n" \
-                                "👤number id: {num_id}\n" \
-                                "🕰join date: {join_date}\n" \
-                                "🌟level: {user_level}\n" \
-                                "⭐️score count: {score}\n" \
-                                "💳validity: {validity}\n" \
-                                "💰sub collection count: {sub_count}\n" \
-                                "💵amount of support: {protection}\n" \
-                                "💎fantasy coins: {fantasy}\n" \
-                                "delete time: {delete_time}\n".format(num_id=c_tag, join_date=join_date,
-                                                                      sub_count=sub_count,
-                                                                      protection=protection, score=score,
-                                                                      fantasy=fantasy,
-                                                                      validity=validity, name=a_tag, username=username,
-                                                                      btag=b_tag,user_level=user_level,
-                                                                      delete_time=delete_time)
+                            "🌐id: {username}\n" \
+                            "👤number id: {num_id}\n" \
+                            "🕰join date: {join_date}\n" \
+                            "🌟level: {user_level}\n" \
+                            "⭐️score count: {score}\n" \
+                            "💳validity: {validity}\n" \
+                            "💰sub collection count: {sub_count}\n" \
+                            "💵amount of support: {protection}\n" \
+                            "💎fantasy coins: {fantasy}\n" \
+                            "delete time: {delete_time}\n".format(num_id=c_tag, join_date=join_date,
+                                                                  sub_count=sub_count,
+                                                                  protection=protection, score=score,
+                                                                  fantasy=fantasy,
+                                                                  validity=validity, name=a_tag, username=username,
+                                                                  btag=b_tag,user_level=user_level,
+                                                                  delete_time=delete_time)
 
                     text += "\n" + "➖➖➖➖➖➖➖➖➖"
                 else:
