@@ -531,7 +531,7 @@ async def pay(event):
                 response = await conv.wait_event(events.CallbackQuery())
                 data = response.data
                 if data == b'yes':
-                    find_user = cur.execute(f"SELECT * FROM users WHERE id={user_id}").fetchall()
+                    find_user = cur.execute(f"SELECT * FROM users WHERE id={user_id}").fetchone()
                     cur.execute(f"DELETE FROM users WHERE id = {user_id}")
                     cur.execute(f"DELETE FROM invite WHERE user_id = {user_id}")
                     con.commit()
