@@ -465,7 +465,8 @@ TEXT = {
     "level_two_up": "تبریک!\nتعداد زیر مجموعه شما به ۱۰ عدد رسید، سطح عضویت شما از برنزی به نقره ای ارتقا یافت!",
     "level_three_up": "تبریک!\nتعداد زیر مجموعه شما به ۲۰ عدد رسید، سطح عضویت شما از نقره ای به طلایی ارتقا یافت!",
     "sure_delete": "آیا از حذف اکانت خود اطمینان دارید؟\nتمام اطلاعات اکانت شما از جمله تعداد سکه، زیر مجموعه ها، سطح کاربری و... حذف خواهد شد!",
-    "account_deleted": "اکانت شما با موفقیت حذف شد! جهت ایجاد مجدد اکانت \start را ارسال کنید"
+    "account_deleted": "اکانت شما با موفقیت حذف شد! جهت ایجاد مجدد اکانت \start را ارسال کنید",
+    "delete_list": "لیست حذف اکانت",
 }
 
 EN_TEXT = {
@@ -816,5 +817,6 @@ Your points balance is {score}, to get more points, you can subcategory or buy c
     "level_two_up": "Congratulations!\nYour number of sub-groups has reached 10, your membership level has been upgraded from bronze to silver!",
     "level_three_up": "Congratulations!\nYour number of followers has reached 20, your membership level has been upgraded from Silver to Gold!",
     "sure_delete": "Are you sure you want to delete your account?\nAll your account information, including the number of coins, subcategories, user level, etc., will be deleted!",
-    "account_deleted": "Your account has been successfully deleted! Submit \start to re-create your account."
+    "account_deleted": "Your account has been successfully deleted! Submit \start to re-create your account.",
+    "delete_list": "Account Delete List"
 }

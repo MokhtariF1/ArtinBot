@@ -16,7 +16,7 @@ import time
 from service import Manager
 import asyncio
 from pathlib import Path
-
+import jdatetime
 
 
 api_id = config.API_ID
@@ -531,14 +531,92 @@ async def pay(event):
                 response = await conv.wait_event(events.CallbackQuery())
                 data = response.data
                 if data == b'yes':
+                    find_user = cur.execute(f"SELECT * FROM users WHERE id={user_id}").fetchall()
                     cur.execute(f"DELETE FROM users WHERE id = {user_id}")
                     cur.execute(f"DELETE FROM invite WHERE user_id = {user_id}")
+                    con.commit()
+                    cur.execute(f"INSERT INTO users VALUES ({find_user[0]}, {find_user[1]}, {find_user[2]}, {find_user[3]}, {find_user[4]}, {find_user[5]}, {find_user[6]}, {find_user[7]}, {find_user[8]}, {find_user[9]}, {find_user[10]}, {find_user[11]}, {int(time.time())})")
                     con.commit()
                     await conv.send_message(bot_text["account_deleted"])
                     return
                 else:
                     await conv.send_message(bot_text["canceled"])
                     return
+        elif text == bot_text["delete_list"]:
+            text = ""
+            delete_users = cur.execute("SELECT * FROM deleted_accounts").fetchall()
+            for user in delete_users:
+                num_id = user[0]
+                join_date = user[3]
+                sub_count = user[4]
+                score = user[5]
+                protection = user[7]
+                fantasy = user[6]
+                validity = user[8]
+                user_level = user[10]
+                delete_time = user[12]
+                dt_obj = datetime.fromtimestamp(delete_time)
+                delete_time = jdatetime.datetime.fromgregorian(
+                    year=dt_obj.year,
+                    month=dt_obj.month,
+                    day=dt_obj.day,
+                    hour=dt_obj.hour,
+                    minute=dt_obj.minute,
+                    second=dt_obj.second,
+                ).__str__
+                if user_level == "1":
+                    user_level = bot_text["level_one"]
+                elif user_level == "2":
+                    user_level = bot_text["level_two"]
+                elif user_level == "3":
+                    user_level = bot_text["level_three"]
+                tel_user = await bot.get_entity(user_id)
+                first_name = tel_user.first_name
+                last_name = tel_user.last_name
+                username = tel_user.username if tel_user.username is not None else '❌'
+                full_name = first_name + last_name if last_name is not None else first_name
+                a_tag = f'<a href="tg://user?id={user_id}">{full_name}</a>'
+                c_tag = f'<code>{num_id}</code>'
+                if lang == 1:
+                    b_tag = "<b>📜 Your user information is as follows:</b>"
+                    text += "{btag}\n\n" \
+                                "⁣👦🏻name: {name}\n" \
+                                "🌐id: {username}\n" \
+                                "👤number id: {num_id}\n" \
+                                "🕰join date: {join_date}\n" \
+                                "🌟level: {user_level}\n" \
+                                "⭐️score count: {score}\n" \
+                                "💳validity: {validity}\n" \
+                                "💰sub collection count: {sub_count}\n" \
+                                "💵amount of support: {protection}\n" \
+                                "💎fantasy coins: {fantasy}\n" \
+                                "delete time: {delete_time}\n".format(num_id=c_tag, join_date=join_date,
+                                                                      sub_count=sub_count,
+                                                                      protection=protection, score=score,
+                                                                      fantasy=fantasy,
+                                                                      validity=validity, name=a_tag, username=username,
+                                                                      btag=b_tag,user_level=user_level,
+                                                                      delete_time=delete_time)
+                else:
+                    b_tag = f'<b>📜 اطلاعات کاربری شما به شرح ذیل می باشد:</b>'
+                    text += "{btag}\n\n" \
+                                "⁣👦🏻نام: {name}\n" \
+                                "🌐آیدی: {username}\n" \
+                                "👤آیدی عددی: {num_id}\n" \
+                                "🕰زمان عضویت: {join_date}\n" \
+                                "🌟سطح عضویت: {user_level}\n" \
+                                "⭐️تعداد امتیاز: {score}\n" \
+                                "💳میزان اعتبار: {validity}\n" \
+                                "💰تعداد زیر مجموعه: {sub_count}\n" \
+                                "💵مقدار حمایت: {protection}\n" \
+                                "💎تعداد سکه فانتزی: {fantasy}\n"
+                                "تاریخ حذف: {delete_time}".format(num_id=c_tag, join_date=join_date,
+                                                                      sub_count=sub_count,
+                                                                      protection=protection, score=score,
+                                                                      fantasy=fantasy,
+                                                                      validity=validity, name=a_tag, username=username,
+                                                                      btag=b_tag,
+                                                                      user_level=user_level, delete_time=delete_time)
         elif text == bot_text["sports_meeting"]:
             keys = [
                 [
@@ -1953,7 +2031,8 @@ async def pay(event):
                 keys = get_public_keys(user_id)
                 await event.reply(bot_text["select"], buttons=keys)
             else:
-                users = 111
+                # users = 111
+                users = len(cur.execute("SELECT * FROM users").fetchall())
                 await event.reply(bot_text["statistics_text"].format(users=users))
         # elif text == bot_text["fia_info_management"]:
         #     ch_admin = check_admin(user_id=user_id)
