@@ -1338,6 +1338,9 @@ async def pay(event):
                         Button.text(bot_text["one_send"])
                     ],
                     [
+                        Button.text(bot_text["delete_list"])
+                    ],
+                    [
                         Button.text(bot_text["fia_info_management"])
                     ],
                     [Button.text(bot_text['back'])],
