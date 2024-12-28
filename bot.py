@@ -9394,6 +9394,7 @@ async def reset_idea(event):
 @bot.on(events.CallbackQuery(data=b'delete_history'))
 async def delete_history(event):
     user_id = event.sender_id
+    lang = check_lang(user_id)
     text = ""
     delete_users = cur.execute(f"SELECT * FROM deleted_accounts WHERE id={user_id}").fetchall()
     for index, user in enumerate(delete_users):
