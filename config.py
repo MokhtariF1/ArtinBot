@@ -468,6 +468,7 @@ TEXT = {
     "account_deleted": "اکانت شما با موفقیت حذف شد! جهت ایجاد مجدد اکانت \start را ارسال کنید",
     "delete_list": "لیست حذف اکانت",
     "delete_history": "تاریخچه حذف اکانت",
+    "updating": "این قسمت در حال آپدیت می باشد. بزودی اطلاع رسانی خواهد شد.",
 }
 
 EN_TEXT = {
@@ -821,4 +822,5 @@ Your points balance is {score}, to get more points, you can subcategory or buy c
     "account_deleted": "Your account has been successfully deleted! Submit \start to re-create your account.",
     "delete_list": "Account Delete List",
     "delete_history": "Delete Account History",
+    "updating": "This section is being updated. Information will be provided soon.",
 }

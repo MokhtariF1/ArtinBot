@@ -625,24 +625,25 @@ async def pay(event):
                     text += "\n" + "➖➖➖➖➖➖➖➖➖"
             await bot.send_message(user_id, text, parse_mode="html")
         elif text == bot_text["sports_meeting"]:
-            keys = [
-                [
-                    Button.text(bot_text["scores"]),
-                ],
-                [
-                    Button.text(bot_text["fantasy"]),
-                    Button.text(bot_text["forecast"], resize=True),
-                ],
-                [
-                    Button.text(bot_text["show_table"]),
-                    Button.text(bot_text["set_notifications"]),
-                    Button.text(bot_text["in_person_meeting"]),
-                ],
-                [
-                    back
-                ]
-            ]
-            await event.reply(bot_text["select"], buttons=keys)
+            await event.reply(bot_text["updating"])
+            # keys = [
+            #     [
+            #         Button.text(bot_text["scores"]),
+            #     ],
+            #     [
+            #         Button.text(bot_text["fantasy"]),
+            #         Button.text(bot_text["forecast"], resize=True),
+            #     ],
+            #     [
+            #         Button.text(bot_text["show_table"]),
+            #         Button.text(bot_text["set_notifications"]),
+            #         Button.text(bot_text["in_person_meeting"]),
+            #     ],
+            #     [
+            #         back
+            #     ]
+            # ]
+            # await event.reply(bot_text["select"], buttons=keys)
         elif text == bot_text["account_setup"]:
             keys = [
                 [
@@ -785,7 +786,7 @@ async def pay(event):
         elif text == bot_text["fantasy"]:
             await event.reply(bot_text["coming_soon"])
         elif text == bot_text["reply"]:
-            await event.reply(bot_text["coming_soon"])
+            await event.reply(bot_text["updating"])
         elif text == bot_text["championship_calendar"]:
             buttons = [
                 [
