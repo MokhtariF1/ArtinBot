@@ -8345,7 +8345,7 @@ async def pay(event):
                     Button.inline(bot_text["delete_history"], b'delete_history')
                 ]
                 await bot.send_message(user_id, full_text,
-                                       parse_mode='html', buttons=keys)
+                                       parse_mode='html', buttons=buttons)
         elif text == bot_text["sub_collection"]:
             bot_id = config.BOT_ID
             invite_link = bot_id + "?start=" + str(user_id)
