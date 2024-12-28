@@ -8341,8 +8341,11 @@ async def pay(event):
                                                                       btag=b_tag,
                                                                       user_level=user_level)
                 full_text += "\n🆔 @F1DATAIQBOT"
+                buttons = [
+                    Button.inline(bot_text["delete_history"], b'delete_history')
+                ]
                 await bot.send_message(user_id, full_text,
-                                       parse_mode='html')
+                                       parse_mode='html', buttons=keys)
         elif text == bot_text["sub_collection"]:
             bot_id = config.BOT_ID
             invite_link = bot_id + "?start=" + str(user_id)
@@ -9388,4 +9391,86 @@ async def reset_idea(event):
     await event.reply(bot_text["reset_success"])
 
 
+@bot.on(events.CallbackQuery(data=b'delete_history'))
+async def delete_history(event):
+    user_id = event.sender_id
+    text = ""
+    delete_users = cur.execute(f"SELECT * FROM deleted_accounts WHERE id={user_id}").fetchall()
+    for index, user in enumerate(delete_users):
+        print(user)
+        num_id = user[0]
+        join_date = user[3]
+        sub_count = user[4]
+        score = user[5]
+        protection = user[7]
+        fantasy = user[6]
+        validity = user[8]
+        user_level = user[10]
+        delete_time = user[12]
+        dt_obj = datetime.fromtimestamp(delete_time)
+        delete_time = jdatetime.datetime.fromgregorian(
+            year=dt_obj.year,
+            month=dt_obj.month,
+            day=dt_obj.day,
+            hour=dt_obj.hour,
+            minute=dt_obj.minute,
+            second=dt_obj.second,
+        )
+        delete_time = f"{delete_time.year}-{delete_time.month}-{delete_time.day} {delete_time.hour}:{delete_time.minute}:{delete_time.second}"
+        if user_level == "1":
+            user_level = bot_text["level_one"]
+        elif user_level == "2":
+            user_level = bot_text["level_two"]
+        elif user_level == "3":
+            user_level = bot_text["level_three"]
+        tel_user = await bot.get_entity(num_id)
+        first_name = tel_user.first_name
+        last_name = tel_user.last_name
+        username = tel_user.username if tel_user.username is not None else '❌'
+        full_name = first_name + last_name if last_name is not None else first_name
+        a_tag = f'<a href="tg://user?id={num_id}">{full_name}</a>'
+        c_tag = f'<code>{num_id}</code>'
+        if lang == 1:
+            b_tag = f"<b>Delete Number {index + 1}</b>"
+            text += "\n{btag}\n\n" \
+                    "⁣👦🏻name: {name}\n" \
+                    "🌐id: {username}\n" \
+                    "👤number id: {num_id}\n" \
+                    "🕰join date: {join_date}\n" \
+                    "🌟level: {user_level}\n" \
+                    "⭐️score count: {score}\n" \
+                    "💳validity: {validity}\n" \
+                    "💰sub collection count: {sub_count}\n" \
+                    "💵amount of support: {protection}\n" \
+                    "💎fantasy coins: {fantasy}\n" \
+                    "delete time: {delete_time}\n".format(num_id=c_tag, join_date=join_date,
+                                                          sub_count=sub_count,
+                                                          protection=protection, score=score,
+                                                          fantasy=fantasy,
+                                                          validity=validity, name=a_tag, username=username,
+                                                          btag=b_tag, user_level=user_level,
+                                                          delete_time=delete_time)
+            text += "\n" + "➖➖➖➖➖➖➖➖➖"
+        else:
+            b_tag = f'<b>حذف شماره {index + 1}</b>'
+            text += "\n{btag}\n\n" \
+                    "⁣👦🏻نام: {name}\n" \
+                    "🌐آیدی: {username}\n" \
+                    "👤آیدی عددی: {num_id}\n" \
+                    "🕰زمان عضویت: {join_date}\n" \
+                    "🌟سطح عضویت: {user_level}\n" \
+                    "⭐️تعداد امتیاز: {score}\n" \
+                    "💳میزان اعتبار: {validity}\n" \
+                    "💰تعداد زیر مجموعه: {sub_count}\n" \
+                    "💵مقدار حمایت: {protection}\n" \
+                    "💎تعداد سکه فانتزی: {fantasy}\n" \
+                    "تاریخ حذف: {delete_time}".format(num_id=c_tag, join_date=join_date,
+                                                      sub_count=sub_count,
+                                                      protection=protection, score=score,
+                                                      fantasy=fantasy,
+                                                      validity=validity, name=a_tag, username=username,
+                                                      btag=b_tag,
+                                                      user_level=user_level, delete_time=delete_time)
+            text += "\n" + "➖➖➖➖➖➖➖➖➖"
+    await bot.send_message(user_id, text, parse_mode="html")
 bot.run_until_disconnected()
