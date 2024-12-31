@@ -469,6 +469,7 @@ TEXT = {
     "delete_list": "لیست حذف اکانت",
     "delete_history": "تاریخچه حذف اکانت",
     "updating": "این قسمت در حال آپدیت می باشد. بزودی اطلاع رسانی خواهد شد.",
+    "save_reply": "تنظیم بازپخش",
 }
 
 EN_TEXT = {
@@ -823,4 +824,5 @@ Your points balance is {score}, to get more points, you can subcategory or buy c
     "delete_list": "Account Delete List",
     "delete_history": "Delete Account History",
     "updating": "This section is being updated. Information will be provided soon.",
+    "save_reply": "Config Reply",
 }

@@ -8070,6 +8070,123 @@ async def pay(event):
                     print(ergast_requesting)
                     await bot.delete_messages(user_id, ergast_requesting.id)
                     await event.reply(bot_text["successfully"])
+        elif text == bot_text["save_reply"]:
+            async with bot.conversation(user_id) as conv:
+                # year_keys = [
+                #     [
+                #         Button.inline("2024", b'2024')
+                #     ],
+                #     [
+                #         Button.inline("2023", b'2023')
+                #     ],
+                #     [
+                #         Button.inline("2022", b'2022')
+                #     ],
+                #     [
+                #         Button.inline("2021", b'2021')
+                #     ],
+                #     [
+                #         Button.inline("2020", b'2020')
+                #     ],
+                #     [
+                #         Button.inline("2019", b'2019')
+                #     ],
+                #     [
+                #         Button.inline("2018", b'2018')
+                #     ],
+                #     [
+                #         Button.inline(bot_text["cancel"], b'cancel')
+                #     ]
+                # ]
+                year_keys = []
+                for i in range(2010, 2026):
+                    btn = [Button.inline(str(i), str.encode(str(i)))]
+                    year_keys.append(btn)
+                year_keys.append([Button.inline(bot_text["cancel"], b'cancel')])
+                ask_year = await conv.send_message(bot_text["select_year"], buttons=year_keys)
+                try:
+                    year_res = await conv.wait_event(events.CallbackQuery(), timeout=60)
+                    await bot.delete_messages(user_id, ask_year.id)
+                except TimeoutError:
+                    await conv.send_message(bot_text["timeout_error"])
+                    await bot.delete_messages(user_id, ask_year.id)
+                    return
+                year_data = year_res.data
+                if year_data == b'cancel':
+                    await conv.send_message(bot_text["canceled"])
+                    await bot.delete_messages(user_id, ask_year.id)
+                    await conv.cancel_all()
+                else:
+                    year = int(year_data)
+                    response = manager.get_event(year=year)["Country"]
+                    gp_keys = []
+                    for gp in response:
+                        if lang == 1:
+                            gp_text = gp["t"]
+                        else:
+                            gp_text = country_tr[gp["tr"]]
+                        gp_data = gp["t"].encode()
+                        key = Button.inline(gp_text, data=gp_data)
+                        gp_keys.append(key)
+                    result = []
+                    for i in range(0, len(gp_keys), 2):
+                        if i + 1 < len(gp_keys):
+                            result.append([gp_keys[i], gp_keys[i + 1]])
+                        else:
+                            result.append([gp_keys[i]])
+                    result.append([Button.inline(bot_text["cancel"], b'cancel')])
+                    ask_gp = await conv.send_message(bot_text["select_gp"], buttons=result)
+                    try:
+                        gp_res = await conv.wait_event(events.CallbackQuery(), timeout=60)
+                        await bot.delete_messages(user_id, ask_gp.id)
+                    except TimeoutError:
+                        await conv.send_message(bot_text["timeout_error"])
+                        await bot.delete_messages(user_id, ask_gp.id)
+                        return
+                    gp_data = gp_res.data
+                    if gp_data == b'cancel':
+                        await conv.send_message(bot_text["canceled"])
+                        await conv.cancel_all()
+                    else:
+                        gp = gp_data.decode()
+                        # url = f"https://f1datas.com/api/v1/fastf1/session?year={year}&country={gp}"
+                        sessions = manager.get_session(year=year, country=gp)["sessions"]
+                        # sessions = requests.get(url).json()["sessions"]
+                        type_tr = {
+                            "Practice_1": "تمرین اول",
+                            "Practice_2": "تمرین دوم",
+                            "Practice_3": "تمرین سوم",
+                            "Sprint": "اسپرینت",
+                            "Sprint_Shootout": "اسپرینت شوت آوت",
+                            "Sprint_Qualifying": "تعیین خط اسپرینت",
+                            "Qualifying": "تعیین خط",
+                            "Race": "مسابقه"
+                        }
+                        sessions_keys = []
+                        for session in sessions:
+                            if lang == 1:
+                                session_text = session
+                            else:
+                                session_text = type_tr[session]
+                            session_key = [
+                                Button.inline(session_text, session.encode()),
+                            ]
+                            sessions_keys.append(session_key)
+                        ask_event = await event.reply(bot_text["select_session"], buttons=sessions_keys)
+                        try:
+                            session_res = await conv.wait_event(events.CallbackQuery(), timeout=60)
+                            await bot.delete_messages(user_id, ask_event.id)
+                        except TimeoutError:
+                            await conv.send_message(bot_text["timeout_error"])
+                            await bot.delete_messages(user_id, ask_event.id)
+                            return
+                        event_data = session_res.data
+                        if event_data == b'cancel':
+                            await conv.send_message(bot_text["canceled"])
+                            await conv.cancel_all()
+                        else:
+                            session = event_data.decode()
+                            await event.reply(f"{year}-{gp}-{session}")
         # elif text == bot_text["add_grand"]:
         #     is_admin = check_admin(user_id)
         #     if is_admin is False:
