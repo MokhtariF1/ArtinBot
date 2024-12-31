@@ -1608,6 +1608,9 @@ async def pay(event):
                         Button.text(bot_text["off_all"]),
                     ],
                     [
+                        Button.text(bot_text["save_reply"])
+                    ],
+                    [
                         Button.text(bot_text["back"])
                     ]
                 ]
