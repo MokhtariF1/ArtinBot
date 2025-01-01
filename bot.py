@@ -3,6 +3,11 @@ from random import randint
 from telethon import TelegramClient, events, Button
 import config
 import sqlite3
+import openpyxl
+from telethon.tl.types import PeerUser, PeerChat, PeerChannel
+import asyncio
+from pathlib import Path
+import funections
 from navlib import paginate
 from funections import *
 import os
