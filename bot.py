@@ -1,20 +1,16 @@
 import requests
 from random import randint
-import openpyxl
 from telethon import TelegramClient, events, Button
-from telethon.tl.types import PeerUser, PeerChat, PeerChannel
 import config
 import sqlite3
-import funections
 from navlib import paginate
 from funections import *
 import os
 import time
 from service import Manager
-import asyncio
-from pathlib import Path
 import jdatetime
 from pymongo import MongoClient
+from bson import ObjectId
 
 
 api_id = config.API_ID
@@ -9727,4 +9723,29 @@ async def delete_history(event):
                                                       user_level=user_level, delete_time=delete_time)
             text += "\n" + "➖➖➖➖➖➖➖➖➖"
     await bot.send_message(user_id, text, parse_mode="html")
+@bot.on(events.CallbackQuery(pattern="reply:*"))
+async def reply(event):
+    # find reply in reply collection and then show user avalable qualitys
+    find_id = event.data.decode().split(":")[1]
+    find_reply = reply_collection.find_one({"_id": ObjectId(find_id)})
+    if find_reply is None:
+        await event.reply(bot_text["not_found"])
+        return
+    else:
+        qualitys = []
+        for k in find_reply["link"].keys():
+            qualitys.append([Button.inline(k, str.encode("get_video:" + find_id + ":" + k))])
+        await event.reply(bot_text["select_quality"], buttons=qualitys)
+@bot.on(events.CallbackQuery(pattern="get_video:*"))
+async def get_video(event):
+    # get video from link and send it to user
+    user_id = event.sender_id
+    find_id = event.data.decode().split(":")[1]
+    quality = event.data.decode().split(":")[2]
+    find_reply = reply_collection.find_one({"_id": ObjectId(find_id)})
+    if find_reply is None:
+        await event.reply(bot_text["not_found"])
+    else:
+        video_link = find_reply["link"][quality]
+        await bot.forward_messages(user_id, video_link, config.REPLY_CHANNEL)
 bot.run_until_disconnected()

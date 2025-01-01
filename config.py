@@ -35,6 +35,8 @@ START_SCORE = 10
 DAILY_COIN = 2
 SUB_COIN = 10
 DATA_MONEY = 2
+REPLY_CHANNEL = 2475588093
+
 
 async def join_check(user_id, cli):
     entity = await cli.get_entity(CHANNEL_ID)
