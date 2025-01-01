@@ -9729,7 +9729,4 @@ async def delete_history(event):
                                                       user_level=user_level, delete_time=delete_time)
             text += "\n" + "➖➖➖➖➖➖➖➖➖"
     await bot.send_message(user_id, text, parse_mode="html")
-@bot.on(events.CallbackQuery(pattern="reply:*"))
-async def reply(event):
-    video_id
 bot.run_until_disconnected()
