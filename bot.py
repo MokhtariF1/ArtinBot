@@ -8292,20 +8292,19 @@ async def pay(event):
                                             link = await conv.send_message(bot_text["enter_link"])
                                             get_link = await conv.get_response()
                                             get_link = str(get_link.raw_text).split("/")[-1]
-                                            if quality.decode() not in avalable_quality:
-                                                before_link = find_reply["link"]
-                                                before_link[quality.decode()] = get_link
-                                                # data = {
-                                                #     "year": year,
-                                                #     "gp": gp,
-                                                #     "event": session,
-                                                #     "driver": None,
-                                                #     "link": {
-                                                #         quality.decode(): get_link,
-                                                #     },
-                                                # }
-                                                reply_collection.update_one({"year": year, "gp": gp, "event": session, "driver": None}, {"$set": {"link": before_link}})
-                                                await event.reply(bot_text["saved"])
+                                            before_link = find_reply["link"]
+                                            before_link[quality.decode()] = get_link
+                                            # data = {
+                                            #     "year": year,
+                                            #     "gp": gp,
+                                            #     "event": session,
+                                            #     "driver": None,
+                                            #     "link": {
+                                            #         quality.decode(): get_link,
+                                            #     },
+                                            # }
+                                            reply_collection.update_one({"year": year, "gp": gp, "event": session, "driver": None}, {"$set": {"link": before_link}})
+                                            await event.reply(bot_text["saved"])
         elif text == bot_text["reply"]:
             # show saved datas in reply collection in inline buttons and send to user
             reply_count = reply_collection.count_documents({})
