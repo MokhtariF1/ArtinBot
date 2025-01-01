@@ -470,6 +470,10 @@ TEXT = {
     "delete_history": "تاریخچه حذف اکانت",
     "updating": "این قسمت در حال آپدیت می باشد. بزودی اطلاع رسانی خواهد شد.",
     "save_reply": "تنظیم بازپخش",
+    "select_type": "آیا میخواهید فقط برای این رویداد لینک ثبت کنید یا برای رانندگان این رویداد؟",
+    "event_drivers": "ثبت رانندگان",
+    "event_select": "ثبت رویداد",
+    "enter_link": "لینک ویدیو را وارد کنید:",
 }
 
 EN_TEXT = {
@@ -825,4 +829,8 @@ Your points balance is {score}, to get more points, you can subcategory or buy c
     "delete_history": "Delete Account History",
     "updating": "This section is being updated. Information will be provided soon.",
     "save_reply": "Config Reply",
+    "select_type": "Do you want to register a link for the event only or for event drivers?",
+    "event_drivers": "Event Drivers",
+    "event_select": "Save Event",
+    "enter_link": "Enter video link:",
 }

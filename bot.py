@@ -2,21 +2,19 @@ import requests
 from random import randint
 import openpyxl
 from telethon import TelegramClient, events, Button
-from telethon.errors.rpcerrorlist import UserIsBlockedError
-from telethon.tl.functions.channels import GetFullChannelRequest
 from telethon.tl.types import PeerUser, PeerChat, PeerChannel
 import config
 import sqlite3
 import funections
 from navlib import paginate
 from funections import *
-from delta_to_pole import create_image
 import os
 import time
 from service import Manager
 import asyncio
 from pathlib import Path
 import jdatetime
+from pymongo import MongoClient
 
 
 api_id = config.API_ID
@@ -43,6 +41,11 @@ else:
 # DB
 con = sqlite3.connect(config.DB_NAME)
 cur = con.cursor()
+# connect to mongodb
+client = MongoClient("127.0.0.1:27017")
+db = client["f1"]
+reply_collection = db["reply"]
+# ---------
 manager = Manager()
 user_messages = {}
 bot_text = config.TEXT
@@ -785,8 +788,8 @@ async def pay(event):
             await event.reply(bot_text["select"], buttons=keys)
         elif text == bot_text["fantasy"]:
             await event.reply(bot_text["coming_soon"])
-        elif text == bot_text["reply"]:
-            await event.reply(bot_text["updating"])
+        # elif text == bot_text["reply"]:
+        #     await event.reply(bot_text["updating"])
         elif text == bot_text["championship_calendar"]:
             buttons = [
                 [
@@ -8189,7 +8192,82 @@ async def pay(event):
                             await conv.cancel_all()
                         else:
                             session = event_data.decode()
-                            await event.reply(f"{year}-{gp}-{session}")
+                            if session == "Practice_1" or session == "Practice_2" or session == "Practice_3":
+                                # ask user in conversation for enter type he want register link
+                                type_buttons = [
+                                    [
+                                        Button.inline(bot_text["event_drivers"], data=b'drivers'),
+                                        Button.inline(bot_text["event_select"], data=b'select'),
+                                    ],
+                                    [
+                                        Button.inline(bot_text["cancel"], b'cancel')
+                                    ],
+                                ]
+                                ask_type = await conv.send_message(bot_text["select_type"], buttons=type_buttons)
+                                # handle user response
+                                user_response = await conv.wait_event(events.CallbackQuery())
+                                if user_response.data == b'drivers':
+                                    # to do for next day
+                                    await conv.send_message(bot_text["soon"])
+                                    return
+                                elif user_response.data == b'select':
+                                    # ask user for video quality with inline keys in conversation
+                                    quality_buttons = [
+                                        [
+                                            Button.inline("360p", data=b'360p'),
+                                        ],
+                                        [
+                                            Button.inline("480p", data=b'480p'),
+                                        ],
+                                        [
+                                            Button.inline("720p", data=b'720p'),
+                                        ],
+                                        [
+                                            Button.inline("1080p", data=b'1080p'),
+                                        ],
+                                        [
+                                            Button.inline("4k", data=b'4k'),
+                                        ],
+                                        [
+                                            Button.inline(bot_text["cancel"], data=b'cancel')
+                                        ]
+                                    ]
+                                    ask_quality = await conv.send_message(bot_text["select_quality"], buttons=quality_buttons)
+                                    # handle user response
+                                    user_response = await conv.wait_event(events.CallbackQuery())
+                                    quality = user_response.data
+                                    if quality == b'cancel':
+                                        await conv.send_message(bot_text["canceled"])
+                                        return
+                                    else:
+                                        #get link from user 
+                                        link = await conv.send_message(bot_text["enter_link"])
+                                        get_link = await conv.get_response()
+                                        get_link = str(get_link.raw_text).split("/")[-1]
+                                        data = {
+                                            "year": year,
+                                            "gp": gp,
+                                            "event": session,
+                                            "quality": quality.decode(),
+                                            "driver": None,
+                                            "link": get_link,
+                                        }
+                                        reply_collection.insert_one(data)
+                                        await event.reply(bot_text["saved"])
+        elif text == bot_text["reply"]:
+            # show saved datas in reply collection in inline buttons and send to user
+            reply_count = reply_collection.count_documents({})
+            if reply_count == 0:
+                await event.reply(bot_text["not_found"])
+                return
+            else:
+                reply_data = reply_collection.find()
+                buttons = []
+                for i in reply_data:
+                    # make button with year and gp and event
+                    buttons.append([Button.inline(f"{i['year']} {i['gp']} {i['event']}", str.encode('reply:' + str(i["_id"])))])
+                await event.reply(bot_text["select"], buttons=buttons)
+                            # await event.reply(f"{year}-{gp}-{session}")
         # elif text == bot_text["add_grand"]:
         #     is_admin = check_admin(user_id)
         #     if is_admin is False:
