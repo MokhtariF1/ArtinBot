@@ -9752,5 +9752,5 @@ async def get_video(event):
         await event.reply(bot_text["not_found"])
     else:
         video_link = find_reply["link"][quality]
-        await bot.forward_messages(user_id, video_link, config.REPLY_CHANNEL)
+        await bot.forward_messages(user_id, int(video_link), config.REPLY_CHANNEL)
 bot.run_until_disconnected()
