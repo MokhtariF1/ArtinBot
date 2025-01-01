@@ -8304,7 +8304,7 @@ async def pay(event):
                                                 #         quality.decode(): get_link,
                                                 #     },
                                                 # }
-                                                reply_collection.update_one(find_reply, {"$set": {"link": before_link}})
+                                                reply_collection.update_one({"year": year, "gp": gp, "event": session, "driver": None}, {"$set": {"link": before_link}})
                                                 await event.reply(bot_text["saved"])
         elif text == bot_text["reply"]:
             # show saved datas in reply collection in inline buttons and send to user
