@@ -8307,7 +8307,6 @@ async def pay(event):
                                                 reply_collection.update_one(find_reply, {"$set": {"link": before_link}})
                                                 await event.reply(bot_text["saved"])
         elif text == bot_text["reply"]:
-            await bot.forward_messages(user_id, 2, 2475588093)
             # show saved datas in reply collection in inline buttons and send to user
             reply_count = reply_collection.count_documents({})
             if reply_count == 0:
