@@ -16,6 +16,7 @@ from service import Manager
 import jdatetime
 from pymongo import MongoClient
 from bson import ObjectId
+from telethon.tl.functions.channels import GetFullChannelRequest
 
 
 api_id = config.API_ID
