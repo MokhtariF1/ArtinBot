@@ -8243,7 +8243,7 @@ async def pay(event):
                                             #get link from user 
                                             link = await conv.send_message(bot_text["enter_link"], buttons=back)
                                             get_link = await conv.get_response()
-                                            if get_link == bot_text["back"]:
+                                            if get_link.raw_text == bot_text["back"]:
                                                 await conv.send_message(bot_text["canceled"])
                                                 return
                                             else:
@@ -8257,6 +8257,7 @@ async def pay(event):
                                                     },
                                                     "link": {},
                                                 }
+                                                print(data)
                                                 reply_collection.insert_one(data)
                                                 await event.reply(bot_text["saved"])
                                     else:
@@ -8293,7 +8294,7 @@ async def pay(event):
                                             #get link from user 
                                             link = await conv.send_message(bot_text["enter_link"], buttons=back)
                                             get_link = await conv.get_response()
-                                            if get_link == bot_text["back"]:
+                                            if get_link.raw_text == bot_text["back"]:
                                                 await conv.send_message(bot_text["canceled"])
                                                 return
                                             else:
@@ -8346,7 +8347,7 @@ async def pay(event):
                                             #get link from user 
                                             link = await conv.send_message(bot_text["enter_link"], buttons=back)
                                             get_link = await conv.get_response()
-                                            if get_link == bot_text["back"]:
+                                            if get_link.raw_text == bot_text["back"]:
                                                 await conv.send_message(bot_text["canceled"])
                                                 return
                                             else:
@@ -8397,7 +8398,7 @@ async def pay(event):
                                             #get link from user 
                                             link = await conv.send_message(bot_text["enter_link"], buttons=back)
                                             get_link = await conv.get_response()
-                                            if get_link == bot_text["back"]:
+                                            if get_link.raw_text == bot_text["back"]:
                                                 await conv.send_message(bot_text["canceled"])
                                                 return
                                             else:
@@ -8413,7 +8414,7 @@ async def pay(event):
                                                 #         quality.decode(): get_link,
                                                 #     },
                                                 # }
-                                                reply_collection.update_one({"year": year, "gp": gp, "event": session, "driver": None}, {"$set": {"link": before_link}})
+                                                reply_collection.update_one({"year": year, "gp": gp, "event": session, "summary": None}, {"$set": {"link": before_link}})
                                                 await event.reply(bot_text["saved"])
         elif text == bot_text["reply"]:
             # show saved datas in reply collection in inline buttons and send to user
