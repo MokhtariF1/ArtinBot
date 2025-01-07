@@ -8209,7 +8209,7 @@ async def pay(event):
                                 # handle user response
                                 user_response = await conv.wait_event(events.CallbackQuery())
                                 if user_response.data == b'summary':
-                                    find_reply = reply_collection.find_one({"year": year, "gp": gp, "event": session})
+                                    find_reply = reply_collection.find_one({"year": year, "gp": gp, "event": session, "is_summary": True})
                                     if find_reply is None:
                                         # ask user for video quality with inline keys in conversation
                                         quality_buttons = [
@@ -8256,6 +8256,8 @@ async def pay(event):
                                                         quality.decode(): get_link,
                                                     },
                                                     "link": {},
+                                                    "is_summary": True,
+                                                    "is_event": False,
                                                 }
                                                 print(data)
                                                 reply_collection.insert_one(data)
@@ -8313,7 +8315,7 @@ async def pay(event):
                                                 reply_collection.update_one({"year": year, "gp": gp, "event": session, "summary": find_reply["summary"]}, {"$set": {"summary": before_link}})
                                                 await event.reply(bot_text["saved"])
                                 elif user_response.data == b'select':
-                                    find_reply = reply_collection.find_one({"year": year, "gp": gp, "event": session, "driver": None})
+                                    find_reply = reply_collection.find_one({"year": year, "gp": gp, "event": session, "is_event": True})
                                     if find_reply is None:
                                         # ask user for video quality with inline keys in conversation
                                         quality_buttons = [
@@ -8361,6 +8363,8 @@ async def pay(event):
                                                         quality.decode(): get_link,
                                                     },
                                                     "summary": {},
+                                                    "is_summary": False,
+                                                    "is_event": True,
                                                 }
                                                 reply_collection.insert_one(data)
                                                 await event.reply(bot_text["saved"])
