@@ -8435,7 +8435,7 @@ async def pay(event):
                         if len(i["summary"].keys()) == 0:
                             buttons.append([Button.inline(f"{i['year']} {i['gp']} {i['event']}", str.encode('reply:' + str(i["_id"])))])
                         else:
-                            buttons.append([Button.inline(f"{i['year']} {i['gp']} {i['event']} {i['summary']}", str.encode('summary_reply:' + str(i["_id"])))])
+                            buttons.append([Button.inline(f"{i['year']} {i['gp']} {i['event']} summary", str.encode('summary_reply:' + str(i["_id"])))])
                     else:
                         if i["driver"] is None:
                             buttons.append([Button.inline(f"{i['year']} {i['gp']} {i['event']}", str.encode('reply:' + str(i["_id"])))])
