@@ -478,6 +478,7 @@ TEXT = {
     "enter_link": "لینک ویدیو را وارد کنید:",
     "select_quality": "کیفیت را انتخاب کنید:",
     "summary": "خلاصه",
+    "give_link": "ثبت لینک",
 }
 
 EN_TEXT = {
@@ -838,5 +839,6 @@ Your points balance is {score}, to get more points, you can subcategory or buy c
     "event_select": "Save Event",
     "enter_link": "Enter video link:",
     "select_quality": "Select the quality:",
-    "summary": "Summary"
+    "summary": "Summary",
+    "give_link": "Register Link"
 }

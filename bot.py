@@ -8300,20 +8300,39 @@ async def pay(event):
                                                 await conv.send_message(bot_text["canceled"])
                                                 return
                                             else:
-                                                get_link = str(get_link.raw_text).split("/")[-1]
-                                                before_link = find_reply["summary"]
-                                                before_link[quality.decode()] = get_link
-                                                # data = {
-                                                #     "year": year,
-                                                #     "gp": gp,
-                                                #     "event": session,
-                                                #     "driver": None,
-                                                #     "link": {
-                                                #         quality.decode(): get_link,
-                                                #     },
-                                                # }
-                                                reply_collection.update_one({"year": year, "gp": gp, "event": session, "summary": find_reply["summary"]}, {"$set": {"summary": before_link}})
-                                                await event.reply(bot_text["saved"])
+                                                select_work = [
+                                                    [
+                                                        Button.inline(bot_text["give_link"], b'give_link'),
+                                                        Button.inline(bot_text["delete_btn"], b'delete_btn')
+                                                    ],
+                                                    [
+                                                        Button.inline(bot_text["back"], b'back')
+                                                    ]
+                                                ]
+                                                await conv.send_message(bot_text["select"], buttons=select_work)
+                                                response = await conv.wait_event(events.CallbackQuery())
+                                                if response.data == b'back':
+                                                    await conv.send_message(bot_text["canceled"])
+                                                    return
+                                                elif response.data == b'delete_btn':
+                                                    reply_collection.delete_one({"year": year, "gp": gp, "event": session, "is_summary": True})
+                                                    await conv.send_message(bot_text["deleted"])
+                                                    return
+                                                elif response.data == b'give_link':
+                                                    get_link = str(get_link.raw_text).split("/")[-1]
+                                                    before_link = find_reply["summary"]
+                                                    before_link[quality.decode()] = get_link
+                                                    # data = {
+                                                    #     "year": year,
+                                                    #     "gp": gp,
+                                                    #     "event": session,
+                                                    #     "driver": None,
+                                                    #     "link": {
+                                                    #         quality.decode(): get_link,
+                                                    #     },
+                                                    # }
+                                                    reply_collection.update_one({"year": year, "gp": gp, "event": session, "summary": find_reply["summary"]}, {"$set": {"summary": before_link}})
+                                                    await event.reply(bot_text["saved"])
                                 elif user_response.data == b'select':
                                     find_reply = reply_collection.find_one({"year": year, "gp": gp, "event": session, "is_event": True})
                                     if find_reply is None:
@@ -8406,20 +8425,39 @@ async def pay(event):
                                                 await conv.send_message(bot_text["canceled"])
                                                 return
                                             else:
-                                                get_link = str(get_link.raw_text).split("/")[-1]
-                                                before_link = find_reply["link"]
-                                                before_link[quality.decode()] = get_link
-                                                # data = {
-                                                #     "year": year,
-                                                #     "gp": gp,
-                                                #     "event": session,
-                                                #     "driver": None,
-                                                #     "link": {
-                                                #         quality.decode(): get_link,
-                                                #     },
-                                                # }
-                                                reply_collection.update_one({"year": year, "gp": gp, "event": session, "summary": None}, {"$set": {"link": before_link}})
-                                                await event.reply(bot_text["saved"])
+                                                select_work = [
+                                                    [
+                                                        Button.inline(bot_text["give_link"], b'give_link'),
+                                                        Button.inline(bot_text["delete_btn"], b'delete_btn')
+                                                    ],
+                                                    [
+                                                        Button.inline(bot_text["back"], b'back')
+                                                    ]
+                                                ]
+                                                await conv.send_message(bot_text["select"], buttons=select_work)
+                                                response = await conv.wait_event(events.CallbackQuery())
+                                                if response.data == b'back':
+                                                    await conv.send_message(bot_text["canceled"])
+                                                    return
+                                                elif response.data == b'delete_btn':
+                                                    reply_collection.delete_one({"year": year, "gp": gp, "event": session, "is_summary": True})
+                                                    await conv.send_message(bot_text["deleted"])
+                                                    return
+                                                elif response.data == b'give_link':
+                                                    get_link = str(get_link.raw_text).split("/")[-1]
+                                                    before_link = find_reply["link"]
+                                                    before_link[quality.decode()] = get_link
+                                                    # data = {
+                                                    #     "year": year,
+                                                    #     "gp": gp,
+                                                    #     "event": session,
+                                                    #     "driver": None,
+                                                    #     "link": {
+                                                    #         quality.decode(): get_link,
+                                                    #     },
+                                                    # }
+                                                    reply_collection.update_one({"year": year, "gp": gp, "event": session, "summary": None}, {"$set": {"link": before_link}})
+                                                    await event.reply(bot_text["saved"])
         elif text == bot_text["reply"]:
             # show saved datas in reply collection in inline buttons and send to user
             reply_count = reply_collection.count_documents({})
