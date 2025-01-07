@@ -8425,7 +8425,7 @@ async def pay(event):
                 buttons = []
                 for i in reply_data:
                     # make button with year and gp and event
-                    if i["session"] == "Practice_1" or i["session"] == "Practice_2" or i["session"] == "Practice_3" or i["session"] == "Qualifying":
+                    if i["event"] == "Practice_1" or i["event"] == "Practice_2" or i["event"] == "Practice_3" or i["event"] == "Qualifying":
                         if i["summary"] is None:
                             buttons.append([Button.inline(f"{i['year']} {i['gp']} {i['event']}", str.encode('reply:' + str(i["_id"])))])
                         else:
