@@ -8294,31 +8294,31 @@ async def pay(event):
                                             return
                                         else:
                                             #get link from user 
-                                            link = await conv.send_message(bot_text["enter_link"], buttons=back)
-                                            get_link = await conv.get_response()
-                                            if get_link.raw_text == bot_text["back"]:
+                                            select_work = [
+                                                [
+                                                    Button.inline(bot_text["give_link"], b'give_link'),
+                                                    Button.inline(bot_text["delete_btn"], b'delete_btn')
+                                                ],
+                                                [
+                                                    Button.inline(bot_text["back"], b'back')
+                                                ]
+                                            ]
+                                            await conv.send_message(bot_text["select"], buttons=select_work)
+                                            response = await conv.wait_event(events.CallbackQuery())
+                                            if response.data == b'back':
                                                 await conv.send_message(bot_text["canceled"])
                                                 return
-                                            else:
-                                                select_work = [
-                                                    [
-                                                        Button.inline(bot_text["give_link"], b'give_link'),
-                                                        Button.inline(bot_text["delete_btn"], b'delete_btn')
-                                                    ],
-                                                    [
-                                                        Button.inline(bot_text["back"], b'back')
-                                                    ]
-                                                ]
-                                                await conv.send_message(bot_text["select"], buttons=select_work)
-                                                response = await conv.wait_event(events.CallbackQuery())
-                                                if response.data == b'back':
+                                            elif response.data == b'delete_btn':
+                                                reply_collection.delete_one({"year": year, "gp": gp, "event": session, "is_summary": True})
+                                                await conv.send_message(bot_text["deleted"])
+                                                return
+                                            elif response.data == b'give_link':
+                                                link = await conv.send_message(bot_text["enter_link"], buttons=back)
+                                                get_link = await conv.get_response()
+                                                if get_link.raw_text == bot_text["back"]:
                                                     await conv.send_message(bot_text["canceled"])
                                                     return
-                                                elif response.data == b'delete_btn':
-                                                    reply_collection.delete_one({"year": year, "gp": gp, "event": session, "is_summary": True})
-                                                    await conv.send_message(bot_text["deleted"])
-                                                    return
-                                                elif response.data == b'give_link':
+                                                else:
                                                     get_link = str(get_link.raw_text).split("/")[-1]
                                                     before_link = find_reply["summary"]
                                                     before_link[quality.decode()] = get_link
@@ -8419,31 +8419,31 @@ async def pay(event):
                                             return
                                         else:
                                             #get link from user 
-                                            link = await conv.send_message(bot_text["enter_link"], buttons=back)
-                                            get_link = await conv.get_response()
-                                            if get_link.raw_text == bot_text["back"]:
+                                            select_work = [
+                                                [
+                                                    Button.inline(bot_text["give_link"], b'give_link'),
+                                                    Button.inline(bot_text["delete_btn"], b'delete_btn')
+                                                ],
+                                                [
+                                                    Button.inline(bot_text["back"], b'back')
+                                                ]
+                                            ]
+                                            await conv.send_message(bot_text["select"], buttons=select_work)
+                                            response = await conv.wait_event(events.CallbackQuery())
+                                            if response.data == b'back':
                                                 await conv.send_message(bot_text["canceled"])
                                                 return
-                                            else:
-                                                select_work = [
-                                                    [
-                                                        Button.inline(bot_text["give_link"], b'give_link'),
-                                                        Button.inline(bot_text["delete_btn"], b'delete_btn')
-                                                    ],
-                                                    [
-                                                        Button.inline(bot_text["back"], b'back')
-                                                    ]
-                                                ]
-                                                await conv.send_message(bot_text["select"], buttons=select_work)
-                                                response = await conv.wait_event(events.CallbackQuery())
-                                                if response.data == b'back':
+                                            elif response.data == b'delete_btn':
+                                                reply_collection.delete_one({"year": year, "gp": gp, "event": session, "is_summary": True})
+                                                await conv.send_message(bot_text["deleted"])
+                                                return
+                                            elif response.data == b'give_link':
+                                                link = await conv.send_message(bot_text["enter_link"], buttons=back)
+                                                get_link = await conv.get_response()
+                                                if get_link.raw_text == bot_text["back"]:
                                                     await conv.send_message(bot_text["canceled"])
                                                     return
-                                                elif response.data == b'delete_btn':
-                                                    reply_collection.delete_one({"year": year, "gp": gp, "event": session, "is_summary": True})
-                                                    await conv.send_message(bot_text["deleted"])
-                                                    return
-                                                elif response.data == b'give_link':
+                                                else:
                                                     get_link = str(get_link.raw_text).split("/")[-1]
                                                     before_link = find_reply["link"]
                                                     before_link[quality.decode()] = get_link
