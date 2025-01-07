@@ -8310,7 +8310,7 @@ async def pay(event):
                                                 return
                                             elif response.data == b'delete_btn':
                                                 link_reply = find_reply["summary"]
-                                                link_reply.pop(quality.decode())
+                                                del link_reply[quality.decode()]
                                                 reply_collection.update_one({"year": year, "gp": gp, "event": session, "is_summary": True}, {"$set": {"summary": link_reply}})
                                                 await conv.send_message(bot_text["deleted"])
                                                 return
@@ -8437,7 +8437,7 @@ async def pay(event):
                                                 return
                                             elif response.data == b'delete_btn':
                                                 link_reply = find_reply["link"]
-                                                link_reply.pop(quality.decode())
+                                                del link_reply[quality.decode()]
                                                 reply_collection.update_one({"year": year, "gp": gp, "event": session, "is_event": True}, {"$set": {"link": link_reply}})
                                                 await conv.send_message(bot_text["deleted"])
                                                 return
