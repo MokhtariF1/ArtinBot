@@ -477,6 +477,7 @@ TEXT = {
     "event_select": "ثبت رویداد",
     "enter_link": "لینک ویدیو را وارد کنید:",
     "select_quality": "کیفیت را انتخاب کنید:",
+    "summary": "خلاصه",
 }
 
 EN_TEXT = {
@@ -836,5 +837,6 @@ Your points balance is {score}, to get more points, you can subcategory or buy c
     "event_drivers": "Event Drivers",
     "event_select": "Save Event",
     "enter_link": "Enter video link:",
-    "select_quality": "Select the quality:"
+    "select_quality": "Select the quality:",
+    "summary": "Summary"
 }
