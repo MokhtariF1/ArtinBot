@@ -8434,7 +8434,7 @@ async def pay(event):
                                                 await conv.send_message(bot_text["canceled"])
                                                 return
                                             elif response.data == b'delete_btn':
-                                                reply_collection.delete_one({"year": year, "gp": gp, "event": session, "is_summary": True})
+                                                reply_collection.delete_one({"year": year, "gp": gp, "event": session, "is_event": True})
                                                 await conv.send_message(bot_text["deleted"])
                                                 return
                                             elif response.data == b'give_link':
