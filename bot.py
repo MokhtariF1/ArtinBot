@@ -8309,7 +8309,9 @@ async def pay(event):
                                                 await conv.send_message(bot_text["canceled"])
                                                 return
                                             elif response.data == b'delete_btn':
-                                                reply_collection.delete_one({"year": year, "gp": gp, "event": session, "is_summary": True})
+                                                link_reply = find_reply["summary"]
+                                                link_reply = dict(link_reply).pop(quality.decode())
+                                                reply_collection.update_one({"year": year, "gp": gp, "event": session, "is_summary": True}, {"$set": {"summary": link_reply}})
                                                 await conv.send_message(bot_text["deleted"])
                                                 return
                                             elif response.data == b'give_link':
@@ -8434,7 +8436,9 @@ async def pay(event):
                                                 await conv.send_message(bot_text["canceled"])
                                                 return
                                             elif response.data == b'delete_btn':
-                                                reply_collection.delete_one({"year": year, "gp": gp, "event": session, "is_event": True})
+                                                link_reply = find_reply["link"]
+                                                link_reply = dict(link_reply).pop(quality.decode())
+                                                reply_collection.update_one({"year": year, "gp": gp, "event": session, "is_event": True}, {"$set": {"link": link_reply}})
                                                 await conv.send_message(bot_text["deleted"])
                                                 return
                                             elif response.data == b'give_link':
@@ -8456,7 +8460,7 @@ async def pay(event):
                                                     #         quality.decode(): get_link,
                                                     #     },
                                                     # }
-                                                    reply_collection.update_one({"year": year, "gp": gp, "event": session, "summary": None}, {"$set": {"link": before_link}})
+                                                    reply_collection.update_one({"year": year, "gp": gp, "event": session, "is_event": True}, {"$set": {"link": before_link}})
                                                     await event.reply(bot_text["saved"])
         elif text == bot_text["reply"]:
             # show saved datas in reply collection in inline buttons and send to user
