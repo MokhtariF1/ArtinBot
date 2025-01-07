@@ -8359,6 +8359,7 @@ async def pay(event):
                                                     "link": {
                                                         quality.decode(): get_link,
                                                     },
+                                                    "summary": None,
                                                 }
                                                 reply_collection.insert_one(data)
                                                 await event.reply(bot_text["saved"])
