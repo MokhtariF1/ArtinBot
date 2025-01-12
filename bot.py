@@ -8604,18 +8604,18 @@ async def pay(event):
                 buttons = []
                 for i in reply_data:
                     # make button with year and gp and event
-                    if i["event"] == "Practice_1" or i["event"] == "Practice_2" or i["event"] == "Practice_3" or i["event"] == "Qualifying":
+                    if i["event"] == "Practice_1" or i["event"] == "Practice_2" or i["event"] == "Practice_3" or i["event"] == "Qualifying" or i["event"] == "Race":
                         if i["is_event"]:
                             buttons.append([Button.inline(f"{i['year']} {i['gp']} {i['event']}", str.encode('reply:' + str(i["_id"])))])
                         elif i["is_fastest"]:
                             buttons.append([Button.inline(f"{i['year']} {i['gp']} {i['event']} fastest lap", str.encode('fastest_reply:' + str(i["_id"])))])
                         else:
                             buttons.append([Button.inline(f"{i['year']} {i['gp']} {i['event']} summary", str.encode('summary_reply:' + str(i["_id"])))])
-                    else:
-                        if i["driver"] is None:
-                            buttons.append([Button.inline(f"{i['year']} {i['gp']} {i['event']}", str.encode('reply:' + str(i["_id"])))])
-                        else:
-                            buttons.append([Button.inline(f"{i['year']} {i['gp']} {i['event']} {i['summary']}", str.encode('driver_reply:' + str(i["_id"])))])
+                    # else:
+                        # if i["driver"] is None:
+                        #     buttons.append([Button.inline(f"{i['year']} {i['gp']} {i['event']}", str.encode('reply:' + str(i["_id"])))])
+                        # else:
+                        #     buttons.append([Button.inline(f"{i['year']} {i['gp']} {i['event']} {i['summary']}", str.encode('driver_reply:' + str(i["_id"])))])
                 await event.reply(bot_text["select"], buttons=buttons)
                             # await event.reply(f"{year}-{gp}-{session}")
         # elif text == bot_text["add_grand"]:
