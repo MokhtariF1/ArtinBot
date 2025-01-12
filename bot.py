@@ -8201,10 +8201,10 @@ async def pay(event):
                                         Button.inline(bot_text["summary"], data=b'summary'),
                                         Button.inline(bot_text["event_select"], data=b'select'),
                                     ],
-                                    [
-                                        Button.inline(bot_text["cancel"], b'cancel')
-                                    ],
                                 ]
+                                if session == "Qualifying":
+                                    type_buttons.append([Button.inline(bot_text["fastest_lap"], b'fastest_lap')])
+                                type_buttons.append([Button.inline(bot_text["cancel"], b'cancel')])
                                 ask_type = await conv.send_message(bot_text["select_type"], buttons=type_buttons)
                                 # handle user response
                                 user_response = await conv.wait_event(events.CallbackQuery())
@@ -8258,6 +8258,7 @@ async def pay(event):
                                                     "link": {},
                                                     "is_summary": True,
                                                     "is_event": False,
+                                                    "is_fastest": False,
                                                 }
                                                 print(data)
                                                 reply_collection.insert_one(data)
@@ -8386,6 +8387,7 @@ async def pay(event):
                                                     "summary": {},
                                                     "is_summary": False,
                                                     "is_event": True,
+                                                    "is_fastest": False,
                                                 }
                                                 reply_collection.insert_one(data)
                                                 await event.reply(bot_text["saved"])
@@ -8461,6 +8463,134 @@ async def pay(event):
                                                     #     },
                                                     # }
                                                     reply_collection.update_one({"year": year, "gp": gp, "event": session, "is_event": True}, {"$set": {"link": before_link}})
+                                                    await event.reply(bot_text["saved"])
+                                elif user_response.data == b'fastest_lap':
+                                    find_reply = reply_collection.find_one({"year": year, "gp": gp, "event": session, "is_fastest": True})
+                                    if find_reply is None:
+                                        # ask user for video quality with inline keys in conversation
+                                        quality_buttons = [
+                                            [
+                                                Button.inline("360p❌", data=b'360p'),
+                                            ],
+                                            [
+                                                Button.inline("480p❌", data=b'480p'),
+                                            ],
+                                            [
+                                                Button.inline("720p❌", data=b'720p'),
+                                            ],
+                                            [
+                                                Button.inline("1080p❌", data=b'1080p'),
+                                            ],
+                                            [
+                                                Button.inline("4k❌", data=b'4k'),
+                                            ],
+                                            [
+                                                Button.inline(bot_text["cancel"], data=b'cancel')
+                                            ]
+                                        ]
+                                        ask_quality = await conv.send_message(bot_text["select_quality"], buttons=quality_buttons)
+                                        # handle user response
+                                        user_response = await conv.wait_event(events.CallbackQuery())
+                                        quality = user_response.data
+                                        if quality == b'cancel':
+                                            await conv.send_message(bot_text["canceled"])
+                                            return
+                                        else:
+                                            #get link from user 
+                                            link = await conv.send_message(bot_text["enter_link"], buttons=back)
+                                            get_link = await conv.get_response()
+                                            if get_link.raw_text == bot_text["back"]:
+                                                await conv.send_message(bot_text["canceled"])
+                                                return
+                                            else:
+                                                get_link = str(get_link.raw_text).split("/")[-1]
+                                                data = {
+                                                    "year": year,
+                                                    "gp": gp,
+                                                    "event": session,
+                                                    "driver": None,
+                                                    "link": {
+                                                        quality.decode(): get_link,
+                                                    },
+                                                    "summary": {},
+                                                    "is_summary": False,
+                                                    "is_event": False,
+                                                    "is_fastest": True,
+                                                }
+                                                reply_collection.insert_one(data)
+                                                await event.reply(bot_text["saved"])
+                                    else:
+                                        # ask user for video quality with inline keys in conversation
+                                        avalable_quality = find_reply["link"].keys()
+                                        quality_buttons = [
+                                            [
+                                                Button.inline("360p✅" if "360p" in avalable_quality else "360p❌", data=b'360p'),
+                                            ],
+                                            [
+                                                Button.inline("480p✅" if "480p" in avalable_quality else "480p❌", data=b'480p'),
+                                            ],
+                                            [
+                                                Button.inline("720p✅" if "720p" in avalable_quality else "720p❌", data=b'720p'),
+                                            ],
+                                            [
+                                                Button.inline("1080p✅" if "1080p" in avalable_quality else "1080p❌", data=b'1080p'),
+                                            ],
+                                            [
+                                                Button.inline("4k✅" if "4k" in avalable_quality else "4k❌", data=b'4k'),
+                                            ],
+                                            [
+                                                Button.inline(bot_text["cancel"], data=b'cancel')
+                                            ]
+                                        ]
+                                        ask_quality = await conv.send_message(bot_text["select_quality"], buttons=quality_buttons)
+                                        # handle user response
+                                        user_response = await conv.wait_event(events.CallbackQuery())
+                                        quality = user_response.data
+                                        if quality == b'cancel':
+                                            await conv.send_message(bot_text["canceled"])
+                                            return
+                                        else:
+                                            #get link from user 
+                                            select_work = [
+                                                [
+                                                    Button.inline(bot_text["give_link"], b'give_link'),
+                                                    Button.inline(bot_text["delete_btn"], b'delete_btn')
+                                                ],
+                                                [
+                                                    Button.inline(bot_text["back"], b'back')
+                                                ]
+                                            ]
+                                            await conv.send_message(bot_text["select"], buttons=select_work)
+                                            response = await conv.wait_event(events.CallbackQuery())
+                                            if response.data == b'back':
+                                                await conv.send_message(bot_text["canceled"])
+                                                return
+                                            elif response.data == b'delete_btn':
+                                                link_reply = find_reply["link"]
+                                                del link_reply[quality.decode()]
+                                                reply_collection.update_one({"year": year, "gp": gp, "event": session, "is_fastest": False}, {"$set": {"link": link_reply}})
+                                                await conv.send_message(bot_text["deleted"])
+                                                return
+                                            elif response.data == b'give_link':
+                                                link = await conv.send_message(bot_text["enter_link"], buttons=back)
+                                                get_link = await conv.get_response()
+                                                if get_link.raw_text == bot_text["back"]:
+                                                    await conv.send_message(bot_text["canceled"])
+                                                    return
+                                                else:
+                                                    get_link = str(get_link.raw_text).split("/")[-1]
+                                                    before_link = find_reply["link"]
+                                                    before_link[quality.decode()] = get_link
+                                                    # data = {
+                                                    #     "year": year,
+                                                    #     "gp": gp,
+                                                    #     "event": session,
+                                                    #     "driver": None,
+                                                    #     "link": {
+                                                    #         quality.decode(): get_link,
+                                                    #     },
+                                                    # }
+                                                    reply_collection.update_one({"year": year, "gp": gp, "event": session, "is_fastest": True}, {"$set": {"link": before_link}})
                                                     await event.reply(bot_text["saved"])
         elif text == bot_text["reply"]:
             # show saved datas in reply collection in inline buttons and send to user
