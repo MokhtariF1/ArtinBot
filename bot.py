@@ -8604,8 +8604,10 @@ async def pay(event):
                 for i in reply_data:
                     # make button with year and gp and event
                     if i["event"] == "Practice_1" or i["event"] == "Practice_2" or i["event"] == "Practice_3" or i["event"] == "Qualifying":
-                        if len(i["summary"].keys()) == 0:
+                        if i["is_event"]:
                             buttons.append([Button.inline(f"{i['year']} {i['gp']} {i['event']}", str.encode('reply:' + str(i["_id"])))])
+                        elif i["is_fastest"]:
+                            buttons.append([Button.inline(f"{i['year']} {i['gp']} {i['event']} fastest lap", str.encode('fastest_reply:' + str(i["_id"])))])
                         else:
                             buttons.append([Button.inline(f"{i['year']} {i['gp']} {i['event']} summary", str.encode('summary_reply:' + str(i["_id"])))])
                     else:
