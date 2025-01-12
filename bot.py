@@ -8509,10 +8509,11 @@ async def pay(event):
                                                     "gp": gp,
                                                     "event": session,
                                                     "driver": None,
-                                                    "link": {
+                                                    "link": {},
+                                                    "summary": {},
+                                                    "fastest": {
                                                         quality.decode(): get_link,
                                                     },
-                                                    "summary": {},
                                                     "is_summary": False,
                                                     "is_event": False,
                                                     "is_fastest": True,
@@ -8521,7 +8522,7 @@ async def pay(event):
                                                 await event.reply(bot_text["saved"])
                                     else:
                                         # ask user for video quality with inline keys in conversation
-                                        avalable_quality = find_reply["link"].keys()
+                                        avalable_quality = find_reply["fastest"].keys()
                                         quality_buttons = [
                                             [
                                                 Button.inline("360p✅" if "360p" in avalable_quality else "360p❌", data=b'360p'),
@@ -8566,9 +8567,9 @@ async def pay(event):
                                                 await conv.send_message(bot_text["canceled"])
                                                 return
                                             elif response.data == b'delete_btn':
-                                                link_reply = find_reply["link"]
+                                                link_reply = find_reply["fastest"]
                                                 del link_reply[quality.decode()]
-                                                reply_collection.update_one({"year": year, "gp": gp, "event": session, "is_fastest": False}, {"$set": {"link": link_reply}})
+                                                reply_collection.update_one({"year": year, "gp": gp, "event": session, "is_fastest": True}, {"$set": {"fastest": link_reply}})
                                                 await conv.send_message(bot_text["deleted"])
                                                 return
                                             elif response.data == b'give_link':
@@ -8579,7 +8580,7 @@ async def pay(event):
                                                     return
                                                 else:
                                                     get_link = str(get_link.raw_text).split("/")[-1]
-                                                    before_link = find_reply["link"]
+                                                    before_link = find_reply["fastest"]
                                                     before_link[quality.decode()] = get_link
                                                     # data = {
                                                     #     "year": year,
@@ -8590,7 +8591,7 @@ async def pay(event):
                                                     #         quality.decode(): get_link,
                                                     #     },
                                                     # }
-                                                    reply_collection.update_one({"year": year, "gp": gp, "event": session, "is_fastest": True}, {"$set": {"link": before_link}})
+                                                    reply_collection.update_one({"year": year, "gp": gp, "event": session, "is_fastest": True}, {"$set": {"fastest": before_link}})
                                                     await event.reply(bot_text["saved"])
         elif text == bot_text["reply"]:
             # show saved datas in reply collection in inline buttons and send to user
@@ -10071,5 +10072,30 @@ async def summary_get_video(event):
         await event.reply(bot_text["not_found"])
     else:
         video_link = find_reply["summary"][quality]
+        await bot.forward_messages(user_id, int(video_link), config.REPLY_CHANNEL, drop_author=True)
+@bot.on(events.CallbackQuery(pattern="fastest_reply:*"))
+async def fastest_reply(event):
+    # find reply in reply collection and then show user avalable qualitys
+    find_id = event.data.decode().split(":")[1]
+    find_reply = reply_collection.find_one({"_id": ObjectId(find_id)})
+    if find_reply is None:
+        await event.reply(bot_text["not_found"])
+        return
+    else:
+        qualitys = []
+        for k in find_reply["fastest"].keys():
+            qualitys.append([Button.inline(k, str.encode("fastest_get_video:" + find_id + ":" + k))])
+        await event.reply(bot_text["select_quality"], buttons=qualitys)
+@bot.on(events.CallbackQuery(pattern="fastest_get_video:*"))
+async def fastest_get_video(event):
+    # get video from link and send it to user
+    user_id = event.sender_id
+    find_id = event.data.decode().split(":")[1]
+    quality = event.data.decode().split(":")[2]
+    find_reply = reply_collection.find_one({"_id": ObjectId(find_id)})
+    if find_reply is None:
+        await event.reply(bot_text["not_found"])
+    else:
+        video_link = find_reply["fastest"][quality]
         await bot.forward_messages(user_id, int(video_link), config.REPLY_CHANNEL, drop_author=True)
 bot.run_until_disconnected()
