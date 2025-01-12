@@ -8194,7 +8194,7 @@ async def pay(event):
                             await conv.cancel_all()
                         else:
                             session = event_data.decode()
-                            if session == "Practice_1" or session == "Practice_2" or session == "Practice_3" or session == "Qualifying":
+                            if session == "Practice_1" or session == "Practice_2" or session == "Practice_3" or session == "Qualifying" or session == "Race":
                                 # ask user in conversation for enter type he want register link
                                 type_buttons = [
                                     [
