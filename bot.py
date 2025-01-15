@@ -8796,7 +8796,7 @@ async def pay(event):
                         elif i["is_fastest"]:
                             buttons.append([Button.inline(f"{i['year']} {i['gp']} {i['event']} fastest lap", str.encode('fastest_reply:' + str(i["_id"])))])
                         elif  i["is_driver"]:
-                            buttons.append([Button.inline(f"{i['year']} {i['gp']} {i['event']} {i["driver_code"]}", str.encode('driver_reply:' + str(i["_id"])))])
+                            buttons.append([Button.inline(f"{i['year']} {i['gp']} {i['event']} {i['driver_code']}", str.encode('driver_reply:' + str(i["_id"])))])
                         else:
                             buttons.append([Button.inline(f"{i['year']} {i['gp']} {i['event']} summary", str.encode('summary_reply:' + str(i["_id"])))])
                     # else:
@@ -10309,6 +10309,6 @@ async def driver_get_video(event):
     if find_reply is None:
         await event.reply(bot_text["not_found"])
     else:
-        video_link = find_reply["fastest"][quality]
+        video_link = find_reply["driver"][find_reply["driver_code"]][quality]
         await bot.forward_messages(user_id, int(video_link), config.REPLY_CHANNEL, drop_author=True)
 bot.run_until_disconnected()
