@@ -8608,6 +8608,7 @@ async def pay(event):
                                     url = f"http://ergast.com/api/f1/{year}/{gp_round}/drivers.json"
                                     if config.ergast:
                                         drivers = requests.get(url).json()["MRData"]["DriverTable"]["Drivers"]
+                                        print(drivers)
                                     else:
                                         drivers = ergast_data["MRData"]["DriverTable"]["Drivers"]
                                         drivers_keys = []
