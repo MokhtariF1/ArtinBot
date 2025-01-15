@@ -8604,6 +8604,7 @@ async def pay(event):
                                                     reply_collection.update_one({"year": year, "gp": gp, "event": session, "is_fastest": True}, {"$set": {"fastest": before_link}})
                                                     await event.reply(bot_text["saved"])
                                 elif user_response.data == b'driver':
+                                    print(year, gp_round)
                                     url = f"http://ergast.com/api/f1/{year}/{gp_round}/drivers.json"
                                     if config.ergast:
                                         drivers = requests.get(url).json()["MRData"]["DriverTable"]["Drivers"]
