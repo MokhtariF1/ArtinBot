@@ -8159,7 +8159,7 @@ async def pay(event):
                         gp_country = gp_data.decode().split(":")[0]
                         gp_round = int(gp_data.decode().split(":")[1])
                         # url = f"https://f1datas.com/api/v1/fastf1/session?year={year}&country={gp}"
-                        sessions = manager.get_session(year=year, country=gp)["sessions"]
+                        sessions = manager.get_session(year=year, country=gp_country)["sessions"]
                         # sessions = requests.get(url).json()["sessions"]
                         type_tr = {
                             "Practice_1": "تمرین اول",
