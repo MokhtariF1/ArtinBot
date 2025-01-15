@@ -8768,8 +8768,8 @@ async def pay(event):
                                                         return
                                                     else:
                                                         get_link = str(get_link.raw_text).split("/")[-1]
-                                                        before_link = find_reply["driver"][driver_code]
-                                                        before_link[quality.decode()] = get_link
+                                                        before_link = find_reply["driver"]
+                                                        before_link[driver_code][quality.decode()] = get_link
                                                         # data = {
                                                         #     "year": year,
                                                         #     "gp": gp,
