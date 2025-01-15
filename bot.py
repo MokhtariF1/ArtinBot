@@ -8795,6 +8795,8 @@ async def pay(event):
                             buttons.append([Button.inline(f"{i['year']} {i['gp']} {i['event']}", str.encode('reply:' + str(i["_id"])))])
                         elif i["is_fastest"]:
                             buttons.append([Button.inline(f"{i['year']} {i['gp']} {i['event']} fastest lap", str.encode('fastest_reply:' + str(i["_id"])))])
+                        elif  i["is_driver"]:
+                            buttons.append([Button.inline(f"{i['year']} {i['gp']} {i['event']} {i["driver_code"]}", str.encode('driver_reply:' + str(i["_id"])))])
                         else:
                             buttons.append([Button.inline(f"{i['year']} {i['gp']} {i['event']} summary", str.encode('summary_reply:' + str(i["_id"])))])
                     # else:
@@ -10274,6 +10276,31 @@ async def fastest_reply(event):
         await event.reply(bot_text["select_quality"], buttons=qualitys)
 @bot.on(events.CallbackQuery(pattern="fastest_get_video:*"))
 async def fastest_get_video(event):
+    # get video from link and send it to user
+    user_id = event.sender_id
+    find_id = event.data.decode().split(":")[1]
+    quality = event.data.decode().split(":")[2]
+    find_reply = reply_collection.find_one({"_id": ObjectId(find_id)})
+    if find_reply is None:
+        await event.reply(bot_text["not_found"])
+    else:
+        video_link = find_reply["fastest"][quality]
+        await bot.forward_messages(user_id, int(video_link), config.REPLY_CHANNEL, drop_author=True)
+@bot.on(events.CallbackQuery(pattern="driver_reply:*"))
+async def driver_reply(event):
+    # find reply in reply collection and then show user avalable qualitys
+    find_id = event.data.decode().split(":")[1]
+    find_reply = reply_collection.find_one({"_id": ObjectId(find_id)})
+    if find_reply is None:
+        await event.reply(bot_text["not_found"])
+        return
+    else:
+        qualitys = []
+        for k in find_reply["driver"][find_reply["driver_code"]].keys():
+            qualitys.append([Button.inline(k, str.encode("driver_get_video:" + find_id + ":" + k))])
+        await event.reply(bot_text["select_quality"], buttons=qualitys)
+@bot.on(events.CallbackQuery(pattern="driver_get_video:*"))
+async def driver_get_video(event):
     # get video from link and send it to user
     user_id = event.sender_id
     find_id = event.data.decode().split(":")[1]
