@@ -8956,11 +8956,11 @@ async def pay(event):
                         Button.inline(bot_text["stress_index"], b'si'),
                     ],
                     [
-                        Button.inline(bot_text["cancel"], b'cancel')
+                        Button.inline(bot_text["reply"], b'reply')
                     ],
                     [
-                        Button.inline(bot_text["reply"], b'reply')
-                    ]
+                        Button.inline(bot_text["cancel"], b'cancel')
+                    ],
                 ]
                 await conv_all.send_message(bot_text["select"], buttons=keys_all)
                 response = await conv_all.wait_event(events.CallbackQuery())
@@ -9013,7 +9013,10 @@ async def pay(event):
                     statistics_value = bot_text["stress_index"]
                 elif response.data == b'reply':
                     count_reply = watch_reply_collection.count_documents({"user_id": user_id})
+                    if count_reply != 0:
+                        count_reply = len(watch_reply_collection.find_one({"user_id": user_id})["watched"])
                     await event.reply(bot_text["reply_count"].format(count=count_reply), parse_mode="html")
+                    return
                 elif response.data == b'cancel':
                     return
                 else:
@@ -10336,7 +10339,16 @@ async def driver_get_video(event):
         video_link = find_reply["driver"][find_reply["driver_code"]][quality]
         s = await bot.forward_messages(user_id, int(video_link), config.REPLY_CHANNEL, drop_author=True)
         # save user id and requested reply data to database
-        watch_reply_collection.update_one({"user_id": user_id}, {"$push": {"watched": find_reply["_id"]}})
+        find_watch = watch_reply_collection.find_one({"user_id": user_id})
+        if find_watch is None:
+            watch_reply_collection.insert_one(
+                {
+                    "user_id": user_id,
+                    "watched": [],
+                }
+            )
+        else:
+            watch_reply_collection.update_one({"user_id": user_id}, {"$push": {"watched": find_reply["_id"]}})
         await event.reply(bot_text["delete_video_warn"])
         for i in range(20):
             await asyncio.sleep(1)
