@@ -10252,6 +10252,7 @@ async def get_video(event):
     else:
         video_link = find_reply["link"][quality]
         s = await bot.forward_messages(user_id, int(video_link), config.REPLY_CHANNEL, drop_author=True)
+        await event.reply(bot_text["delete_video_warn"])
         for i in range(20):
             await asyncio.sleep(1)
         await bot.delete_messages(user_id, s.id)
@@ -10267,6 +10268,7 @@ async def summary_get_video(event):
     else:
         video_link = find_reply["summary"][quality]
         s = await bot.forward_messages(user_id, int(video_link), config.REPLY_CHANNEL, drop_author=True)
+        await event.reply(bot_text["delete_video_warn"])
         for i in range(20):
             await asyncio.sleep(1)
         await bot.delete_messages(user_id, s.id)
@@ -10295,6 +10297,7 @@ async def fastest_get_video(event):
     else:
         video_link = find_reply["fastest"][quality]
         s = await bot.forward_messages(user_id, int(video_link), config.REPLY_CHANNEL, drop_author=True)
+        await event.reply(bot_text["delete_video_warn"])
         for i in range(20):
             await asyncio.sleep(1)
         await bot.delete_messages(user_id, s.id)
@@ -10323,6 +10326,7 @@ async def driver_get_video(event):
     else:
         video_link = find_reply["driver"][find_reply["driver_code"]][quality]
         s = await bot.forward_messages(user_id, int(video_link), config.REPLY_CHANNEL, drop_author=True)
+        await event.reply(bot_text["delete_video_warn"])
         for i in range(20):
             await asyncio.sleep(1)
         await bot.delete_messages(user_id, s.id)

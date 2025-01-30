@@ -480,6 +480,7 @@ TEXT = {
     "summary": "خلاصه",
     "give_link": "ثبت لینک",
     "fastest_lap": "سریع ترین دور",
+    "delete_video_warn": "توجه!❌\nاین ویدیو ۲۰ ثانیه دیگر حذف میشود، آن را جایی ذخیره کنید"
 }
 
 EN_TEXT = {
@@ -842,5 +843,6 @@ Your points balance is {score}, to get more points, you can subcategory or buy c
     "select_quality": "Select the quality:",
     "summary": "Summary",
     "give_link": "Register Link",
-    "fastest_lap": "Fastest Lap"
+    "fastest_lap": "Fastest Lap",
+    "delete_video_warn": "Attention!❌\nThis video will be deleted in 20 seconds, save it somewhere"
 }
