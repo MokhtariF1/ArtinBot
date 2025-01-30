@@ -1,11 +1,12 @@
 from telethon import TelegramClient, events
 import paramiko
 import config
+import os
 
 # Replace these with your own Telegram bot details
 api_id = config.API_ID  # Get from https://my.telegram.org/auth
 api_hash = config.API_HASH  # Get from https://my.telegram.org/auth
-bot_token = config.BOT_TOKEN  # Get from BotFather
+bot_token = "7835088329:AAEBvgV8VmAMRBEnQ8qEVAypdgRqnTI8aHU"  # Get from BotFather
 admins = [1061254944, 5415792594]
 # VPS credentials
 vps_ip = '195.248.243.253'
@@ -16,8 +17,10 @@ vps_password = 'k%h0He:Hf%@o=QLe1Xx!e]s~=j8kn>Y}Cp#Gin1:Z%q]}>#_h}tz:QHgyzT!azm,
 service_name = 'f1_bot'
 
 # Create the Telethon client
+print("connecting...")
+os.remove("restart_bot.session")
 client = TelegramClient('restart_bot', api_id, api_hash).start(bot_token=bot_token)
-
+print("connected!")
 # Event handler for the '/restart' command
 @client.on(events.NewMessage(pattern='/restart'))
 async def restart_bot(event):
