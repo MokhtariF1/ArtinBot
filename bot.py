@@ -9012,9 +9012,11 @@ async def pay(event):
                 elif response.data == b'si':
                     statistics_value = bot_text["stress_index"]
                 elif response.data == b'reply':
-                    count_reply = watch_reply_collection.count_documents({"user_id": user_id})
-                    if count_reply != 0 and count_reply != 1:
-                        count_reply = len(watch_reply_collection.find_one({"user_id": user_id})["watched"])
+                    count_reply = watch_reply_collection.find_one({"user_id": user_id})
+                    if count_reply is not None:
+                        count_reply = len(watch_reply_collection.find_one({"user_id": user_id})["watched"]) + 1
+                    else:
+                        count_reply = 0
                     await event.reply(bot_text["reply_count"].format(count=count_reply), parse_mode="html")
                     return
                 elif response.data == b'cancel':
