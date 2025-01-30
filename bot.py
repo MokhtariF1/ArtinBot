@@ -47,6 +47,7 @@ cur = con.cursor()
 client = MongoClient("127.0.0.1:27017")
 db = client["f1"]
 reply_collection = db["reply"]
+watch_reply_collection = db["watch"]
 # ---------
 manager = Manager()
 user_messages = {}
@@ -10312,5 +10313,8 @@ async def driver_get_video(event):
         await event.reply(bot_text["not_found"])
     else:
         video_link = find_reply["driver"][find_reply["driver_code"]][quality]
-        await bot.forward_messages(user_id, int(video_link), config.REPLY_CHANNEL, drop_author=True)
+        s = await bot.forward_messages(user_id, int(video_link), config.REPLY_CHANNEL, drop_author=True)
+        for i in range(20):
+            await asyncio.sleep(1)
+        await bot.delete_messages(user_id, s.id)
 bot.run_until_disconnected()
