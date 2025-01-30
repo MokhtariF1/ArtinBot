@@ -480,7 +480,8 @@ TEXT = {
     "summary": "خلاصه",
     "give_link": "ثبت لینک",
     "fastest_lap": "سریع ترین دور",
-    "delete_video_warn": "توجه!❌\nاین ویدیو ۲۰ ثانیه دیگر حذف میشود، آن را جایی ذخیره کنید"
+    "delete_video_warn": "توجه!❌\nاین ویدیو ۲۰ ثانیه دیگر حذف میشود، آن را جایی ذخیره کنید",
+    "reply_count": "تعداد ویدیو های دریافت شده شما در بخش بازپخش: <blockqoute>{count}</blockqoute>"
 }
 
 EN_TEXT = {
@@ -844,5 +845,6 @@ Your points balance is {score}, to get more points, you can subcategory or buy c
     "summary": "Summary",
     "give_link": "Register Link",
     "fastest_lap": "Fastest Lap",
-    "delete_video_warn": "Attention!❌\nThis video will be deleted in 20 seconds, save it somewhere"
+    "delete_video_warn": "Attention!❌\nThis video will be deleted in 20 seconds, save it somewhere",
+    "reply_count": "Number of videos you have downloaded in the replay section: <blockquote>{count}</blockqoute>"
 }

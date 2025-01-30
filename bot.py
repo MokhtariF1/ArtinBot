@@ -8957,6 +8957,9 @@ async def pay(event):
                     ],
                     [
                         Button.inline(bot_text["cancel"], b'cancel')
+                    ],
+                    [
+                        Button.inline(bot_text["reply"], b'reply')
                     ]
                 ]
                 await conv_all.send_message(bot_text["select"], buttons=keys_all)
@@ -9008,6 +9011,9 @@ async def pay(event):
                     statistics_value = bot_text["efficiency_breakdown"]
                 elif response.data == b'si':
                     statistics_value = bot_text["stress_index"]
+                elif response.data == b'reply':
+                    count_reply = watch_reply_collection.count_documents({"user_id": user_id})
+                    await event.reply(bot_text["reply_count"].format(count=count_reply), parse_mode="html")
                 elif response.data == b'cancel':
                     return
                 else:
