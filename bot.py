@@ -47,7 +47,7 @@ cur = con.cursor()
 client = MongoClient("127.0.0.1:27017")
 db = client["f1"]
 reply_collection = db["reply"]
-watch_reply_collection = db["watch"]
+watch_reply_collection = db["watch_reply"]
 # ---------
 manager = Manager()
 user_messages = {}
