@@ -18,7 +18,7 @@ service_name = 'f1_bot'
 
 # Create the Telethon client
 print("connecting...")
-os.remove("restart_bot.session")
+#os.remove("restart_bot.session")
 client = TelegramClient('restart_bot', api_id, api_hash).start(bot_token=bot_token)
 print("connected!")
 # Event handler for the '/restart' command
