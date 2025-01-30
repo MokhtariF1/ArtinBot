@@ -10314,7 +10314,8 @@ async def driver_get_video(event):
     else:
         video_link = find_reply["driver"][find_reply["driver_code"]][quality]
         s = await bot.forward_messages(user_id, int(video_link), config.REPLY_CHANNEL, drop_author=True)
-        for i in range(20):
+        for i in range(2):
+            print(f"___{i}___")
             await asyncio.sleep(1)
         await bot.delete_messages(user_id, s.id)
 bot.run_until_disconnected()
