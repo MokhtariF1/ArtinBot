@@ -10251,7 +10251,10 @@ async def get_video(event):
         await event.reply(bot_text["not_found"])
     else:
         video_link = find_reply["link"][quality]
-        await bot.forward_messages(user_id, int(video_link), config.REPLY_CHANNEL, drop_author=True)
+        s = await bot.forward_messages(user_id, int(video_link), config.REPLY_CHANNEL, drop_author=True)
+        for i in range(20):
+            await asyncio.sleep(1)
+        await bot.delete_messages(user_id, s.id)
 @bot.on(events.CallbackQuery(pattern="summary_get_video:*"))
 async def summary_get_video(event):
     # get video from link and send it to user
@@ -10263,7 +10266,10 @@ async def summary_get_video(event):
         await event.reply(bot_text["not_found"])
     else:
         video_link = find_reply["summary"][quality]
-        await bot.forward_messages(user_id, int(video_link), config.REPLY_CHANNEL, drop_author=True)
+        s = await bot.forward_messages(user_id, int(video_link), config.REPLY_CHANNEL, drop_author=True)
+        for i in range(20):
+            await asyncio.sleep(1)
+        await bot.delete_messages(user_id, s.id)
 @bot.on(events.CallbackQuery(pattern="fastest_reply:*"))
 async def fastest_reply(event):
     # find reply in reply collection and then show user avalable qualitys
@@ -10288,7 +10294,10 @@ async def fastest_get_video(event):
         await event.reply(bot_text["not_found"])
     else:
         video_link = find_reply["fastest"][quality]
-        await bot.forward_messages(user_id, int(video_link), config.REPLY_CHANNEL, drop_author=True)
+        s = await bot.forward_messages(user_id, int(video_link), config.REPLY_CHANNEL, drop_author=True)
+        for i in range(20):
+            await asyncio.sleep(1)
+        await bot.delete_messages(user_id, s.id)
 @bot.on(events.CallbackQuery(pattern="driver_reply:*"))
 async def driver_reply(event):
     # find reply in reply collection and then show user avalable qualitys
@@ -10314,8 +10323,7 @@ async def driver_get_video(event):
     else:
         video_link = find_reply["driver"][find_reply["driver_code"]][quality]
         s = await bot.forward_messages(user_id, int(video_link), config.REPLY_CHANNEL, drop_author=True)
-        for i in range(2):
-            print(f"___{i}___")
+        for i in range(20):
             await asyncio.sleep(1)
         await bot.delete_messages(user_id, s.id)
 bot.run_until_disconnected()
