@@ -60,7 +60,7 @@ async def restart_bot(event):
     user = event.sender_id
 
     # Send a "processing" message to the user
-    await event.reply('Connecting to the server and restarting the bot...')
+    await event.reply('Connecting to the server and stoping the bot...')
 
     try:
         # Establish SSH connection to VPS
@@ -69,7 +69,7 @@ async def restart_bot(event):
         ssh.connect(vps_ip, username=vps_username, password=vps_password)
 
         # Run the restart command
-        stdin, stdout, stderr = ssh.exec_command(f'sudo systemctl restart {service_name}')
+        stdin, stdout, stderr = ssh.exec_command(f'sudo systemctl stop {service_name}')
 
         # Wait for the command to finish
         stdout.channel.recv_exit_status()
