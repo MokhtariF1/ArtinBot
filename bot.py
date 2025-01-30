@@ -10261,7 +10261,16 @@ async def get_video(event):
     else:
         video_link = find_reply["link"][quality]
         s = await bot.forward_messages(user_id, int(video_link), config.REPLY_CHANNEL, drop_author=True)
-        watch_reply_collection.update_one({"user_id": user_id}, {"$push": {"watched": find_reply["_id"]}})
+        find_watch = watch_reply_collection.find_one({"user_id": user_id})
+        if find_watch is None:
+            watch_reply_collection.insert_one(
+                {
+                    "user_id": user_id,
+                    "watched": [],
+                }
+            )
+        else:
+            watch_reply_collection.update_one({"user_id": user_id}, {"$push": {"watched": find_reply["_id"]}})
         await event.reply(bot_text["delete_video_warn"])
         for i in range(20):
             await asyncio.sleep(1)
@@ -10278,7 +10287,16 @@ async def summary_get_video(event):
     else:
         video_link = find_reply["summary"][quality]
         s = await bot.forward_messages(user_id, int(video_link), config.REPLY_CHANNEL, drop_author=True)
-        watch_reply_collection.update_one({"user_id": user_id}, {"$push": {"watched": find_reply["_id"]}})
+        find_watch = watch_reply_collection.find_one({"user_id": user_id})
+        if find_watch is None:
+            watch_reply_collection.insert_one(
+                {
+                    "user_id": user_id,
+                    "watched": [],
+                }
+            )
+        else:
+            watch_reply_collection.update_one({"user_id": user_id}, {"$push": {"watched": find_reply["_id"]}})
         await event.reply(bot_text["delete_video_warn"])
         for i in range(20):
             await asyncio.sleep(1)
@@ -10308,7 +10326,16 @@ async def fastest_get_video(event):
     else:
         video_link = find_reply["fastest"][quality]
         s = await bot.forward_messages(user_id, int(video_link), config.REPLY_CHANNEL, drop_author=True)
-        watch_reply_collection.update_one({"user_id": user_id}, {"$push": {"watched": find_reply["_id"]}})
+        find_watch = watch_reply_collection.find_one({"user_id": user_id})
+        if find_watch is None:
+            watch_reply_collection.insert_one(
+                {
+                    "user_id": user_id,
+                    "watched": [],
+                }
+            )
+        else:
+            watch_reply_collection.update_one({"user_id": user_id}, {"$push": {"watched": find_reply["_id"]}})
         await event.reply(bot_text["delete_video_warn"])
         for i in range(20):
             await asyncio.sleep(1)
