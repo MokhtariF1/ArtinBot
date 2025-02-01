@@ -9039,11 +9039,11 @@ async def pay(event):
                             session = type_tr[request["event"]]
                             gp = country_tr[request["gp"].replace(" ", "_")]
                         if request["is_event"]:
-                            races += request["year"] + "-" + gp + "-" + session + "-" + quality + "\n"
+                            races += str(request["year"]) + "-" + gp + "-" + session + "-" + quality + "\n"
                         elif request["is_summray"]:
-                            summray += request["year"] + "-" + gp + "-" + session + "-" + quality + "\n"
+                            summray += str(request["year"]) + "-" + gp + "-" + session + "-" + quality + "\n"
                         elif request["is_fastest"]:
-                            fastest += request["year"] + "-" + gp + "-" + session + "-" + quality + "\n"
+                            fastest += str(request["year"]) + "-" + gp + "-" + session + "-" + quality + "\n"
                         elif request["is_driver"]:
                             driver = None
                             print(request["driver"])
@@ -9051,7 +9051,7 @@ async def pay(event):
                                 driver = driver_buy_code_en[request["driver"]].replace("_", " ")
                             else:
                                 driver = driver_buy_code_fa[request["driver"]]
-                            drivers_requests += request["year"] + "-" + gp + "-" + session + "-" + quality + "-" + driver + "\n"
+                            drivers_requests += str(request["year"]) + "-" + gp + "-" + session + "-" + quality + "-" + driver + "\n"
                     first_text = first_text.format(full_race=races, summray=summray, fastest=fastest, drivers=drivers_requests, count=reply_count)
                     await event.reply(first_text, parse_mode="html")
                     return
