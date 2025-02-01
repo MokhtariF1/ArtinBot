@@ -9052,7 +9052,7 @@ async def pay(event):
                             else:
                                 driver = driver_buy_code_fa[request["driver"]]
                             drivers_requests += str(request["year"]) + "-" + gp + "-" + session + "-" + quality + "-" + driver + "\n"
-                    first_text = first_text.format(full_race=races, summray=summray, fastest=fastest, drivers=drivers_requests, count=count_reply)
+                    first_text = first_text.format(full_race=races, summary=summray, fastest=fastest, drivers=drivers_requests, count=count_reply)
                     await event.reply(first_text, parse_mode="html")
                     return
                 elif response.data == b'cancel':
