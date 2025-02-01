@@ -460,6 +460,7 @@ async def save_msg(event):
 
 @bot.on(events.NewMessage())
 async def pay(event):
+    global type_tr
     user_id = event.sender_id
     if check_admin(user_id) is False:
         if check_and_limit(user_id):
