@@ -481,7 +481,7 @@ TEXT = {
     "give_link": "ثبت لینک",
     "fastest_lap": "سریع ترین دور",
     "delete_video_warn": "توجه!❌\nاین ویدیو ۲۰ ثانیه دیگر حذف میشود، آن را جایی ذخیره کنید",
-    "reply_count": "تعداد ویدیو های دریافت شده شما در بخش بازپخش: <blockquote>{count}</blockquote>"
+    "reply_count": "تعداد ویدیو های دریافت شده شما در بخش بازپخش: <blockquote>{count}</blockquote>\nفول ریس: {full_race}\nخلاصه ها: {summary}\nراننده ها: {drivers}\nسریع ترین دور ها: {fastest}"
 }
 
 EN_TEXT = {
@@ -846,5 +846,5 @@ Your points balance is {score}, to get more points, you can subcategory or buy c
     "give_link": "Register Link",
     "fastest_lap": "Fastest Lap",
     "delete_video_warn": "Attention!❌\nThis video will be deleted in 20 seconds, save it somewhere",
-    "reply_count": "Number of videos you have downloaded in the replay section: <blockquote>{count}</blockquote>"
+    "reply_count": "Number of videos you have downloaded in the replay section: <blockquote>{count}</blockquote>\nFull race: {full_race}\nSummaries: {summary}\nDrivers: {drivers}\nFastest laps: {fastest}"
 }
